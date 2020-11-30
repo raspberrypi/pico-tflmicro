@@ -1,0 +1,22 @@
+
+cmake_minimum_required(VERSION 3.12)
+
+project(kernel_fully_connected_test C CXX ASM)
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_CXX_STANDARD 11)
+
+add_executable(kernel_fully_connected_test "")
+
+target_include_directories(kernel_fully_connected_test
+  PRIVATE
+  ${CMAKE_CURRENT_LIST_DIR}/../../tests/kernel_fully_connected_test
+)
+
+target_sources(kernel_fully_connected_test
+  PRIVATE
+  ${CMAKE_CURRENT_LIST_DIR}/../../tests/kernel_fully_connected_test/fully_connected_test.cpp
+)
+
+target_link_libraries(
+    kernel_fully_connected_test
+    pico-tflmicro)
