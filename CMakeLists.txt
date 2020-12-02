@@ -8,7 +8,7 @@ project(pico-tflmicro C CXX ASM)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 11)
 
-add_pico_sdk_targets()
+pico_sdk_init()
 
 add_library(pico-tflmicro "")
 
