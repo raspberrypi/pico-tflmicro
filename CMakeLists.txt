@@ -1,9 +1,14 @@
 
 cmake_minimum_required(VERSION 3.12)
 
+# Pull in PICO SDK (must be before project)
+include(pico_sdk_import.cmake)
+
 project(pico-tflmicro C CXX ASM)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 11)
+
+add_pico_sdk_targets()
 
 add_library(pico-tflmicro "")
 
@@ -35,7 +40,6 @@ target_sources(pico-tflmicro
     ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/kernels/kernel_util.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/all_ops_resolver.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/benchmarks/keyword_scrambled_model_data.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/debug_log.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/activations.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/add.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/arg_min_max.cpp
@@ -89,6 +93,7 @@ target_sources(pico-tflmicro
     ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/micro_utils.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/recording_micro_allocator.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/recording_simple_memory_allocator.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/rp2/debug_log.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/simple_memory_allocator.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/test_helpers.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/schema/schema_utils.cpp
@@ -234,7 +239,6 @@ target_sources(pico-tflmicro_test
     ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/kernels/kernel_util.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/all_ops_resolver.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/benchmarks/keyword_scrambled_model_data.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/debug_log.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/activations.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/add.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/arg_min_max.cpp
@@ -288,6 +292,7 @@ target_sources(pico-tflmicro_test
     ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/micro_utils.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/recording_micro_allocator.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/recording_simple_memory_allocator.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/rp2/debug_log.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/simple_memory_allocator.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/test_helpers.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/schema/schema_utils.cpp

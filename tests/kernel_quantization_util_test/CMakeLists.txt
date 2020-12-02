@@ -19,4 +19,7 @@ target_sources(kernel_quantization_util_test
 
 target_link_libraries(
     kernel_quantization_util_test
+    pico_stdlib
     pico-tflmicro)
+
+pico_add_extra_outputs(kernel_quantization_util_test)

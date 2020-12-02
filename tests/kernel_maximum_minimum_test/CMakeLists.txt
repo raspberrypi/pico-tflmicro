@@ -19,4 +19,7 @@ target_sources(kernel_maximum_minimum_test
 
 target_link_libraries(
     kernel_maximum_minimum_test
+    pico_stdlib
     pico-tflmicro)
+
+pico_add_extra_outputs(kernel_maximum_minimum_test)

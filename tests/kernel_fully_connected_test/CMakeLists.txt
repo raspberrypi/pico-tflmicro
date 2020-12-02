@@ -19,4 +19,7 @@ target_sources(kernel_fully_connected_test
 
 target_link_libraries(
     kernel_fully_connected_test
+    pico_stdlib
     pico-tflmicro)
+
+pico_add_extra_outputs(kernel_fully_connected_test)

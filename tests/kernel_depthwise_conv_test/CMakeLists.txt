@@ -19,4 +19,7 @@ target_sources(kernel_depthwise_conv_test
 
 target_link_libraries(
     kernel_depthwise_conv_test
+    pico_stdlib
     pico-tflmicro)
+
+pico_add_extra_outputs(kernel_depthwise_conv_test)

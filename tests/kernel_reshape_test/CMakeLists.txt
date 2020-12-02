@@ -19,4 +19,7 @@ target_sources(kernel_reshape_test
 
 target_link_libraries(
     kernel_reshape_test
+    pico_stdlib
     pico-tflmicro)
+
+pico_add_extra_outputs(kernel_reshape_test)

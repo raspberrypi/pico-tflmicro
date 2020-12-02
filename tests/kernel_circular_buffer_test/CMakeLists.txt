@@ -19,4 +19,7 @@ target_sources(kernel_circular_buffer_test
 
 target_link_libraries(
     kernel_circular_buffer_test
+    pico_stdlib
     pico-tflmicro)
+
+pico_add_extra_outputs(kernel_circular_buffer_test)

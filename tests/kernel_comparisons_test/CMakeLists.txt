@@ -19,4 +19,7 @@ target_sources(kernel_comparisons_test
 
 target_link_libraries(
     kernel_comparisons_test
+    pico_stdlib
     pico-tflmicro)
+
+pico_add_extra_outputs(kernel_comparisons_test)

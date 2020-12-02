@@ -19,4 +19,7 @@ target_sources(kernel_resize_nearest_neighbor_test
 
 target_link_libraries(
     kernel_resize_nearest_neighbor_test
+    pico_stdlib
     pico-tflmicro)
+
+pico_add_extra_outputs(kernel_resize_nearest_neighbor_test)
