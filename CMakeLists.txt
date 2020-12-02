@@ -96,6 +96,7 @@ target_sources(pico-tflmicro
     ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/rp2/debug_log.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/simple_memory_allocator.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/test_helpers.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/testing/test_conv_model.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/schema/schema_utils.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/LICENSE
     ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/core/public/version.h
@@ -295,6 +296,7 @@ target_sources(pico-tflmicro_test
     ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/rp2/debug_log.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/simple_memory_allocator.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/test_helpers.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/testing/test_conv_model.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/schema/schema_utils.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/LICENSE
     ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/core/public/version.h
@@ -408,6 +410,7 @@ target_sources(pico-tflmicro_test
     ${CMAKE_CURRENT_LIST_DIR}/src/third_party/ruy/ruy/profiler/instrumentation.h
 )
 
+add_subdirectory("tests/greedy_memory_planner_test")
 add_subdirectory("tests/kernel_activations_test")
 add_subdirectory("tests/kernel_add_test")
 add_subdirectory("tests/kernel_arg_min_max_test")
@@ -447,3 +450,17 @@ add_subdirectory("tests/kernel_sub_test")
 add_subdirectory("tests/kernel_svdf_test")
 add_subdirectory("tests/kernel_tanh_test")
 add_subdirectory("tests/kernel_unpack_test")
+add_subdirectory("tests/linear_memory_planner_test")
+add_subdirectory("tests/memory_arena_threshold_test")
+add_subdirectory("tests/memory_helpers_test")
+add_subdirectory("tests/micro_allocator_test")
+add_subdirectory("tests/micro_error_reporter_test")
+add_subdirectory("tests/micro_interpreter_test")
+add_subdirectory("tests/micro_mutable_op_resolver_test")
+add_subdirectory("tests/micro_string_test")
+add_subdirectory("tests/micro_time_test")
+add_subdirectory("tests/micro_utils_test")
+add_subdirectory("tests/recording_micro_allocator_test")
+add_subdirectory("tests/recording_simple_memory_allocator_test")
+add_subdirectory("tests/simple_memory_allocator_test")
+add_subdirectory("tests/testing_helpers_test")
