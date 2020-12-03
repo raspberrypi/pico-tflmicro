@@ -39,8 +39,7 @@ limitations under the License.
 #ifndef TF_LITE_STRIP_ERROR_STRINGS
 #include <stdio.h>
 
-//#include "pico/stdlib.h"
-extern "C" void setup_default_uart();
+#include "pico/stdlib.h"
 #endif
 
 extern "C" void DebugLog(const char* s) {
