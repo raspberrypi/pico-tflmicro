@@ -12,14 +12,24 @@ target_include_directories(kernel_depthwise_conv_test
   ${CMAKE_CURRENT_LIST_DIR}/../../tests/kernel_depthwise_conv_test
 )
 
+set_target_properties(
+  kernel_depthwise_conv_test
+  PROPERTIES
+  COMPILE_FLAGS -fno-rtti
+  COMPILE_FLAGS -fno-exceptions
+  COMPILE_FLAGS -fno-threadsafe-statics
+  COMPILE_FLAGS -nostdlib
+)
+
 target_sources(kernel_depthwise_conv_test
   PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/../../tests/kernel_depthwise_conv_test/depthwise_conv_test.cpp
 )
 
 target_link_libraries(
-    kernel_depthwise_conv_test
-    pico_stdlib
-    pico-tflmicro)
+  kernel_depthwise_conv_test
+  pico-tflmicro
+  pico-tflmicro_test
+)
 
 pico_add_extra_outputs(kernel_depthwise_conv_test)

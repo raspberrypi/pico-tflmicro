@@ -12,14 +12,24 @@ target_include_directories(kernel_circular_buffer_test
   ${CMAKE_CURRENT_LIST_DIR}/../../tests/kernel_circular_buffer_test
 )
 
+set_target_properties(
+  kernel_circular_buffer_test
+  PROPERTIES
+  COMPILE_FLAGS -fno-rtti
+  COMPILE_FLAGS -fno-exceptions
+  COMPILE_FLAGS -fno-threadsafe-statics
+  COMPILE_FLAGS -nostdlib
+)
+
 target_sources(kernel_circular_buffer_test
   PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/../../tests/kernel_circular_buffer_test/circular_buffer_test.cpp
 )
 
 target_link_libraries(
-    kernel_circular_buffer_test
-    pico_stdlib
-    pico-tflmicro)
+  kernel_circular_buffer_test
+  pico-tflmicro
+  pico-tflmicro_test
+)
 
 pico_add_extra_outputs(kernel_circular_buffer_test)

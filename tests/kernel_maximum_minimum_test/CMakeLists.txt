@@ -12,14 +12,24 @@ target_include_directories(kernel_maximum_minimum_test
   ${CMAKE_CURRENT_LIST_DIR}/../../tests/kernel_maximum_minimum_test
 )
 
+set_target_properties(
+  kernel_maximum_minimum_test
+  PROPERTIES
+  COMPILE_FLAGS -fno-rtti
+  COMPILE_FLAGS -fno-exceptions
+  COMPILE_FLAGS -fno-threadsafe-statics
+  COMPILE_FLAGS -nostdlib
+)
+
 target_sources(kernel_maximum_minimum_test
   PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/../../tests/kernel_maximum_minimum_test/maximum_minimum_test.cpp
 )
 
 target_link_libraries(
-    kernel_maximum_minimum_test
-    pico_stdlib
-    pico-tflmicro)
+  kernel_maximum_minimum_test
+  pico-tflmicro
+  pico-tflmicro_test
+)
 
 pico_add_extra_outputs(kernel_maximum_minimum_test)

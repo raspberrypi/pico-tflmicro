@@ -12,14 +12,24 @@ target_include_directories(kernel_unpack_test
   ${CMAKE_CURRENT_LIST_DIR}/../../tests/kernel_unpack_test
 )
 
+set_target_properties(
+  kernel_unpack_test
+  PROPERTIES
+  COMPILE_FLAGS -fno-rtti
+  COMPILE_FLAGS -fno-exceptions
+  COMPILE_FLAGS -fno-threadsafe-statics
+  COMPILE_FLAGS -nostdlib
+)
+
 target_sources(kernel_unpack_test
   PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/../../tests/kernel_unpack_test/unpack_test.cpp
 )
 
 target_link_libraries(
-    kernel_unpack_test
-    pico_stdlib
-    pico-tflmicro)
+  kernel_unpack_test
+  pico-tflmicro
+  pico-tflmicro_test
+)
 
 pico_add_extra_outputs(kernel_unpack_test)

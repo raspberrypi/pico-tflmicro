@@ -12,14 +12,24 @@ target_include_directories(kernel_resize_nearest_neighbor_test
   ${CMAKE_CURRENT_LIST_DIR}/../../tests/kernel_resize_nearest_neighbor_test
 )
 
+set_target_properties(
+  kernel_resize_nearest_neighbor_test
+  PROPERTIES
+  COMPILE_FLAGS -fno-rtti
+  COMPILE_FLAGS -fno-exceptions
+  COMPILE_FLAGS -fno-threadsafe-statics
+  COMPILE_FLAGS -nostdlib
+)
+
 target_sources(kernel_resize_nearest_neighbor_test
   PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/../../tests/kernel_resize_nearest_neighbor_test/resize_nearest_neighbor_test.cpp
 )
 
 target_link_libraries(
-    kernel_resize_nearest_neighbor_test
-    pico_stdlib
-    pico-tflmicro)
+  kernel_resize_nearest_neighbor_test
+  pico-tflmicro
+  pico-tflmicro_test
+)
 
 pico_add_extra_outputs(kernel_resize_nearest_neighbor_test)

@@ -29,6 +29,15 @@ target_compile_definitions(
   COMPILE_DEFINITIONS TF_LITE_STATIC_MEMORY=1
 )
 
+set_target_properties(
+  pico-tflmicro
+  PROPERTIES
+  COMPILE_FLAGS -fno-rtti
+  COMPILE_FLAGS -fno-exceptions
+  COMPILE_FLAGS -fno-threadsafe-statics
+  COMPILE_FLAGS -nostdlib
+)
+
 target_link_libraries(
   pico-tflmicro
   pico_stdlib
@@ -234,6 +243,15 @@ target_compile_definitions(
   COMPILE_DEFINITIONS TF_LITE_STATIC_MEMORY=1
 )
 
+set_target_properties(
+  pico-tflmicro_test
+  PROPERTIES
+  COMPILE_FLAGS -fno-rtti
+  COMPILE_FLAGS -fno-exceptions
+  COMPILE_FLAGS -fno-threadsafe-statics
+  COMPILE_FLAGS -nostdlib
+)
+
 target_link_libraries(
   pico-tflmicro_test
   pico_stdlib
@@ -246,6 +264,10 @@ target_sources(pico-tflmicro_test
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/testing/test_conv_model.h
 )
 
+add_subdirectory("examples/hello_world")
+add_subdirectory("examples/person_detection")
+add_subdirectory("examples/magic_wand")
+add_subdirectory("examples/micro_speech")
 add_subdirectory("tests/greedy_memory_planner_test")
 add_subdirectory("tests/kernel_activations_test")
 add_subdirectory("tests/kernel_add_test")
