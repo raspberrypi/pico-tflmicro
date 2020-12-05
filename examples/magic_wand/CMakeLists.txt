@@ -33,6 +33,7 @@ target_sources(gesture_predictor_test
 target_link_libraries(
   gesture_predictor_test
   pico-tflmicro
+  hardware_pwm
   pico-tflmicro_test
 )
 
@@ -65,6 +66,7 @@ target_sources(gesture_output_handler_test
 target_link_libraries(
   gesture_output_handler_test
   pico-tflmicro
+  hardware_pwm
   pico-tflmicro_test
 )
 
@@ -106,6 +108,7 @@ target_sources(magic_wand
 target_link_libraries(
   magic_wand
   pico-tflmicro
+  hardware_pwm
 )
 
 pico_add_extra_outputs(magic_wand)
@@ -141,6 +144,7 @@ target_sources(magic_wand_test
 target_link_libraries(
   magic_wand_test
   pico-tflmicro
+  hardware_pwm
   pico-tflmicro_test
 )
 
@@ -173,6 +177,7 @@ target_sources(gesture_accelerometer_handler_test
 target_link_libraries(
   gesture_accelerometer_handler_test
   pico-tflmicro
+  hardware_pwm
   pico-tflmicro_test
 )
 

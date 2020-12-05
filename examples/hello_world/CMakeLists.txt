@@ -32,6 +32,7 @@ target_sources(hello_world_test
 target_link_libraries(
   hello_world_test
   pico-tflmicro
+  hardware_pwm
   pico-tflmicro_test
 )
 
@@ -60,7 +61,7 @@ target_sources(hello_world
   ${CMAKE_CURRENT_LIST_DIR}/main.cpp
   ${CMAKE_CURRENT_LIST_DIR}/main_functions.cpp
   ${CMAKE_CURRENT_LIST_DIR}/model.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/output_handler.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/rp2/output_handler.cpp
   ${CMAKE_CURRENT_LIST_DIR}/constants.h
   ${CMAKE_CURRENT_LIST_DIR}/main_functions.h
   ${CMAKE_CURRENT_LIST_DIR}/model.h
@@ -70,6 +71,7 @@ target_sources(hello_world
 target_link_libraries(
   hello_world
   pico-tflmicro
+  hardware_pwm
 )
 
 pico_add_extra_outputs(hello_world)
@@ -93,8 +95,8 @@ set_target_properties(
 
 target_sources(output_handler_test
   PRIVATE
-  ${CMAKE_CURRENT_LIST_DIR}/output_handler.cpp
   ${CMAKE_CURRENT_LIST_DIR}/output_handler_test.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/rp2/output_handler.cpp
   ${CMAKE_CURRENT_LIST_DIR}/constants.h
   ${CMAKE_CURRENT_LIST_DIR}/output_handler.h
 )
@@ -102,6 +104,7 @@ target_sources(output_handler_test
 target_link_libraries(
   output_handler_test
   pico-tflmicro
+  hardware_pwm
   pico-tflmicro_test
 )
 

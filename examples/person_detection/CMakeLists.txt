@@ -32,6 +32,7 @@ target_sources(detection_responder_test
 target_link_libraries(
   detection_responder_test
   pico-tflmicro
+  hardware_pwm
   pico-tflmicro_test
 )
 
@@ -70,6 +71,7 @@ target_sources(person_detection_test
 target_link_libraries(
   person_detection_test
   pico-tflmicro
+  hardware_pwm
   pico-tflmicro_test
 )
 
@@ -104,6 +106,7 @@ target_sources(image_provider_test
 target_link_libraries(
   image_provider_test
   pico-tflmicro
+  hardware_pwm
   pico-tflmicro_test
 )
 
@@ -144,6 +147,7 @@ target_sources(person_detection
 target_link_libraries(
   person_detection
   pico-tflmicro
+  hardware_pwm
 )
 
 pico_add_extra_outputs(person_detection)

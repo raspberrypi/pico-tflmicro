@@ -38,6 +38,7 @@ target_sources(audio_provider_mock_test
 target_link_libraries(
   audio_provider_mock_test
   pico-tflmicro
+  hardware_pwm
   pico-tflmicro_test
 )
 
@@ -121,6 +122,7 @@ target_sources(feature_provider_mock_test
 target_link_libraries(
   feature_provider_mock_test
   pico-tflmicro
+  hardware_pwm
   pico-tflmicro_test
 )
 
@@ -208,6 +210,7 @@ target_sources(micro_speech
 target_link_libraries(
   micro_speech
   pico-tflmicro
+  hardware_pwm
 )
 
 pico_add_extra_outputs(micro_speech)
@@ -248,6 +251,7 @@ target_sources(simple_features_generator_test
 target_link_libraries(
   simple_features_generator_test
   pico-tflmicro
+  hardware_pwm
   pico-tflmicro_test
 )
 
@@ -280,6 +284,7 @@ target_sources(command_responder_test
 target_link_libraries(
   command_responder_test
   pico-tflmicro
+  hardware_pwm
   pico-tflmicro_test
 )
 
@@ -372,6 +377,7 @@ target_sources(micro_speech_mock
 target_link_libraries(
   micro_speech_mock
   pico-tflmicro
+  hardware_pwm
 )
 
 pico_add_extra_outputs(micro_speech_mock)
@@ -450,6 +456,7 @@ target_sources(micro_features_generator_test
 target_link_libraries(
   micro_features_generator_test
   pico-tflmicro
+  hardware_pwm
   pico-tflmicro_test
 )
 
@@ -525,6 +532,7 @@ target_sources(feature_provider_test
 target_link_libraries(
   feature_provider_test
   pico-tflmicro
+  hardware_pwm
   pico-tflmicro_test
 )
 
@@ -561,6 +569,7 @@ target_sources(micro_speech_test
 target_link_libraries(
   micro_speech_test
   pico-tflmicro
+  hardware_pwm
   pico-tflmicro_test
 )
 
@@ -595,6 +604,7 @@ target_sources(audio_provider_test
 target_link_libraries(
   audio_provider_test
   pico-tflmicro
+  hardware_pwm
   pico-tflmicro_test
 )
 
@@ -629,6 +639,7 @@ target_sources(recognize_commands_test
 target_link_libraries(
   recognize_commands_test
   pico-tflmicro
+  hardware_pwm
   pico-tflmicro_test
 )
 
