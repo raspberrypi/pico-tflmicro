@@ -152,3 +152,37 @@ target_link_libraries(
 
 pico_add_extra_outputs(person_detection)
 
+
+add_executable(person_detection_benchmark "")
+
+target_include_directories(person_detection_benchmark
+  PRIVATE
+  ${CMAKE_CURRENT_LIST_DIR}/.
+)
+
+set_target_properties(
+  person_detection_benchmark
+  PROPERTIES
+  COMPILE_FLAGS -fno-rtti
+  COMPILE_FLAGS -fno-exceptions
+  COMPILE_FLAGS -fno-threadsafe-statics
+  COMPILE_FLAGS -nostdlib
+)
+
+target_sources(person_detection_benchmark
+  PRIVATE
+  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/micro/benchmarks/person_detection_benchmark.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/micro/tools/make/downloads/person_model_grayscale/no_person_image_data.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/micro/tools/make/downloads/person_model_grayscale/person_detect_model_data.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/micro/tools/make/downloads/person_model_grayscale/person_image_data.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/person_detect_model_data.h
+)
+
+target_link_libraries(
+  person_detection_benchmark
+  pico-tflmicro
+  hardware_pwm
+)
+
+pico_add_extra_outputs(person_detection_benchmark)
+

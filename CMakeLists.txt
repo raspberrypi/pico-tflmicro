@@ -53,7 +53,6 @@ target_sources(pico-tflmicro
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/kernels/internal/quantization_util.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/kernels/kernel_util.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/all_ops_resolver.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/benchmarks/keyword_scrambled_model_data.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/activations.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/add.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/arg_min_max.cpp
@@ -103,11 +102,11 @@ target_sources(pico-tflmicro
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/micro_interpreter.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/micro_profiler.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/micro_string.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/micro_time.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/micro_utils.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/recording_micro_allocator.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/recording_simple_memory_allocator.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/rp2/debug_log.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/rp2/micro_time.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/simple_memory_allocator.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/test_helpers.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/testing/test_conv_model.cpp
@@ -178,6 +177,7 @@ target_sources(pico-tflmicro
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/kernels/padding.h
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/all_ops_resolver.h
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/benchmarks/keyword_scrambled_model_data.h
+  ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/benchmarks/micro_benchmark.h
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/compatibility.h
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/debug_log.h
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/activation_utils.h
@@ -264,6 +264,7 @@ target_sources(pico-tflmicro_test
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/testing/test_conv_model.h
 )
 
+add_subdirectory("examples/keyword_benchmark")
 add_subdirectory("examples/hello_world")
 add_subdirectory("examples/person_detection")
 add_subdirectory("examples/magic_wand")
