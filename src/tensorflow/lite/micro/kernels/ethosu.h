@@ -1,4 +1,4 @@
-/* Copyright 2019 The TensorFlow Authors. All Rights Reserved.
+/* Copyright 2020 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -12,14 +12,17 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
+#ifndef TENSORFLOW_LITE_MICRO_KERNELS_ETHOSU_H_
+#define TENSORFLOW_LITE_MICRO_KERNELS_ETHOSU_H_
 
-#include "detection_responder.h"
+#include "tensorflow/lite/c/common.h"
 
-// This dummy implementation writes person and no person scores to the error
-// console. Real applications will want to take some custom action instead, and
-// should implement their own versions of this function.
-void RespondToDetection(tflite::ErrorReporter* error_reporter,
-                        int8_t person_score, int8_t no_person_score) {
-  TF_LITE_REPORT_ERROR(error_reporter, "person score:%d no person score %d",
-                       person_score, no_person_score);
-}
+namespace tflite {
+
+TfLiteRegistration* Register_ETHOSU();
+
+const char* GetString_ETHOSU();
+
+}  // namespace tflite
+
+#endif  // TENSORFLOW_LITE_MICRO_KERNELS_ETHOSU_H_

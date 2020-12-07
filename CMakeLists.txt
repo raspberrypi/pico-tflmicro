@@ -73,8 +73,10 @@ target_sources(pico-tflmicro
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/comparisons.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/concatenation.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/dequantize.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/detection_postprocess.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/elementwise.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/ethosu.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/flexbuffers_generated_data.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/floor.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/hard_swish.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/kernel_runner.cpp
@@ -186,6 +188,8 @@ target_sources(pico-tflmicro
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/compatibility.h
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/debug_log.h
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/activation_utils.h
+  ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/ethosu.h
+  ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/flexbuffers_generated_data.h
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/fully_connected.h
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/kernel_runner.h
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/kernel_util.h
@@ -314,7 +318,9 @@ target_sources(pico-tflmicro
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/flatbuffers/LICENSE.txt
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/flatbuffers/include/flatbuffers/base.h
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/flatbuffers/include/flatbuffers/flatbuffers.h
+  ${CMAKE_CURRENT_LIST_DIR}/src/third_party/flatbuffers/include/flatbuffers/flexbuffers.h
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/flatbuffers/include/flatbuffers/stl_emulation.h
+  ${CMAKE_CURRENT_LIST_DIR}/src/third_party/flatbuffers/include/flatbuffers/util.h
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/gemmlowp/LICENSE
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/gemmlowp/fixedpoint/fixedpoint.h
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/gemmlowp/fixedpoint/fixedpoint_neon.h
@@ -370,6 +376,7 @@ target_sources(pico-tflmicro_test
   PUBLIC
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/benchmarks/keyword_scrambled_model_data.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/testing/test_conv_model.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/testing/util_test.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/testing/micro_test.h
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/testing/test_conv_model.h
 )
@@ -390,6 +397,7 @@ add_subdirectory("tests/kernel_concatenation_test")
 add_subdirectory("tests/kernel_conv_test")
 add_subdirectory("tests/kernel_depthwise_conv_test")
 add_subdirectory("tests/kernel_dequantize_test")
+add_subdirectory("tests/kernel_detection_postprocess_test")
 add_subdirectory("tests/kernel_elementwise_test")
 add_subdirectory("tests/kernel_floor_test")
 add_subdirectory("tests/kernel_fully_connected_test")
@@ -433,4 +441,3 @@ add_subdirectory("tests/recording_micro_allocator_test")
 add_subdirectory("tests/recording_simple_memory_allocator_test")
 add_subdirectory("tests/simple_memory_allocator_test")
 add_subdirectory("tests/testing_helpers_test")
-add_subdirectory("tests/util_test")
