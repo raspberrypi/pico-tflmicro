@@ -12,15 +12,6 @@ target_include_directories(simple_memory_allocator_test
   ${CMAKE_CURRENT_LIST_DIR}/../../tests/simple_memory_allocator_test
 )
 
-set_target_properties(
-  simple_memory_allocator_test
-  PROPERTIES
-  COMPILE_FLAGS -fno-rtti
-  COMPILE_FLAGS -fno-exceptions
-  COMPILE_FLAGS -fno-threadsafe-statics
-  COMPILE_FLAGS -nostdlib
-)
-
 target_sources(simple_memory_allocator_test
   PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/../../tests/simple_memory_allocator_test/simple_memory_allocator_test.cpp

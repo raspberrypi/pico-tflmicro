@@ -13,15 +13,6 @@ target_include_directories(keyword_benchmark
   ${CMAKE_CURRENT_LIST_DIR}/.
 )
 
-set_target_properties(
-  keyword_benchmark
-  PROPERTIES
-  COMPILE_FLAGS -fno-rtti
-  COMPILE_FLAGS -fno-exceptions
-  COMPILE_FLAGS -fno-threadsafe-statics
-  COMPILE_FLAGS -nostdlib
-)
-
 target_sources(keyword_benchmark
   PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/micro/benchmarks/keyword_benchmark.cpp

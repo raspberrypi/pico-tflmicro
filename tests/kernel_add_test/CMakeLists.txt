@@ -12,15 +12,6 @@ target_include_directories(kernel_add_test
   ${CMAKE_CURRENT_LIST_DIR}/../../tests/kernel_add_test
 )
 
-set_target_properties(
-  kernel_add_test
-  PROPERTIES
-  COMPILE_FLAGS -fno-rtti
-  COMPILE_FLAGS -fno-exceptions
-  COMPILE_FLAGS -fno-threadsafe-statics
-  COMPILE_FLAGS -nostdlib
-)
-
 target_sources(kernel_add_test
   PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/../../tests/kernel_add_test/add_test.cpp

@@ -12,15 +12,6 @@ target_include_directories(kernel_shape_test
   ${CMAKE_CURRENT_LIST_DIR}/../../tests/kernel_shape_test
 )
 
-set_target_properties(
-  kernel_shape_test
-  PROPERTIES
-  COMPILE_FLAGS -fno-rtti
-  COMPILE_FLAGS -fno-exceptions
-  COMPILE_FLAGS -fno-threadsafe-statics
-  COMPILE_FLAGS -nostdlib
-)
-
 target_sources(kernel_shape_test
   PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/../../tests/kernel_shape_test/shape_test.cpp

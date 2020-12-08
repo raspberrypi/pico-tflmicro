@@ -12,15 +12,6 @@ target_include_directories(micro_utils_test
   ${CMAKE_CURRENT_LIST_DIR}/../../tests/micro_utils_test
 )
 
-set_target_properties(
-  micro_utils_test
-  PROPERTIES
-  COMPILE_FLAGS -fno-rtti
-  COMPILE_FLAGS -fno-exceptions
-  COMPILE_FLAGS -fno-threadsafe-statics
-  COMPILE_FLAGS -nostdlib
-)
-
 target_sources(micro_utils_test
   PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/../../tests/micro_utils_test/micro_utils_test.cpp

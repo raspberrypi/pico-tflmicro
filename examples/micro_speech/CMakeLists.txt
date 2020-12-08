@@ -13,15 +13,6 @@ target_include_directories(audio_provider_mock_test
   ${CMAKE_CURRENT_LIST_DIR}/.
 )
 
-set_target_properties(
-  audio_provider_mock_test
-  PROPERTIES
-  COMPILE_FLAGS -fno-rtti
-  COMPILE_FLAGS -fno-exceptions
-  COMPILE_FLAGS -fno-threadsafe-statics
-  COMPILE_FLAGS -nostdlib
-)
-
 target_sources(audio_provider_mock_test
   PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/audio_provider_mock.cpp
@@ -50,15 +41,6 @@ add_executable(feature_provider_mock_test "")
 target_include_directories(feature_provider_mock_test
   PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/.
-)
-
-set_target_properties(
-  feature_provider_mock_test
-  PROPERTIES
-  COMPILE_FLAGS -fno-rtti
-  COMPILE_FLAGS -fno-exceptions
-  COMPILE_FLAGS -fno-threadsafe-statics
-  COMPILE_FLAGS -nostdlib
 )
 
 target_sources(feature_provider_mock_test
@@ -134,15 +116,6 @@ add_executable(micro_speech "")
 target_include_directories(micro_speech
   PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/.
-)
-
-set_target_properties(
-  micro_speech
-  PROPERTIES
-  COMPILE_FLAGS -fno-rtti
-  COMPILE_FLAGS -fno-exceptions
-  COMPILE_FLAGS -fno-threadsafe-statics
-  COMPILE_FLAGS -nostdlib
 )
 
 target_sources(micro_speech
@@ -223,15 +196,6 @@ target_include_directories(simple_features_generator_test
   ${CMAKE_CURRENT_LIST_DIR}/.
 )
 
-set_target_properties(
-  simple_features_generator_test
-  PROPERTIES
-  COMPILE_FLAGS -fno-rtti
-  COMPILE_FLAGS -fno-exceptions
-  COMPILE_FLAGS -fno-threadsafe-statics
-  COMPILE_FLAGS -nostdlib
-)
-
 target_sources(simple_features_generator_test
   PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/no_30ms_sample_data.cpp
@@ -265,15 +229,6 @@ target_include_directories(command_responder_test
   ${CMAKE_CURRENT_LIST_DIR}/.
 )
 
-set_target_properties(
-  command_responder_test
-  PROPERTIES
-  COMPILE_FLAGS -fno-rtti
-  COMPILE_FLAGS -fno-exceptions
-  COMPILE_FLAGS -fno-threadsafe-statics
-  COMPILE_FLAGS -nostdlib
-)
-
 target_sources(command_responder_test
   PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/command_responder.cpp
@@ -296,15 +251,6 @@ add_executable(micro_speech_mock "")
 target_include_directories(micro_speech_mock
   PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/.
-)
-
-set_target_properties(
-  micro_speech_mock
-  PROPERTIES
-  COMPILE_FLAGS -fno-rtti
-  COMPILE_FLAGS -fno-exceptions
-  COMPILE_FLAGS -fno-threadsafe-statics
-  COMPILE_FLAGS -nostdlib
 )
 
 target_sources(micro_speech_mock
@@ -390,15 +336,6 @@ target_include_directories(micro_features_generator_test
   ${CMAKE_CURRENT_LIST_DIR}/.
 )
 
-set_target_properties(
-  micro_features_generator_test
-  PROPERTIES
-  COMPILE_FLAGS -fno-rtti
-  COMPILE_FLAGS -fno-exceptions
-  COMPILE_FLAGS -fno-threadsafe-statics
-  COMPILE_FLAGS -nostdlib
-)
-
 target_sources(micro_features_generator_test
   PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/fft.cpp
@@ -470,15 +407,6 @@ target_include_directories(feature_provider_test
   ${CMAKE_CURRENT_LIST_DIR}/.
 )
 
-set_target_properties(
-  feature_provider_test
-  PROPERTIES
-  COMPILE_FLAGS -fno-rtti
-  COMPILE_FLAGS -fno-exceptions
-  COMPILE_FLAGS -fno-threadsafe-statics
-  COMPILE_FLAGS -nostdlib
-)
-
 target_sources(feature_provider_test
   PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/fft.cpp
@@ -546,15 +474,6 @@ target_include_directories(micro_speech_test
   ${CMAKE_CURRENT_LIST_DIR}/.
 )
 
-set_target_properties(
-  micro_speech_test
-  PROPERTIES
-  COMPILE_FLAGS -fno-rtti
-  COMPILE_FLAGS -fno-exceptions
-  COMPILE_FLAGS -fno-threadsafe-statics
-  COMPILE_FLAGS -nostdlib
-)
-
 target_sources(micro_speech_test
   PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/micro_features/model.cpp
@@ -583,15 +502,6 @@ target_include_directories(audio_provider_test
   ${CMAKE_CURRENT_LIST_DIR}/.
 )
 
-set_target_properties(
-  audio_provider_test
-  PROPERTIES
-  COMPILE_FLAGS -fno-rtti
-  COMPILE_FLAGS -fno-exceptions
-  COMPILE_FLAGS -fno-threadsafe-statics
-  COMPILE_FLAGS -nostdlib
-)
-
 target_sources(audio_provider_test
   PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/audio_provider.cpp
@@ -616,15 +526,6 @@ add_executable(recognize_commands_test "")
 target_include_directories(recognize_commands_test
   PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/.
-)
-
-set_target_properties(
-  recognize_commands_test
-  PROPERTIES
-  COMPILE_FLAGS -fno-rtti
-  COMPILE_FLAGS -fno-exceptions
-  COMPILE_FLAGS -fno-threadsafe-statics
-  COMPILE_FLAGS -nostdlib
 )
 
 target_sources(recognize_commands_test

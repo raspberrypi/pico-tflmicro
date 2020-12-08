@@ -12,15 +12,6 @@ target_include_directories(testing_helpers_test
   ${CMAKE_CURRENT_LIST_DIR}/../../tests/testing_helpers_test
 )
 
-set_target_properties(
-  testing_helpers_test
-  PROPERTIES
-  COMPILE_FLAGS -fno-rtti
-  COMPILE_FLAGS -fno-exceptions
-  COMPILE_FLAGS -fno-threadsafe-statics
-  COMPILE_FLAGS -nostdlib
-)
-
 target_sources(testing_helpers_test
   PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/../../tests/testing_helpers_test/testing_helpers_test.cpp

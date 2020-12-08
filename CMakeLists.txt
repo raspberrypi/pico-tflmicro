@@ -10,10 +10,10 @@ set(CMAKE_CXX_STANDARD 11)
 
 pico_sdk_init()
 
-add_library(pico-tflmicro "")
+add_library(pico-tflmicro INTERFACE)
 
 target_include_directories(pico-tflmicro
-  PUBLIC
+  INTERFACE
   ${CMAKE_CURRENT_LIST_DIR}/src/
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis/CMSIS/DSP/Include
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/ruy
@@ -28,28 +28,29 @@ target_include_directories(pico-tflmicro
 
 target_compile_definitions(
   pico-tflmicro
-  PUBLIC
+  INTERFACE
   COMPILE_DEFINITIONS TF_LITE_DISABLE_X86_NEON=1
   COMPILE_DEFINITIONS TF_LITE_STATIC_MEMORY=1
   COMPILE_DEFINITIONS CMSIS_NN=1
 )
 
-set_target_properties(
+target_compile_options(
   pico-tflmicro
-  PROPERTIES
-  COMPILE_FLAGS -fno-rtti
-  COMPILE_FLAGS -fno-exceptions
-  COMPILE_FLAGS -fno-threadsafe-statics
-  COMPILE_FLAGS -nostdlib
+  INTERFACE
+  #-fno-rtti            # default anyway (for C++)
+  #-fno-exceptions      # default anyway (for C++)
+  $<$<COMPILE_LANGUAGE:CXX>:-fno-threadsafe-statics>
+  -nostdlib
 )
 
 target_link_libraries(
   pico-tflmicro
+  INTERFACE
   pico_stdlib
 )
 
 target_sources(pico-tflmicro
-  PUBLIC
+  INTERFACE
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/c/common.c
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/core/api/error_reporter.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/core/api/flatbuffer_conversions.cpp
@@ -337,7 +338,7 @@ target_sources(pico-tflmicro
 add_library(pico-tflmicro_test "")
 
 target_include_directories(pico-tflmicro_test
-  PUBLIC
+  INTERFACE
   ${CMAKE_CURRENT_LIST_DIR}/src/
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis/CMSIS/DSP/Include
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/ruy
@@ -352,19 +353,10 @@ target_include_directories(pico-tflmicro_test
 
 target_compile_definitions(
   pico-tflmicro_test
-  PUBLIC
+  INTERFACE
   COMPILE_DEFINITIONS TF_LITE_DISABLE_X86_NEON=1
   COMPILE_DEFINITIONS TF_LITE_STATIC_MEMORY=1
   COMPILE_DEFINITIONS CMSIS_NN=1
-)
-
-set_target_properties(
-  pico-tflmicro_test
-  PROPERTIES
-  COMPILE_FLAGS -fno-rtti
-  COMPILE_FLAGS -fno-exceptions
-  COMPILE_FLAGS -fno-threadsafe-statics
-  COMPILE_FLAGS -nostdlib
 )
 
 target_link_libraries(
@@ -373,7 +365,7 @@ target_link_libraries(
 )
 
 target_sources(pico-tflmicro_test
-  PUBLIC
+  INTERFACE
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/benchmarks/keyword_scrambled_model_data.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/testing/test_conv_model.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/testing/util_test.cpp

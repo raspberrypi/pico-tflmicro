@@ -13,15 +13,6 @@ target_include_directories(detection_responder_test_int8
   ${CMAKE_CURRENT_LIST_DIR}/.
 )
 
-set_target_properties(
-  detection_responder_test_int8
-  PROPERTIES
-  COMPILE_FLAGS -fno-rtti
-  COMPILE_FLAGS -fno-exceptions
-  COMPILE_FLAGS -fno-threadsafe-statics
-  COMPILE_FLAGS -nostdlib
-)
-
 target_sources(detection_responder_test_int8
   PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/detection_responder.cpp
@@ -43,15 +34,6 @@ add_executable(person_detection_benchmark "")
 target_include_directories(person_detection_benchmark
   PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/.
-)
-
-set_target_properties(
-  person_detection_benchmark
-  PROPERTIES
-  COMPILE_FLAGS -fno-rtti
-  COMPILE_FLAGS -fno-exceptions
-  COMPILE_FLAGS -fno-threadsafe-statics
-  COMPILE_FLAGS -nostdlib
 )
 
 target_sources(person_detection_benchmark
@@ -77,15 +59,6 @@ add_executable(person_detection_test_int8 "")
 target_include_directories(person_detection_test_int8
   PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/.
-)
-
-set_target_properties(
-  person_detection_test_int8
-  PROPERTIES
-  COMPILE_FLAGS -fno-rtti
-  COMPILE_FLAGS -fno-exceptions
-  COMPILE_FLAGS -fno-threadsafe-statics
-  COMPILE_FLAGS -nostdlib
 )
 
 target_sources(person_detection_test_int8
@@ -117,15 +90,6 @@ target_include_directories(person_detection_int8
   ${CMAKE_CURRENT_LIST_DIR}/.
 )
 
-set_target_properties(
-  person_detection_int8
-  PROPERTIES
-  COMPILE_FLAGS -fno-rtti
-  COMPILE_FLAGS -fno-exceptions
-  COMPILE_FLAGS -fno-threadsafe-statics
-  COMPILE_FLAGS -nostdlib
-)
-
 target_sources(person_detection_int8
   PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/detection_responder.cpp
@@ -155,15 +119,6 @@ add_executable(image_provider_test_int8 "")
 target_include_directories(image_provider_test_int8
   PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/.
-)
-
-set_target_properties(
-  image_provider_test_int8
-  PROPERTIES
-  COMPILE_FLAGS -fno-rtti
-  COMPILE_FLAGS -fno-exceptions
-  COMPILE_FLAGS -fno-threadsafe-statics
-  COMPILE_FLAGS -nostdlib
 )
 
 target_sources(image_provider_test_int8

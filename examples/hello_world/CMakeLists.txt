@@ -13,15 +13,6 @@ target_include_directories(hello_world_test
   ${CMAKE_CURRENT_LIST_DIR}/.
 )
 
-set_target_properties(
-  hello_world_test
-  PROPERTIES
-  COMPILE_FLAGS -fno-rtti
-  COMPILE_FLAGS -fno-exceptions
-  COMPILE_FLAGS -fno-threadsafe-statics
-  COMPILE_FLAGS -nostdlib
-)
-
 target_sources(hello_world_test
   PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/hello_world_test.cpp
@@ -44,15 +35,6 @@ add_executable(hello_world "")
 target_include_directories(hello_world
   PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/.
-)
-
-set_target_properties(
-  hello_world
-  PROPERTIES
-  COMPILE_FLAGS -fno-rtti
-  COMPILE_FLAGS -fno-exceptions
-  COMPILE_FLAGS -fno-threadsafe-statics
-  COMPILE_FLAGS -nostdlib
 )
 
 target_sources(hello_world
@@ -82,15 +64,6 @@ add_executable(output_handler_test "")
 target_include_directories(output_handler_test
   PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/.
-)
-
-set_target_properties(
-  output_handler_test
-  PROPERTIES
-  COMPILE_FLAGS -fno-rtti
-  COMPILE_FLAGS -fno-exceptions
-  COMPILE_FLAGS -fno-threadsafe-statics
-  COMPILE_FLAGS -nostdlib
 )
 
 target_sources(output_handler_test

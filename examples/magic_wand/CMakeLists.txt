@@ -13,15 +13,6 @@ target_include_directories(gesture_predictor_test
   ${CMAKE_CURRENT_LIST_DIR}/.
 )
 
-set_target_properties(
-  gesture_predictor_test
-  PROPERTIES
-  COMPILE_FLAGS -fno-rtti
-  COMPILE_FLAGS -fno-exceptions
-  COMPILE_FLAGS -fno-threadsafe-statics
-  COMPILE_FLAGS -nostdlib
-)
-
 target_sources(gesture_predictor_test
   PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/gesture_predictor.cpp
@@ -47,15 +38,6 @@ target_include_directories(gesture_output_handler_test
   ${CMAKE_CURRENT_LIST_DIR}/.
 )
 
-set_target_properties(
-  gesture_output_handler_test
-  PROPERTIES
-  COMPILE_FLAGS -fno-rtti
-  COMPILE_FLAGS -fno-exceptions
-  COMPILE_FLAGS -fno-threadsafe-statics
-  COMPILE_FLAGS -nostdlib
-)
-
 target_sources(gesture_output_handler_test
   PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/output_handler.cpp
@@ -78,15 +60,6 @@ add_executable(magic_wand "")
 target_include_directories(magic_wand
   PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/.
-)
-
-set_target_properties(
-  magic_wand
-  PROPERTIES
-  COMPILE_FLAGS -fno-rtti
-  COMPILE_FLAGS -fno-exceptions
-  COMPILE_FLAGS -fno-threadsafe-statics
-  COMPILE_FLAGS -nostdlib
 )
 
 target_sources(magic_wand
@@ -121,15 +94,6 @@ target_include_directories(magic_wand_test
   ${CMAKE_CURRENT_LIST_DIR}/.
 )
 
-set_target_properties(
-  magic_wand_test
-  PROPERTIES
-  COMPILE_FLAGS -fno-rtti
-  COMPILE_FLAGS -fno-exceptions
-  COMPILE_FLAGS -fno-threadsafe-statics
-  COMPILE_FLAGS -nostdlib
-)
-
 target_sources(magic_wand_test
   PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/magic_wand_model_data.cpp
@@ -156,15 +120,6 @@ add_executable(gesture_accelerometer_handler_test "")
 target_include_directories(gesture_accelerometer_handler_test
   PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/.
-)
-
-set_target_properties(
-  gesture_accelerometer_handler_test
-  PROPERTIES
-  COMPILE_FLAGS -fno-rtti
-  COMPILE_FLAGS -fno-exceptions
-  COMPILE_FLAGS -fno-threadsafe-statics
-  COMPILE_FLAGS -nostdlib
 )
 
 target_sources(gesture_accelerometer_handler_test
