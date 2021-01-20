@@ -1,4 +1,3 @@
-
 # This is a copy of <PICO_SDK_PATH>/external/pico_sdk_import.cmake
 
 # This can be dropped into an external project to help locate this SDK
@@ -34,7 +33,7 @@ if (NOT PICO_SDK_PATH)
         endif ()
         FetchContent_Declare(
                 pico_sdk
-                GIT_REPOSITORY git@asic-git.pitowers.org:projectmu/pico_sdk.git
+                GIT_REPOSITORY https://github.com/raspberrypi/pico-sdk
                 GIT_TAG master
         )
         if (NOT pico_sdk)
