@@ -2,13 +2,13 @@
 cmake_minimum_required(VERSION 3.12)
 
 # Pull in PICO SDK (must be before project)
-include(pico_sdk_import.cmake)
+# include(pico_sdk_import.cmake)
+# 
+# project(pico-tflmicro C CXX ASM)
+# set(CMAKE_C_STANDARD 11)
+# set(CMAKE_CXX_STANDARD 11)
 
-project(pico-tflmicro C CXX ASM)
-set(CMAKE_C_STANDARD 11)
-set(CMAKE_CXX_STANDARD 11)
-
-pico_sdk_init()
+# pico_sdk_init()
 
 add_library(pico-tflmicro "")
 
@@ -334,110 +334,110 @@ target_sources(pico-tflmicro
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/ruy/ruy/profiler/instrumentation.h
 )
 
-add_library(pico-tflmicro_test "")
+# add_library(pico-tflmicro_test "")
 
-target_include_directories(pico-tflmicro_test
-  PUBLIC
-  ${CMAKE_CURRENT_LIST_DIR}/src/
-  ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis/CMSIS/DSP/Include
-  ${CMAKE_CURRENT_LIST_DIR}/src/third_party/ruy
-  ${CMAKE_CURRENT_LIST_DIR}/src/third_party/gemmlowp
-  ${CMAKE_CURRENT_LIST_DIR}/src/third_party/kissfft
-  ${CMAKE_CURRENT_LIST_DIR}/src/third_party/flatbuffers
-  ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis/CMSIS/Core/Include
-  ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis
-  ${CMAKE_CURRENT_LIST_DIR}/src/third_party/flatbuffers/include
-  ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis/CMSIS/NN/Include
-)
+# target_include_directories(pico-tflmicro_test
+#   PUBLIC
+#   ${CMAKE_CURRENT_LIST_DIR}/src/
+#   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis/CMSIS/DSP/Include
+#   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/ruy
+#   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/gemmlowp
+#   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/kissfft
+#   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/flatbuffers
+#   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis/CMSIS/Core/Include
+#   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis
+#   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/flatbuffers/include
+#   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis/CMSIS/NN/Include
+# )
 
-target_compile_definitions(
-  pico-tflmicro_test
-  PUBLIC
-  COMPILE_DEFINITIONS TF_LITE_DISABLE_X86_NEON=1
-  COMPILE_DEFINITIONS TF_LITE_STATIC_MEMORY=1
-  COMPILE_DEFINITIONS CMSIS_NN=1
-)
+# target_compile_definitions(
+#   pico-tflmicro_test
+#   PUBLIC
+#   COMPILE_DEFINITIONS TF_LITE_DISABLE_X86_NEON=1
+#   COMPILE_DEFINITIONS TF_LITE_STATIC_MEMORY=1
+#   COMPILE_DEFINITIONS CMSIS_NN=1
+# )
 
-set_target_properties(
-  pico-tflmicro_test
-  PROPERTIES
-  COMPILE_FLAGS -fno-rtti
-  COMPILE_FLAGS -fno-exceptions
-  COMPILE_FLAGS -fno-threadsafe-statics
-  COMPILE_FLAGS -nostdlib
-)
+# set_target_properties(
+#   pico-tflmicro_test
+#   PROPERTIES
+#   COMPILE_FLAGS -fno-rtti
+#   COMPILE_FLAGS -fno-exceptions
+#   COMPILE_FLAGS -fno-threadsafe-statics
+#   COMPILE_FLAGS -nostdlib
+# )
 
-target_link_libraries(
-  pico-tflmicro_test
-  pico_stdlib
-)
+# target_link_libraries(
+#   pico-tflmicro_test
+#   pico_stdlib
+# )
 
-target_sources(pico-tflmicro_test
-  PUBLIC
-  ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/benchmarks/keyword_scrambled_model_data.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/testing/test_conv_model.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/testing/util_test.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/testing/micro_test.h
-  ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/testing/test_conv_model.h
-)
+# target_sources(pico-tflmicro_test
+#   PUBLIC
+#   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/benchmarks/keyword_scrambled_model_data.cpp
+#   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/testing/test_conv_model.cpp
+#   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/testing/util_test.cpp
+#   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/testing/micro_test.h
+#   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/testing/test_conv_model.h
+# )
 
-add_subdirectory("examples/keyword_benchmark")
-add_subdirectory("examples/hello_world")
-add_subdirectory("examples/person_detection")
-add_subdirectory("examples/magic_wand")
-add_subdirectory("examples/micro_speech")
-add_subdirectory("tests/greedy_memory_planner_test")
-add_subdirectory("tests/kernel_activations_test")
-add_subdirectory("tests/kernel_add_test")
-add_subdirectory("tests/kernel_arg_min_max_test")
-add_subdirectory("tests/kernel_ceil_test")
-add_subdirectory("tests/kernel_circular_buffer_test")
-add_subdirectory("tests/kernel_comparisons_test")
-add_subdirectory("tests/kernel_concatenation_test")
-add_subdirectory("tests/kernel_conv_test")
-add_subdirectory("tests/kernel_depthwise_conv_test")
-add_subdirectory("tests/kernel_dequantize_test")
-add_subdirectory("tests/kernel_detection_postprocess_test")
-add_subdirectory("tests/kernel_elementwise_test")
-add_subdirectory("tests/kernel_floor_test")
-add_subdirectory("tests/kernel_fully_connected_test")
-add_subdirectory("tests/kernel_hard_swish_test")
-add_subdirectory("tests/kernel_l2norm_test")
-add_subdirectory("tests/kernel_logical_test")
-add_subdirectory("tests/kernel_logistic_test")
-add_subdirectory("tests/kernel_maximum_minimum_test")
-add_subdirectory("tests/kernel_mul_test")
-add_subdirectory("tests/kernel_neg_test")
-add_subdirectory("tests/kernel_pack_test")
-add_subdirectory("tests/kernel_pad_test")
-add_subdirectory("tests/kernel_pooling_test")
-add_subdirectory("tests/kernel_prelu_test")
-add_subdirectory("tests/kernel_quantization_util_test")
-add_subdirectory("tests/kernel_quantize_test")
-add_subdirectory("tests/kernel_reduce_test")
-add_subdirectory("tests/kernel_reshape_test")
-add_subdirectory("tests/kernel_resize_nearest_neighbor_test")
-add_subdirectory("tests/kernel_round_test")
-add_subdirectory("tests/kernel_shape_test")
-add_subdirectory("tests/kernel_softmax_test")
-add_subdirectory("tests/kernel_split_test")
-add_subdirectory("tests/kernel_split_v_test")
-add_subdirectory("tests/kernel_strided_slice_test")
-add_subdirectory("tests/kernel_sub_test")
-add_subdirectory("tests/kernel_svdf_test")
-add_subdirectory("tests/kernel_tanh_test")
-add_subdirectory("tests/kernel_unpack_test")
-add_subdirectory("tests/linear_memory_planner_test")
-add_subdirectory("tests/memory_arena_threshold_test")
-add_subdirectory("tests/memory_helpers_test")
-add_subdirectory("tests/micro_allocator_test")
-add_subdirectory("tests/micro_error_reporter_test")
-add_subdirectory("tests/micro_interpreter_test")
-add_subdirectory("tests/micro_mutable_op_resolver_test")
-add_subdirectory("tests/micro_string_test")
-add_subdirectory("tests/micro_time_test")
-add_subdirectory("tests/micro_utils_test")
-add_subdirectory("tests/recording_micro_allocator_test")
-add_subdirectory("tests/recording_simple_memory_allocator_test")
-add_subdirectory("tests/simple_memory_allocator_test")
-add_subdirectory("tests/testing_helpers_test")
+# add_subdirectory("examples/keyword_benchmark")
+# add_subdirectory("examples/hello_world")
+# add_subdirectory("examples/person_detection")
+# add_subdirectory("examples/magic_wand")
+# add_subdirectory("examples/micro_speech")
+# add_subdirectory("tests/greedy_memory_planner_test")
+# add_subdirectory("tests/kernel_activations_test")
+# add_subdirectory("tests/kernel_add_test")
+# add_subdirectory("tests/kernel_arg_min_max_test")
+# add_subdirectory("tests/kernel_ceil_test")
+# add_subdirectory("tests/kernel_circular_buffer_test")
+# add_subdirectory("tests/kernel_comparisons_test")
+# add_subdirectory("tests/kernel_concatenation_test")
+# add_subdirectory("tests/kernel_conv_test")
+# add_subdirectory("tests/kernel_depthwise_conv_test")
+# add_subdirectory("tests/kernel_dequantize_test")
+# add_subdirectory("tests/kernel_detection_postprocess_test")
+# add_subdirectory("tests/kernel_elementwise_test")
+# add_subdirectory("tests/kernel_floor_test")
+# add_subdirectory("tests/kernel_fully_connected_test")
+# add_subdirectory("tests/kernel_hard_swish_test")
+# add_subdirectory("tests/kernel_l2norm_test")
+# add_subdirectory("tests/kernel_logical_test")
+# add_subdirectory("tests/kernel_logistic_test")
+# add_subdirectory("tests/kernel_maximum_minimum_test")
+# add_subdirectory("tests/kernel_mul_test")
+# add_subdirectory("tests/kernel_neg_test")
+# add_subdirectory("tests/kernel_pack_test")
+# add_subdirectory("tests/kernel_pad_test")
+# add_subdirectory("tests/kernel_pooling_test")
+# add_subdirectory("tests/kernel_prelu_test")
+# add_subdirectory("tests/kernel_quantization_util_test")
+# add_subdirectory("tests/kernel_quantize_test")
+# add_subdirectory("tests/kernel_reduce_test")
+# add_subdirectory("tests/kernel_reshape_test")
+# add_subdirectory("tests/kernel_resize_nearest_neighbor_test")
+# add_subdirectory("tests/kernel_round_test")
+# add_subdirectory("tests/kernel_shape_test")
+# add_subdirectory("tests/kernel_softmax_test")
+# add_subdirectory("tests/kernel_split_test")
+# add_subdirectory("tests/kernel_split_v_test")
+# add_subdirectory("tests/kernel_strided_slice_test")
+# add_subdirectory("tests/kernel_sub_test")
+# add_subdirectory("tests/kernel_svdf_test")
+# add_subdirectory("tests/kernel_tanh_test")
+# add_subdirectory("tests/kernel_unpack_test")
+# add_subdirectory("tests/linear_memory_planner_test")
+# add_subdirectory("tests/memory_arena_threshold_test")
+# add_subdirectory("tests/memory_helpers_test")
+# add_subdirectory("tests/micro_allocator_test")
+# add_subdirectory("tests/micro_error_reporter_test")
+# add_subdirectory("tests/micro_interpreter_test")
+# add_subdirectory("tests/micro_mutable_op_resolver_test")
+# add_subdirectory("tests/micro_string_test")
+# add_subdirectory("tests/micro_time_test")
+# add_subdirectory("tests/micro_utils_test")
+# add_subdirectory("tests/recording_micro_allocator_test")
+# add_subdirectory("tests/recording_simple_memory_allocator_test")
+# add_subdirectory("tests/simple_memory_allocator_test")
+# add_subdirectory("tests/testing_helpers_test")
