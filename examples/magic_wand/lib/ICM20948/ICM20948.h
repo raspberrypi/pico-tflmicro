@@ -143,34 +143,36 @@ class ICM20948 {
 
   virtual ~ICM20948();
 
-  void  imuAHRSupdate(float gx, float gy, float gz, float ax, float ay, float az,
-                      float mx, float my, float mz);
-  float invSqrt(float x);
+  static void  imuAHRSupdate(float gx, float gy, float gz, float ax, float ay, float az,
+                             float mx, float my, float mz);
+  static float invSqrt(float x);
 
-  void icm20948init(void);
-  void icm20948GyroRead(float *ps16X, float *ps16Y, float *ps16Z);
-  bool icm20948AccelRead(float *ps16X, float *ps16Y, float *ps16Z);
-  void icm20948MagRead(float *ps16X, float *ps16Y, float *ps16Z);
-  bool icm20948MagCheck(void);
-  void icm20948CalAvgValue(uint8_t *pIndex, int16_t *pAvgBuffer, int16_t InVal,
-                           int32_t *pOutVal);
-  void icm20948GyroOffset(void);
-  void icm20948ReadSecondary(uint8_t u8I2CAddr, uint8_t u8RegAddr, uint8_t u8Len,
-                             uint8_t *pu8data);
-  void icm20948WriteSecondary(uint8_t u8I2CAddr, uint8_t u8RegAddr, uint8_t u8data);
-  bool icm20948Check(void);
+  static void icm20948init(void);
+  static void icm20948GyroRead(uint16_t *ps16X, uint16_t *ps16Y, uint16_t *ps16Z);
+  static bool icm20948AccelRead(float *ps16X, float *ps16Y, float *ps16Z);
+  static void icm20948MagRead(uint16_t *ps16X, uint16_t *ps16Y, uint16_t *ps16Z);
+  static bool icm20948MagCheck(void);
+  static void icm20948CalAvgValue(uint8_t *pIndex, int16_t *pAvgBuffer, int16_t InVal,
+                                  int32_t *pOutVal);
+  static void icm20948GyroOffset(void);
+  static void icm20948ReadSecondary(uint8_t u8I2CAddr, uint8_t u8RegAddr, uint8_t u8Len,
+                                    uint8_t *pu8data);
+  static void icm20948WriteSecondary(uint8_t u8I2CAddr, uint8_t u8RegAddr,
+                                     uint8_t u8data);
+  static bool icm20948Check(void);
 
-  bool reserved_addr(uint8_t addr);
+  static bool reserved_addr(uint8_t addr);
 
   void imuInit(IMU_EN_SENSOR_TYPE *penMotionSensorType);
 
-  void I2C_WriteOneByte(uint8_t reg, uint8_t value);
-  char I2C_ReadOneByte(uint8_t reg);
+  static void I2C_WriteOneByte(uint8_t reg, uint8_t value);
+  static char I2C_ReadOneByte(uint8_t reg);
 
-  int  dataReady();
-  bool imuDataGet(IMU_ST_ANGLES_DATA *pstAngles, IMU_ST_SENSOR_DATA *pstGyroRawData,
-                  IMU_ST_SENSOR_DATA *pstAccelRawData,
-                  IMU_ST_SENSOR_DATA *pstMagnRawData);
+  static int  dataReady();
+  static bool imuDataGet(IMU_ST_ANGLES_DATA *pstAngles,
+                         IMU_ST_SENSOR_DATA *pstGyroRawData,
+                         IMU_ST_SENSOR_DATA *pstAccelRawData,
+                         IMU_ST_SENSOR_DATA *pstMagnRawData);
 };
 extern ICM20948 IMU;
 

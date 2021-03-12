@@ -46,16 +46,17 @@ TfLiteStatus SetupAccelerometer(tflite::ErrorReporter *error_reporter) {
 
   //  sample_every_n = static_cast<int>(roundf(400 / kTargetHz));
 
-  //  TF_LITE_REPORT_ERROR(error_reporter, "Magic starts!");
+    TF_LITE_REPORT_ERROR(error_reporter, "Magic starts!");
   return kTfLiteOk;
 }
 
 static bool UpdateData() {
   bool new_data = false;
-  if ((tflite::GetCurrentTimeTicks() - last_sample_millis) * 1000
-      < 40 * tflite::ticks_per_second()) {
-    return false;
-  }
+//  if ((tflite::GetCurrentTimeTicks() - last_sample_millis) * 1000
+//      < 40 * tflite::ticks_per_second()) {
+//    return false;
+//  }
+  sleep_ms(40);
   if (!IMU.dataReady()) {
     return false;
   }
@@ -64,7 +65,7 @@ static bool UpdateData() {
   float x = 0.0f, y = 0.0f, z = 0.0f;
   IMU.icm20948AccelRead(&x, &y, &z);
 
-  // 原始数据出力
+  // 原始数据处理
   x = x * 4.0 / 32768.0;
   y = y * 4.0 / 32768.0;
   z = z * 4.0 / 32768.0;
@@ -81,7 +82,7 @@ static bool UpdateData() {
   //           norm_z * 1000);
   //  printf("%f,%f,%f\n", norm_x * 1000, norm_y * 1000, norm_z * 1000);
 
-  if (begin_index >= 384) {
+  if (begin_index >= 600) {
     begin_index = 0;
   }
 

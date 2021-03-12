@@ -14,7 +14,6 @@ limitations under the License.
 ==============================================================================*/
 
 #include "gesture_predictor.h"
-//#include "st7735.h"
 
 #include "constants.h"
 
@@ -60,6 +59,7 @@ int PredictGesture(float *output) {
     --prediction_suppression_count;
   }
 #if 0
+//#include "st7735.h"
   if (max_predict_index != 3) {
 
     if (max_predict_index == 0) {

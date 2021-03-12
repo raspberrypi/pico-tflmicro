@@ -27,6 +27,7 @@ typedef struct mic_i2s_config {
 
 uint8_t mic_i2s_init(mic_i2s_config_t *config);
 void    mic_dma_init(mic_i2s_config_t *config);
+void    read(int16_t **buffer);
 void    update_pio_frequency(mic_i2s_config_t *config);
 // 16bit, monoral, 16000Hz,  linear PCM
 void CreateWavHeader(char *header, int waveDataSize);  // size of header is 44

@@ -2,28 +2,27 @@
 .side_set 2
 		;   /-- LRCLK
 		;   |/--BCLK
-public entry_point:
-    nop       		 side 0b10
-    set x, 7         side 0b00  
-noploop1:          
-	nop               side 0b01
-	jmp x-- noploop1  side 0b00
-    set x, 7          side 0b00
-bitloop1:
-    in pins,  1       side 0b01
+
+bitloop1:           ;        ||
+	in pins,  1       side 0b01
 	jmp x-- bitloop1  side 0b00
-    set x, 7          side 0b10
-noploop2:
-    nop      		  side 0b11
-    jmp x-- noploop2  side 0b10
-    set x, 7          side 0b10
-bitloop2:
-    in pins,    1  	  side 0b11
-    jmp x-- bitloop2  side 0b10
-    
+    set x, 13         side 0b01
+	;set x, 9         side 0b01
+noploop1:
+	nop               side 0b00
+	jmp x-- noploop1  side 0b01
+	set x, 31         side 0b11
 
+bitloop0:
+    nop      		  side 0b10
+    jmp x-- bitloop0  side 0b11
 
-
+public entry_point:
+    nop       		  side 0b11
+	nop       		  side 0b00
+	nop       		  side 0b01
+    set x, 15         side 0b00
+	;set x, 19        side 0b00
 
 % c-sdk {
 void mic_i2s_program_init(PIO pio, uint sm, uint offset, uint8_t LRclk_pin, uint8_t clock_pin, uint data_pin) {

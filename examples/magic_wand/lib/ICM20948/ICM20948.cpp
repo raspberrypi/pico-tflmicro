@@ -9,7 +9,7 @@
 #define I2C_PORT i2c0
 IMU_ST_SENSOR_DATA gstGyroOffset = { 0, 0, 0 };
 
-ICM20948::ICM20948() = default;
+ICM20948::ICM20948()  = default;
 ICM20948::~ICM20948() = default;
 
 char ICM20948::I2C_ReadOneByte(uint8_t reg) {
@@ -34,7 +34,7 @@ void ICM20948::I2C_WriteOneByte(uint8_t reg, uint8_t value) {
 float angles[3];
 float q0, q1, q2, q3;
 
-bool  ICM20948::reserved_addr(uint8_t addr) {
+bool ICM20948::reserved_addr(uint8_t addr) {
   return (addr & 0x78) == 0 || (addr & 0x78) == 0x78;
 }
 
@@ -90,43 +90,44 @@ bool ICM20948::imuDataGet(IMU_ST_ANGLES_DATA *pstAngles,
                           IMU_ST_SENSOR_DATA *pstGyroRawData,
                           IMU_ST_SENSOR_DATA *pstAccelRawData,
                           IMU_ST_SENSOR_DATA *pstMagnRawData) {
-//  float   MotionVal[9];
-//  float s16Gyro[3], s16Accel[3], s16Magn[3];
-//  icm20948AccelRead(&s16Accel[0], &s16Accel[1], &s16Accel[2]);
-//  icm20948GyroRead(&s16Gyro[0], &s16Gyro[1], &s16Gyro[2]);
-//  icm20948MagRead(&s16Magn[0], &s16Magn[1], &s16Magn[2]);
-//
-//  MotionVal[0] = s16Gyro[0] / 32.8;
-//  MotionVal[1] = s16Gyro[1] / 32.8;
-//  MotionVal[2] = s16Gyro[2] / 32.8;
-//  MotionVal[3] = s16Accel[0];
-//  MotionVal[4] = s16Accel[1];
-//  MotionVal[5] = s16Accel[2];
-//  MotionVal[6] = s16Magn[0];
-//  MotionVal[7] = s16Magn[1];
-//  MotionVal[8] = s16Magn[2];
-//  imuAHRSupdate((float)MotionVal[0] * 0.0175, (float)MotionVal[1] * 0.0175,
-//                (float)MotionVal[2] * 0.0175, (float)MotionVal[3], (float)MotionVal[4],
-//                (float)MotionVal[5], (float)MotionVal[6], (float)MotionVal[7],
-//                MotionVal[8]);
-//
-//  pstAngles->fPitch = asin(-2 * q1 * q3 + 2 * q0 * q2) * 57.3;  // pitch
-//  pstAngles->fRoll =
-//    atan2(2 * q2 * q3 + 2 * q0 * q1, -2 * q1 * q1 - 2 * q2 * q2 + 1) * 57.3;  // roll
-//  pstAngles->fYaw =
-//    atan2(-2 * q1 * q2 - 2 * q0 * q3, 2 * q2 * q2 + 2 * q3 * q3 - 1) * 57.3;
-//
-//  pstGyroRawData->s16X = s16Gyro[0];
-//  pstGyroRawData->s16Y = s16Gyro[1];
-//  pstGyroRawData->s16Z = s16Gyro[2];
-//
-//  pstAccelRawData->s16X = s16Accel[0];
-//  pstAccelRawData->s16Y = s16Accel[1];
-//  pstAccelRawData->s16Z = s16Accel[2];
-//
-//  pstMagnRawData->s16X = s16Magn[0];
-//  pstMagnRawData->s16Y = s16Magn[1];
-//  pstMagnRawData->s16Z = s16Magn[2];
+  uint16_t  MotionVal[9];
+  float    s16Accel[3];
+  uint16_t s16Gyro[3], s16Magn[3];
+  icm20948AccelRead(&s16Accel[0], &s16Accel[1], &s16Accel[2]);
+  icm20948GyroRead(&s16Gyro[0], &s16Gyro[1], &s16Gyro[2]);
+  icm20948MagRead(&s16Magn[0], &s16Magn[1], &s16Magn[2]);
+
+  MotionVal[0] = s16Gyro[0] / 32.8;
+  MotionVal[1] = s16Gyro[1] / 32.8;
+  MotionVal[2] = s16Gyro[2] / 32.8;
+  MotionVal[3] = s16Accel[0];
+  MotionVal[4] = s16Accel[1];
+  MotionVal[5] = s16Accel[2];
+  MotionVal[6] = s16Magn[0];
+  MotionVal[7] = s16Magn[1];
+  MotionVal[8] = s16Magn[2];
+  imuAHRSupdate((float)MotionVal[0] * 0.0175, (float)MotionVal[1] * 0.0175,
+                (float)MotionVal[2] * 0.0175, (float)MotionVal[3], (float)MotionVal[4],
+                (float)MotionVal[5], (float)MotionVal[6], (float)MotionVal[7],
+                MotionVal[8]);
+
+  pstAngles->fPitch = asin(-2 * q1 * q3 + 2 * q0 * q2) * 57.3;  // pitch
+  pstAngles->fRoll =
+    atan2(2 * q2 * q3 + 2 * q0 * q1, -2 * q1 * q1 - 2 * q2 * q2 + 1) * 57.3;  // roll
+  pstAngles->fYaw =
+    atan2(-2 * q1 * q2 - 2 * q0 * q3, 2 * q2 * q2 + 2 * q3 * q3 - 1) * 57.3;
+
+  pstGyroRawData->s16X = s16Gyro[0];
+  pstGyroRawData->s16Y = s16Gyro[1];
+  pstGyroRawData->s16Z = s16Gyro[2];
+
+  pstAccelRawData->s16X = s16Accel[0];
+  pstAccelRawData->s16Y = s16Accel[1];
+  pstAccelRawData->s16Z = s16Accel[2];
+
+  pstMagnRawData->s16X = s16Magn[0];
+  pstMagnRawData->s16Y = s16Magn[1];
+  pstMagnRawData->s16Z = s16Magn[2];
 
   return true;
 }
@@ -263,11 +264,12 @@ bool ICM20948::icm20948Check() {
   return bRet;
 }
 
-void ICM20948::icm20948GyroRead(float *ps16X, float *ps16Y, float *ps16Z) {
-  uint8_t                     u8Buf[6];
-  int16_t                     s16Buf[3] = { 0 };
-  uint8_t                     i;
-  int32_t                     s32OutBuf[3] = { 0 };
+void ICM20948::icm20948GyroRead(uint16_t *ps16X, uint16_t *ps16Y, uint16_t *ps16Z) {
+  uint8_t u8Buf[6];
+  int16_t s16Buf[3] = { 0 };
+  uint8_t i;
+  int32_t s32OutBuf[3] = { 0 };
+  //
   static ICM20948_ST_AVG_DATA sstAvgBuf[3];
   static int16_t              ss16c = 0;
   ss16c++;
@@ -292,6 +294,7 @@ void ICM20948::icm20948GyroRead(float *ps16X, float *ps16Y, float *ps16Z) {
   *ps16Y = s32OutBuf[1] - gstGyroOffset.s16Y;
   *ps16Z = s32OutBuf[2] - gstGyroOffset.s16Z;
 }
+
 bool ICM20948::icm20948AccelRead(float *ps16X, float *ps16Y, float *ps16Z) {
   uint8_t                     u8Buf[2];
   int16_t                     s16Buf[3] = { 0 };
@@ -318,7 +321,7 @@ bool ICM20948::icm20948AccelRead(float *ps16X, float *ps16Y, float *ps16Z) {
   //  for (i = 0; i < 3; i++)
   //	{
   //	  icm20948CalAvgValue (&sstAvgBuf[i].u8Index, sstAvgBuf[i].s16AvgBuffer,
-  //s16Buf[i], s32OutBuf + i);
+  // s16Buf[i], s32OutBuf + i);
   //	}
   //
   //  *ps16X = s32OutBuf[0];
@@ -329,20 +332,21 @@ bool ICM20948::icm20948AccelRead(float *ps16X, float *ps16Y, float *ps16Z) {
   //	std::cout<<std::endl<<*ps16X<<std::endl<<*ps16Y<<std::endl<<*ps16Z;
 
   if (*ps16X == 0 && *ps16Y == 0 && *ps16Z == 0) {
-//    *ps16X = NAN;
-//    *ps16Y = NAN;
-//    *ps16Z = NAN;
+    //    *ps16X = NAN;
+    //    *ps16Y = NAN;
+    //    *ps16Z = NAN;
     return false;
   }
   return true;
 }
 
-void ICM20948::icm20948MagRead(float *ps16X, float *ps16Y, float *ps16Z) {
-  uint8_t                     counter = 20;
-  uint8_t                     u8Data[MAG_DATA_LEN];
-  int16_t                     s16Buf[3] = { 0 };
-  uint8_t                     i;
-  int32_t                     s32OutBuf[3] = { 0 };
+void ICM20948::icm20948MagRead(uint16_t *ps16X, uint16_t *ps16Y, uint16_t *ps16Z) {
+  uint8_t counter = 20;
+  uint8_t u8Data[MAG_DATA_LEN];
+  int16_t s16Buf[3] = { 0 };
+  uint8_t i;
+  int32_t s32OutBuf[3] = { 0 };
+  //
   static ICM20948_ST_AVG_DATA sstAvgBuf[3];
   while (counter > 0) {
     sleep_ms(1);
@@ -428,7 +432,8 @@ void ICM20948::icm20948WriteSecondary(uint8_t u8I2CAddr, uint8_t u8RegAddr,
   u8Temp &= ~((REG_VAL_BIT_I2C_MST_EN) & (REG_VAL_BIT_MASK_LEN));
   I2C_WriteOneByte(REG_ADD_I2C_SLV0_CTRL, u8Temp);
 
-  I2C_WriteOneByte(REG_ADD_REG_BANK_SEL, REG_VAL_REG_BANK_0);  }
+  I2C_WriteOneByte(REG_ADD_REG_BANK_SEL, REG_VAL_REG_BANK_0);
+}
 
 void ICM20948::icm20948CalAvgValue(uint8_t *pIndex, int16_t *pAvgBuffer, int16_t InVal,
                                    int32_t *pOutVal) {
@@ -445,9 +450,9 @@ void ICM20948::icm20948CalAvgValue(uint8_t *pIndex, int16_t *pAvgBuffer, int16_t
 }
 
 void ICM20948::icm20948GyroOffset() {
-  uint8_t i;
-  float s16Gx = 0, s16Gy = 0, s16Gz = 0;
-  int32_t s32TempGx = 0, s32TempGy = 0, s32TempGz = 0;
+  uint8_t  i;
+  uint16_t s16Gx = 0, s16Gy = 0, s16Gz = 0;
+  int32_t  s32TempGx = 0, s32TempGy = 0, s32TempGz = 0;
   for (i = 0; i < 32; i++) {
     icm20948GyroRead(&s16Gx, &s16Gy, &s16Gz);
     s32TempGx += s16Gx;

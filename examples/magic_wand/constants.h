@@ -32,7 +32,7 @@ constexpr int kNoGesture = 3;
 // more robust results though, so consider retraining if you are seeing poor
 // predictions.
 constexpr float kDetectionThreshold = 0.2f;
-constexpr int kPredictionHistoryLength = 2;
+constexpr int kPredictionHistoryLength = 5;
 constexpr int kPredictionSuppressionDuration = 25;
 
 #endif  // TENSORFLOW_LITE_MICRO_EXAMPLES_MAGIC_WAND_CONSTANTS_H_

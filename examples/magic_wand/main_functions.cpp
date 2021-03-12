@@ -175,18 +175,18 @@ void loop() {
   HandleOutput(error_reporter, gesture_index);
 
 #if 0
-  if (gesture_index < 3) {
-    if (gesture_index == 0) {
-      ST7735_WriteString(5, 90, "Wing", Font_11x18, ST7735_BLACK, ST7735_GREEN);
+    if (gesture_index < 3) {
+      if (gesture_index == 0) {
+        ST7735_WriteString(5, 90, "Wing", Font_11x18, ST7735_BLACK, ST7735_GREEN);
 
+      }
+      else if (gesture_index == 1) {
+        ST7735_WriteString(5, 90, "Wing", Font_11x18, ST7735_BLACK, ST7735_GREEN);
+      }
+      else if (gesture_index == 2) {
+        ST7735_WriteString(5, 90, "Wing", Font_11x18, ST7735_BLACK, ST7735_GREEN);
+      }
     }
-    else if (gesture_index == 1) {
-      ST7735_WriteString(5, 90, "Wing", Font_11x18, ST7735_BLACK, ST7735_GREEN);
-    }
-    else if (gesture_index == 2) {
-      ST7735_WriteString(5, 90, "Wing", Font_11x18, ST7735_BLACK, ST7735_GREEN);
-    }
-  }
 #else
   if (gesture_index < 3) {
     ST7735_FillRectangle(0, 90, ST7735_WIDTH, 70, ST7735_GREEN);
@@ -194,24 +194,24 @@ void loop() {
 
       ST7735_WriteString(5, 90, "WING:", Font_7x10, ST7735_BLACK, ST7735_GREEN);
       //      ST7735_DrawPixel()
-      ST7735_WriteString(5, 100, "*   *   *", Font_7x10, ST7735_BLACK, ST7735_GREEN);
-      ST7735_WriteString(5, 110, " * * * *", Font_7x10, ST7735_BLACK, ST7735_GREEN);
-      ST7735_WriteString(5, 120, "  *   *", Font_7x10, ST7735_BLACK, ST7735_GREEN);
+      ST7735_WriteString(10, 110, "*   *   *", Font_7x10, ST7735_BLACK, ST7735_GREEN);
+      ST7735_WriteString(10, 120, " * * * *", Font_7x10, ST7735_BLACK, ST7735_GREEN);
+      ST7735_WriteString(10, 130, "  *   *", Font_7x10, ST7735_BLACK, ST7735_GREEN);
     }
     else if (gesture_index == 1) {
-      ST7735_WriteString(5, 90, "RING:", Font_7x10, ST7735_BLACK, ST7735_GREEN);
-      ST7735_WriteString(5, 100, "   *", Font_7x10, ST7735_BLACK, ST7735_GREEN);
-      ST7735_WriteString(5, 105, " *   *", Font_7x10, ST7735_BLACK, ST7735_GREEN);
-      ST7735_WriteString(5, 115, "*      *", Font_7x10, ST7735_BLACK, ST7735_GREEN);
-      ST7735_WriteString(5, 125, " *   *", Font_7x10, ST7735_BLACK, ST7735_GREEN);
-      ST7735_WriteString(5, 130, "   *", Font_7x10, ST7735_BLACK, ST7735_GREEN);
+      ST7735_WriteString(10, 90, "RING:", Font_7x10, ST7735_BLACK, ST7735_GREEN);
+      ST7735_WriteString(10, 110, "   *", Font_7x10, ST7735_BLACK, ST7735_GREEN);
+      ST7735_WriteString(10, 115, " *   *", Font_7x10, ST7735_BLACK, ST7735_GREEN);
+      ST7735_WriteString(10, 125, "*     *", Font_7x10, ST7735_BLACK, ST7735_GREEN);
+      ST7735_WriteString(10, 135, " *   *", Font_7x10, ST7735_BLACK, ST7735_GREEN);
+      ST7735_WriteString(10, 140, "   *", Font_7x10, ST7735_BLACK, ST7735_GREEN);
     }
     else if (gesture_index == 2) {
       ST7735_WriteString(5, 90, "SLOPE:", Font_7x10, ST7735_BLACK, ST7735_GREEN);
-      ST7735_WriteString(5, 100, "   *", Font_7x10, ST7735_BLACK, ST7735_GREEN);
-      ST7735_WriteString(5, 110, "  *", Font_7x10, ST7735_BLACK, ST7735_GREEN);
-      ST7735_WriteString(5, 120, " *", Font_7x10, ST7735_BLACK, ST7735_GREEN);
-      ST7735_WriteString(5, 130, "**** ", Font_7x10, ST7735_BLACK, ST7735_GREEN);
+      ST7735_WriteString(10, 110, "   *", Font_7x10, ST7735_BLACK, ST7735_GREEN);
+      ST7735_WriteString(10, 120, "  *", Font_7x10, ST7735_BLACK, ST7735_GREEN);
+      ST7735_WriteString(10, 130, " *", Font_7x10, ST7735_BLACK, ST7735_GREEN);
+      ST7735_WriteString(10, 140, "**** ", Font_7x10, ST7735_BLACK, ST7735_GREEN);
     }
   }
 #endif
