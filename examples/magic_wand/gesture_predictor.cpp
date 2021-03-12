@@ -14,20 +14,22 @@ limitations under the License.
 ==============================================================================*/
 
 #include "gesture_predictor.h"
+//#include "st7735.h"
 
 #include "constants.h"
 
+#include "stdio.h"
 namespace {
-// State for the averaging algorithm we're using.
+// 我们正在使用的平均算法的状态。
 float prediction_history[kGestureCount][kPredictionHistoryLength] = {};
-int prediction_history_index = 0;
-int prediction_suppression_count = 0;
+int   prediction_history_index                                    = 0;
+int   prediction_suppression_count                                = 0;
 }  // namespace
 
-// Return the result of the last prediction
+// 返回上一次预测的结果
 // 0: wing("W"), 1: ring("O"), 2: slope("angle"), 3: unknown
-int PredictGesture(float* output) {
-  // Record the latest predictions in our rolling history buffer.
+int PredictGesture(float *output) {
+  // 在滚动历史记录缓冲区中记录最新的预测。
   for (int i = 0; i < kGestureCount; ++i) {
     prediction_history[i][prediction_history_index] = output[i];
   }
@@ -39,7 +41,7 @@ int PredictGesture(float* output) {
 
   // Average the last n predictions for each gesture, and find which has the
   // highest score.
-  int max_predict_index = -1;
+  int   max_predict_index = -1;
   float max_predict_score = 0.0f;
   for (int i = 0; i < kGestureCount; i++) {
     float prediction_sum = 0.0f;
@@ -57,13 +59,35 @@ int PredictGesture(float* output) {
   if (prediction_suppression_count > 0) {
     --prediction_suppression_count;
   }
+#if 0
+  if (max_predict_index != 3) {
+
+    if (max_predict_index == 0) {
+      ST7735_WriteString(5, 90, "Wing", Font_11x18, ST7735_BLACK, ST7735_GREEN);
+    }
+    else if (max_predict_index == 1) {
+      ST7735_WriteString(5, 90, "Ring", Font_11x18, ST7735_BLACK, ST7735_GREEN);
+    }
+    else if (max_predict_index == 2) {
+      ST7735_WriteString(5, 90, "Slope", Font_11x18, ST7735_BLACK, ST7735_GREEN);
+    }
+
+    char array[10];
+    sprintf(array, "%.1f%%", max_predict_score*100);
+    ST7735_WriteString(5, 110, array, Font_11x18, ST7735_BLACK, ST7735_GREEN);
+
+    //  ST7735_FillScreen(ST7735_GREEN);
+    printf("%d : %f \n", max_predict_index, max_predict_score);
+  }
+#endif
+
   // If we're predicting no gesture, or the average score is too low, or there's
   // been a gesture recognised too recently, return no gesture.
-  if ((max_predict_index == kNoGesture) ||
-      (max_predict_score < kDetectionThreshold) ||
-      (prediction_suppression_count > 0)) {
+  if ((max_predict_index == kNoGesture) || (max_predict_score < kDetectionThreshold)
+      || (prediction_suppression_count > 0)) {
     return kNoGesture;
-  } else {
+  }
+  else {
     // Reset the suppression counter so we don't come up with another prediction
     // too soon.
     prediction_suppression_count = kPredictionSuppressionDuration;

@@ -14,14 +14,28 @@ limitations under the License.
 ==============================================================================*/
 
 #include "main_functions.h"
+#include "pico/stdlib.h"
+#include <stdio.h>
 
 // This is the default main used on systems that have the standard C entry
 // point. Other devices (for example FreeRTOS or ESP32) that have different
 // requirements for entry code (like an app_main function) should specialize
 // this main.cc file in a target-specific subfolder.
-int main(int argc, char* argv[]) {
-  setup();
-  while (true) {
-    loop();
-  }
+int main (int argc, char *argv[])
+{
+  stdio_init_all ();
+  setup ();
+
+//  const uint LED_PIN = 25;
+//  gpio_init (LED_PIN);
+//  gpio_set_dir (LED_PIN, GPIO_OUT);
+//  printf ("Magic Wand Start\n");
+//  gpio_put (LED_PIN, 1);
+//  sleep_ms (250);
+//  gpio_put (LED_PIN, 0);
+
+  while (true)
+	{
+	  loop ();
+	}
 }

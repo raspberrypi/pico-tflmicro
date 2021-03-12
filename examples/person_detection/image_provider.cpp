@@ -14,13 +14,65 @@ limitations under the License.
 ==============================================================================*/
 
 #include "image_provider.h"
-
 #include "model_settings.h"
 
-TfLiteStatus GetImage(tflite::ErrorReporter* error_reporter, int image_width,
-                      int image_height, int channels, int8_t* image_data) {
+#include "DEV_Config.h"
+#include "arducam.h"
+#include "st7735.h"
+
+#include "pico/stdio.h"
+#include "pico/stdlib.h"
+
+
+struct arducam_config config;
+TfLiteStatus ScreenInit(tflite::ErrorReporter *error_reporter) {
+  stdio_init_all();
+  sleep_ms(1000);
+  ST7735_Init();
+  ST7735_DrawImage(0, 0, 80, 160, arducam_logo);
+  sleep_ms(1000);
+
+  config.sccb            = i2c0;
+  config.sccb_mode       = I2C_MODE_16_8;
+  config.sensor_address  = 0x24;
+  config.pin_sioc        = PIN_CAM_SIOC;
+  config.pin_siod        = PIN_CAM_SIOD;
+  config.pin_resetb      = PIN_CAM_RESETB;
+  config.pin_xclk        = PIN_CAM_XCLK;
+  config.pin_vsync       = PIN_CAM_VSYNC;
+  config.pin_y2_pio_base = PIN_CAM_Y2_PIO_BASE;
+  config.pio             = pio0;
+  config.pio_sm          = 0;
+  config.dma_channel     = 0;
+  arducam_init(&config);
+
+  ST7735_FillScreen(ST7735_BLACK);
+
+  return kTfLiteOk;
+}
+
+TfLiteStatus GetImage(tflite::ErrorReporter *error_reporter, int image_width,
+                      int image_height, int channels, int8_t *image_data) {
+  TF_LITE_MICRO_EXECUTION_TIME_BEGIN
+
+  TF_LITE_MICRO_EXECUTION_TIME_SNIPPET_START(error_reporter)
+  arducam_capture_frame(&config, (uint8_t *)image_data);
+  TF_LITE_MICRO_EXECUTION_TIME_SNIPPET_END(error_reporter, "capture_frame")
+
+  TF_LITE_MICRO_EXECUTION_TIME_SNIPPET_START(error_reporter)
+  uint8_t *displaybuf = new uint8_t[96 * 96 * 2];
+  uint16_t index      = 0;
+  for (int x = 0; x < 96 * 96; x++) {
+    uint16_t imageRGB   = ST7735_COLOR565(image_data[x], image_data[x], image_data[x]);
+    displaybuf[index++] = (uint8_t)(imageRGB >> 8) & 0xFF;
+    displaybuf[index++] = (uint8_t)(imageRGB)&0xFF;
+  }
+  ST7735_DrawImage(0, 0, 96, 96, displaybuf);
+  delete[] displaybuf;
+  TF_LITE_MICRO_EXECUTION_TIME_SNIPPET_END(error_reporter, "Display")
+
   for (int i = 0; i < image_width * image_height * channels; ++i) {
-    image_data[i] = 0;
+    image_data[i] = (uint8_t)image_data[i] - 128;
   }
   return kTfLiteOk;
 }
