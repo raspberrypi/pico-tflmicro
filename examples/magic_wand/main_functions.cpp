@@ -14,6 +14,8 @@ limitations under the License.
 ==============================================================================*/
 
 #include "main_functions.h"
+#include "pico/stdlib.h"
+#include "st7735.h"
 
 #include "accelerometer_handler.h"
 #include "constants.h"
@@ -26,30 +28,38 @@ limitations under the License.
 #include "tensorflow/lite/schema/schema_generated.h"
 #include "tensorflow/lite/version.h"
 
-// Globals, used for compatibility with Arduino-style sketches.
-namespace {
-tflite::ErrorReporter* error_reporter = nullptr;
-const tflite::Model* model = nullptr;
-tflite::MicroInterpreter* interpreter = nullptr;
-TfLiteTensor* model_input = nullptr;
-int input_length;
+const uint LED_PIN = 25;
 
-// Create an area of memory to use for input, output, and intermediate arrays.
-// The size of this will depend on the model you're using, and may need to be
-// determined by experimentation.
+// Global variables, used to be compatible with Arduino style sketches.
+namespace {
+tflite::ErrorReporter *   error_reporter = nullptr;
+const tflite::Model *     model          = nullptr;
+tflite::MicroInterpreter *interpreter    = nullptr;
+TfLiteTensor *            model_input    = nullptr;
+int                       input_length;
+
+// Create a memory area for input, output and intermediate arrays.
+// The size depends on the model you are using and may need to be determined
+// experimentally.
 constexpr int kTensorArenaSize = 60 * 1024;
-uint8_t tensor_arena[kTensorArenaSize];
+uint8_t       tensor_arena[kTensorArenaSize];
+
 }  // namespace
 
-// The name of this function is important for Arduino compatibility.
+// The name of this function is very important for Arduino compatibility.
 void setup() {
-  // Set up logging. Google style is to avoid globals or statics because of
-  // lifetime uncertainty, but since this has a trivial destructor it's okay.
+  ST7735_Init();
+  ST7735_DrawImage(0, 0, 80, 160, arducam_logo);
+
+  // Set up logging.
+  // Google's style is to avoid global variables or static variables due to the
+  // uncertainty of the life cycle, but because it has a trivial destructor, it can.
   static tflite::MicroErrorReporter micro_error_reporter;  // NOLINT
   error_reporter = &micro_error_reporter;
 
-  // Map the model into a usable data structure. This doesn't involve any
-  // copying or parsing, it's a very lightweight operation.
+  // Map the model to the available data structure.
+  // This does not involve any copying or parsing, which is a very lightweight
+  // operation.
   model = tflite::GetModel(g_magic_wand_model_data);
   if (model->version() != TFLITE_SCHEMA_VERSION) {
     TF_LITE_REPORT_ERROR(error_reporter,
@@ -59,11 +69,11 @@ void setup() {
     return;
   }
 
-  // Pull in only the operation implementations we need.
-  // This relies on a complete list of all the ops needed by this graph.
-  // An easier approach is to just use the AllOpsResolver, but this will
-  // incur some penalty in code space for op implementations that are not
-  // needed by this graph.
+  // Only introduce the operation implementation we need.
+  // It depends on the complete list of all operations required for this graph.
+  // A simpler method is to use AllOpsResolver only,
+  // but this will result in a loss of code space for op implementations that are not
+  // needed in this figure.
   static tflite::MicroMutableOpResolver<5> micro_op_resolver;  // NOLINT
   micro_op_resolver.AddConv2D();
   micro_op_resolver.AddDepthwiseConv2D();
@@ -71,22 +81,21 @@ void setup() {
   micro_op_resolver.AddMaxPool2D();
   micro_op_resolver.AddSoftmax();
 
-  // Build an interpreter to run the model with.
+  // Build an interpreter to run the model.
   static tflite::MicroInterpreter static_interpreter(
-      model, micro_op_resolver, tensor_arena, kTensorArenaSize, error_reporter);
+    model, micro_op_resolver, tensor_arena, kTensorArenaSize, error_reporter);
   interpreter = &static_interpreter;
 
-  // Allocate memory from the tensor_arena for the model's tensors.
+  // Allocate memory from tensor_arena for the tensor of the model.
   interpreter->AllocateTensors();
 
-  // Obtain pointer to the model's input tensor.
+  // Get a pointer to the input tensor of the model.
   model_input = interpreter->input(0);
-  if ((model_input->dims->size != 4) || (model_input->dims->data[0] != 1) ||
-      (model_input->dims->data[1] != 128) ||
-      (model_input->dims->data[2] != kChannelNumber) ||
-      (model_input->type != kTfLiteFloat32)) {
-    TF_LITE_REPORT_ERROR(error_reporter,
-                         "Bad input tensor parameters in model");
+  if ((model_input->dims->size != 4) || (model_input->dims->data[0] != 1)
+      || (model_input->dims->data[1] != 128)
+      || (model_input->dims->data[2] != kChannelNumber)
+      || (model_input->type != kTfLiteFloat32)) {
+    TF_LITE_REPORT_ERROR(error_reporter, "Bad input tensor parameters in model");
     return;
   }
 
@@ -96,25 +105,70 @@ void setup() {
   if (setup_status != kTfLiteOk) {
     TF_LITE_REPORT_ERROR(error_reporter, "Set up failed\n");
   }
+
+  ST7735_FillScreen(ST7735_GREEN);
+
+  ST7735_WriteString(5, 20, "Magic", Font_11x18, ST7735_BLACK, ST7735_GREEN);
+  ST7735_WriteString(30, 45, "Wand", Font_11x18, ST7735_BLACK, ST7735_GREEN);
+
+  gpio_init(LED_PIN);
+  gpio_set_dir(LED_PIN, GPIO_OUT);
 }
 
 void loop() {
-  // Attempt to read new data from the accelerometer.
-  bool got_data =
-      ReadAccelerometer(error_reporter, model_input->data.f, input_length);
-  // If there was no new data, wait until next time.
-  if (!got_data) return;
+#if EXECUTION_TIME
+  TF_LITE_MICRO_EXECUTION_TIME_BEGIN
 
-  // Run inference, and report any error.
+  TF_LITE_MICRO_EXECUTION_TIME_SNIPPET_START(error_reporter)
+#endif
+  // Try to read new data from the accelerometer.
+  bool got_data = ReadAccelerometer(error_reporter, model_input->data.f, input_length);
+
+  // If there is no new data, please wait for the next time.
+  if (!got_data)
+    return;
+#if EXECUTION_TIME
+  TF_LITE_MICRO_EXECUTION_TIME_SNIPPET_END(error_reporter, "ReadAccelerometer")
+
+  TF_LITE_MICRO_EXECUTION_TIME_SNIPPET_START(error_reporter)
+#endif
+  gpio_put(LED_PIN, 1);
+  // Run inference and report any errors.
   TfLiteStatus invoke_status = interpreter->Invoke();
+#if EXECUTION_TIME
+  TF_LITE_MICRO_EXECUTION_TIME_SNIPPET_END(error_reporter, "Invoke")
+#endif
   if (invoke_status != kTfLiteOk) {
-    TF_LITE_REPORT_ERROR(error_reporter, "Invoke failed on index: %d\n",
-                         begin_index);
+    TF_LITE_REPORT_ERROR(error_reporter, "Invoke failed on index: %d\n", begin_index);
     return;
   }
-  // Analyze the results to obtain a prediction
+
+  // Analyze the results to get predictions
   int gesture_index = PredictGesture(interpreter->output(0)->data.f);
 
-  // Produce an output
+  // Produces output
   HandleOutput(error_reporter, gesture_index);
+
+#if 0
+  char   s[64];
+  float *f = model_input->data.f;
+  float *p = interpreter->output(0)->data.f;
+  sprintf(s, "%+6.0f : %+6.0f : %+6.0f || W %3.2f : R %3.2f : S %3.2f", f[381], f[382],
+          f[383], p[0], p[1], p[2]);
+  TF_LITE_REPORT_ERROR(error_reporter, s);
+
+//  for (int i = 0; i < 3; i++) {
+//    printf("%d : ", i);
+//    int barNum = static_cast<int>(roundf(p[i] * 10));
+//    for (int k = 0; k < barNum; k++) {
+//      printf("\u2588"); // "█"
+//    }
+//    for (int k = barNum - 1; k < 10; k++) {
+//      printf(" ");
+//    }
+//    printf(" ");
+//  }
+//  printf("\n");
+#endif
+  gpio_put(LED_PIN, 0);
 }

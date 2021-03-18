@@ -1,0 +1,21 @@
+.program image
+.wrap_target
+
+	wait 1 pin 9 // wait for hsync
+	wait 1 pin 8 // wait for rising pclk
+	in pins 1
+	wait 0 pin 8
+.wrap
+
+% c-sdk {
+void image_program_init(PIO pio, uint sm, uint offset, uint pin_base) {
+	pio_sm_set_consecutive_pindirs(pio, sm, pin_base, 1, false);
+
+	pio_sm_config c = image_program_get_default_config(offset);
+	sm_config_set_in_pins(&c, pin_base);
+	sm_config_set_in_shift(&c, false, true, 8);
+	sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_RX);
+	pio_sm_init(pio, sm, offset, &c);
+	//pio_sm_set_enabled(pio, sm, true);
+}
+%}

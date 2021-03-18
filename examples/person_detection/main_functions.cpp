@@ -14,6 +14,8 @@ limitations under the License.
 ==============================================================================*/
 
 #include "main_functions.h"
+#include "pico/stdlib.h"
+#include "st7735.h"
 
 #include "detection_responder.h"
 #include "image_provider.h"
@@ -25,12 +27,14 @@ limitations under the License.
 #include "tensorflow/lite/schema/schema_generated.h"
 #include "tensorflow/lite/version.h"
 
+const uint LED_PIN = 25;
+
 // Globals, used for compatibility with Arduino-style sketches.
 namespace {
-tflite::ErrorReporter* error_reporter = nullptr;
-const tflite::Model* model = nullptr;
-tflite::MicroInterpreter* interpreter = nullptr;
-TfLiteTensor* input = nullptr;
+tflite::ErrorReporter *   error_reporter = nullptr;
+const tflite::Model *     model          = nullptr;
+tflite::MicroInterpreter *interpreter    = nullptr;
+TfLiteTensor *            input          = nullptr;
 
 // In order to use optimized tensorflow lite kernels, a signed int8_t quantized
 // model is preferred over the legacy unsigned model format. This means that
@@ -40,7 +44,7 @@ TfLiteTensor* input = nullptr;
 // signed value.
 
 // An area of memory to use for input, output, and intermediate arrays.
-constexpr int kTensorArenaSize = 136 * 1024;
+constexpr int  kTensorArenaSize = 136 * 1024;
 static uint8_t tensor_arena[kTensorArenaSize];
 }  // namespace
 
@@ -51,7 +55,7 @@ void setup() {
   // NOLINTNEXTLINE(runtime-global-variables)
   static tflite::MicroErrorReporter micro_error_reporter;
   error_reporter = &micro_error_reporter;
-
+#if 1
   // Map the model into a usable data structure. This doesn't involve any
   // copying or parsing, it's a very lightweight operation.
   model = tflite::GetModel(g_person_detect_model_data);
@@ -81,7 +85,7 @@ void setup() {
   // Build an interpreter to run the model with.
   // NOLINTNEXTLINE(runtime-global-variables)
   static tflite::MicroInterpreter static_interpreter(
-      model, micro_op_resolver, tensor_arena, kTensorArenaSize, error_reporter);
+    model, micro_op_resolver, tensor_arena, kTensorArenaSize, error_reporter);
   interpreter = &static_interpreter;
 
   // Allocate memory from the tensor_arena for the model's tensors.
@@ -93,25 +97,52 @@ void setup() {
 
   // Get information about the memory area to use for the model's input.
   input = interpreter->input(0);
+
+#endif
+  TfLiteStatus setup_status = ScreenInit(error_reporter);
+  if (setup_status != kTfLiteOk) {
+    TF_LITE_REPORT_ERROR(error_reporter, "Set up failed\n");
+  }
+
+  gpio_init(LED_PIN);
+  gpio_set_dir(LED_PIN, GPIO_OUT);
 }
 
 // The name of this function is important for Arduino compatibility.
 void loop() {
+  gpio_put(LED_PIN, 1);
+#if EXECUTION_TIME
+  TF_LITE_MICRO_EXECUTION_TIME_BEGIN
+  TF_LITE_MICRO_EXECUTION_TIME_SNIPPET_START(error_reporter)
+#endif
   // Get image from provider.
-  if (kTfLiteOk != GetImage(error_reporter, kNumCols, kNumRows, kNumChannels,
-                            input->data.int8)) {
+  if (kTfLiteOk
+      != GetImage(error_reporter, kNumCols, kNumRows, kNumChannels, input->data.int8)) {
     TF_LITE_REPORT_ERROR(error_reporter, "Image capture failed.");
   }
-
+  gpio_put(LED_PIN, 0);
+#if EXECUTION_TIME
+  TF_LITE_MICRO_EXECUTION_TIME_SNIPPET_END(error_reporter, "GetImage")
+  TF_LITE_MICRO_EXECUTION_TIME_SNIPPET_START(error_reporter)
+#endif
   // Run the model on this input and make sure it succeeds.
   if (kTfLiteOk != interpreter->Invoke()) {
     TF_LITE_REPORT_ERROR(error_reporter, "Invoke failed.");
   }
-
-  TfLiteTensor* output = interpreter->output(0);
+#if EXECUTION_TIME
+  TF_LITE_MICRO_EXECUTION_TIME_SNIPPET_END(error_reporter, "Invoke")
+#endif
+  TfLiteTensor *output = interpreter->output(0);
 
   // Process the inference results.
-  int8_t person_score = output->data.uint8[kPersonIndex];
+  int8_t person_score    = output->data.uint8[kPersonIndex];
   int8_t no_person_score = output->data.uint8[kNotAPersonIndex];
   RespondToDetection(error_reporter, person_score, no_person_score);
+
+  char array[10];
+  sprintf(array, "%d%%", ((person_score + 128) * 100) >> 8);
+  ST7735_FillRectangle(10, 120, ST7735_WIDTH, 40, ST7735_BLACK);
+  ST7735_WriteString(13, 120, array, Font_16x26, ST7735_GREEN, ST7735_BLACK);
+
+  TF_LITE_REPORT_ERROR(error_reporter, "**********");
 }

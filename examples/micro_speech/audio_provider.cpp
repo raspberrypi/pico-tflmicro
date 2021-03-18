@@ -17,20 +17,32 @@ limitations under the License.
 
 #include "micro_features/micro_model_settings.h"
 
+#include "arducam_mic.h"
+
 namespace {
 int16_t g_dummy_audio_data[kMaxAudioSampleSize];
 int32_t g_latest_audio_timestamp = 0;
 }  // namespace
 
+TfLiteStatus SetupAudio() {
+
+  mic_i2s_init(&config);
+
+  return kTfLiteOk;
+}
+
+extern int16_t* g_audio_data;
+
 TfLiteStatus GetAudioSamples(tflite::ErrorReporter* error_reporter,
                              int start_ms, int duration_ms,
                              int* audio_samples_size, int16_t** audio_samples) {
-  for (int i = 0; i < kMaxAudioSampleSize; ++i) {
-    g_dummy_audio_data[i] = 0;
+  if (isAvailable) {  // read audio Sample data
+
+    *audio_samples_size = kMaxAudioSampleSize;
+    read(audio_samples);
+
+    return kTfLiteOk;
   }
-  *audio_samples_size = kMaxAudioSampleSize;
-  *audio_samples = g_dummy_audio_data;
-  return kTfLiteOk;
 }
 
 int32_t LatestAudioTimestamp() {

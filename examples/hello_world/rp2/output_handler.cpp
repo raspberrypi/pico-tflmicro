@@ -20,7 +20,6 @@ limitations under the License.
 #include "hardware/irq.h"
 #include "hardware/resets.h"
 #include "hardware/pwm.h"
-
 #include "constants.h"
 
 namespace {
@@ -38,6 +37,7 @@ extern "C" void on_pwm_wrap() {
 }
 
 void init_pwm_fade() {
+
   // Tell the LED pin that the PWM is in charge of its value.
   gpio_set_function(PICO_DEFAULT_LED_PIN, GPIO_FUNC_PWM);
   // Figure out which slice we just connected to the LED pin
@@ -47,6 +47,7 @@ void init_pwm_fade() {
   // and register our interrupt handler
   pwm_clear_irq(slice_num);
   pwm_set_irq_enabled(slice_num, true);
+
   irq_set_exclusive_handler(PWM_IRQ_WRAP, on_pwm_wrap);
   irq_set_enabled(PWM_IRQ_WRAP, true);
 

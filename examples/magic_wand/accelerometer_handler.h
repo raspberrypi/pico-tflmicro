@@ -21,6 +21,54 @@ limitations under the License.
 #include "tensorflow/lite/c/common.h"
 #include "tensorflow/lite/micro/micro_error_reporter.h"
 
+
+#include <string.h>
+
+#define EXECUTION_TIME 0
+
+#if EXECUTION_TIME
+#include "tensorflow/lite/micro/micro_time.h"
+#include <climits>
+
+#define TF_LITE_MICRO_EXECUTION_TIME_BEGIN                                             \
+  int32_t start_ticks;                                                                 \
+  int32_t duration_ticks;                                                              \
+  int32_t duration_ms;
+
+#define TF_LITE_MICRO_EXECUTION_TIME(reporter, func)                                   \
+  if (tflite::ticks_per_second() == 0) {                                               \
+    TF_LITE_REPORT_ERROR(reporter, "no timer implementation found");                   \
+  }                                                                                    \
+  start_ticks = tflite::GetCurrentTimeTicks();                                         \
+  func;                                                                                \
+  duration_ticks = tflite::GetCurrentTimeTicks() - start_ticks;                        \
+  if (duration_ticks > INT_MAX / 1000) {                                               \
+    duration_ms = duration_ticks / (tflite::ticks_per_second() / 1000);                \
+  }                                                                                    \
+  else {                                                                               \
+    duration_ms = (duration_ticks * 1000) / tflite::ticks_per_second();                \
+  }                                                                                    \
+  TF_LITE_REPORT_ERROR(reporter, "%s took %d ticks (%d ms)", #func, duration_ticks,    \
+                       duration_ms);
+
+#define TF_LITE_MICRO_EXECUTION_TIME_SNIPPET_START(reporter)                           \
+  if (tflite::ticks_per_second() == 0) {                                               \
+    TF_LITE_REPORT_ERROR(reporter, "no timer implementation found");                   \
+  }                                                                                    \
+  start_ticks = tflite::GetCurrentTimeTicks();
+
+#define TF_LITE_MICRO_EXECUTION_TIME_SNIPPET_END(reporter, desc)                       \
+  duration_ticks = tflite::GetCurrentTimeTicks() - start_ticks;                        \
+  if (duration_ticks > INT_MAX / 1000) {                                               \
+    duration_ms = duration_ticks / (tflite::ticks_per_second() / 1000);                \
+  }                                                                                    \
+  else {                                                                               \
+    duration_ms = (duration_ticks * 1000) / tflite::ticks_per_second();                \
+  }                                                                                    \
+  TF_LITE_REPORT_ERROR(reporter, "%s took %d ticks (%d ms)", desc, duration_ticks,     \
+                       duration_ms);
+#endif
+
 extern int begin_index;
 extern TfLiteStatus SetupAccelerometer(tflite::ErrorReporter* error_reporter);
 extern bool ReadAccelerometer(tflite::ErrorReporter* error_reporter,

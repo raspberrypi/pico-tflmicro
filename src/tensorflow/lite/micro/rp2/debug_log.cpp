@@ -44,11 +44,20 @@ limitations under the License.
 
 extern "C" void DebugLog(const char* s) {
 #ifndef TF_LITE_STRIP_ERROR_STRINGS
+
+// When we use USB output, do not set the serial port.
   static bool has_uart_been_set_up = false;
+#if !PICO_STDIO_USB
   if (!has_uart_been_set_up) {
     setup_default_uart();
     has_uart_been_set_up = true;
   }
+#else
+if (!has_uart_been_set_up) {
+    stdio_init_all();
+    has_uart_been_set_up = true;
+  }
+#endif
   // Reusing TF_LITE_STRIP_ERROR_STRINGS to disable DebugLog completely to get
   // maximum reduction in binary size. This is because we have DebugLog calls
   // via TF_LITE_CHECK that are not stubbed out by TF_LITE_REPORT_ERROR.
