@@ -7,15 +7,15 @@ set(CMAKE_CXX_STANDARD 11)
 
 add_executable(gesture_predictor_test "")
 
-#添加编译子目录
-add_subdirectory(lib/Config)
-add_subdirectory(lib/LCD)
-add_subdirectory(lib/ICM20948)
+##添加编译子目录
+#add_subdirectory(../../include/Config)
+#add_subdirectory(../../include/LCD)
+#add_subdirectory(../../include/ICM20948)
 
-#添加头文件目录
-include_directories(lib/Config)
-include_directories(lib/LCD)
-include_directories(lib/ICM20948)
+##添加头文件目录
+#include_directories(../../include/Config)
+#include_directories(../../include/LCD)
+#include_directories(../../include/ICM20948)
 
 target_include_directories(gesture_predictor_test
   PRIVATE
@@ -202,7 +202,7 @@ target_link_libraries(
   pico-tflmicro
   hardware_pwm
   #  pico-tflmicro_test
-  lib/ICM20948
+  ../../include/ICM20948
 )
 
 pico_add_extra_outputs(gesture_accelerometer_handler_test)

@@ -381,11 +381,63 @@ target_sources(pico-tflmicro_test
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/testing/test_conv_model.h
 )
 
+#add_library(arducam_lib "")
+#
+#target_include_directories(arducam_lib
+#  PUBLIC
+#  ${CMAKE_CURRENT_LIST_DIR}/include/
+#  ${CMAKE_CURRENT_LIST_DIR}/include/arducam/
+#  ${CMAKE_CURRENT_LIST_DIR}/include/arducam_mic/
+#  ${CMAKE_CURRENT_LIST_DIR}/include/Config/
+#  ${CMAKE_CURRENT_LIST_DIR}/include/ICM20948/
+#  ${CMAKE_CURRENT_LIST_DIR}/include/LCD/
+#  )
+#
+#target_compile_definitions(
+#  arducam_lib
+#  PUBLIC
+#)
+#
+#set_target_properties(
+#  arducam_lib
+#  PROPERTIES
+#  COMPILE_FLAGS -fno-rtti
+#  COMPILE_FLAGS -fno-exceptions
+#  COMPILE_FLAGS -fno-threadsafe-statics
+#  COMPILE_FLAGS -nostdlib
+#)
+#
+#target_link_libraries(
+#  arducam_lib
+#  pico_stdlib
+#)
+#
+#target_sources(arducam_lib
+#  PUBLIC
+#  ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/benchmarks/keyword_scrambled_model_data.cpp
+#  ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/testing/test_conv_model.cpp
+#  ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/testing/util_test.cpp
+#  ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/testing/micro_test.h
+#  ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/testing/test_conv_model.h
+#  )
+
+add_subdirectory(include/arducam)
+add_subdirectory(include/arducam_mic)
+add_subdirectory(include/LCD)
+add_subdirectory(include/Config)
+add_subdirectory(include/ICM20948)
+
+include_directories(include/arducam)
+include_directories(include/arducam_mic)
+include_directories(include/LCD)
+include_directories(include/Config)
+include_directories(include/ICM20948)
+
 
 #add_subdirectory("examples/keyword_benchmark")
-#add_subdirectory("examples/hello_world")
-#add_subdirectory("examples/person_detection")
-#add_subdirectory("examples/magic_wand")
+add_subdirectory("examples/hello_world")
+add_subdirectory("examples/person_detection")
+add_subdirectory("examples/magic_wand")
 add_subdirectory("examples/micro_speech")
 #add_subdirectory("examples/mnist")
 

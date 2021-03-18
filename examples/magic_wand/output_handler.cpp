@@ -14,9 +14,9 @@ limitations under the License.
 ==============================================================================*/
 
 #include "output_handler.h"
+#include "st7735.h"
 
 void HandleOutput(tflite::ErrorReporter *error_reporter, int kind) {
-  ST7735_FillRectangle(0, 80, ST7735_WIDTH, 160 - 80, ST7735_GREEN);
   if (kind==0) {
     TF_LITE_REPORT_ERROR(
         error_reporter,
@@ -28,6 +28,7 @@ void HandleOutput(tflite::ErrorReporter *error_reporter, int kind) {
         "    * *       * *\n\r"
         "     *         *\n\r");
 
+    ST7735_FillRectangle(0, 80, ST7735_WIDTH, 160 - 80, ST7735_GREEN);
     ST7735_WriteString(5, 80, "WING:", Font_11x18, ST7735_BLACK, ST7735_GREEN);
     ST7735_WriteString(10, 110, "*   *   *", Font_7x10, ST7735_BLACK, ST7735_GREEN);
     ST7735_WriteString(10, 120, " * * * *", Font_7x10, ST7735_BLACK, ST7735_GREEN);
@@ -44,6 +45,7 @@ void HandleOutput(tflite::ErrorReporter *error_reporter, int kind) {
         "       *     *\n\r"
         "          *\n\r");
 
+    ST7735_FillRectangle(0, 80, ST7735_WIDTH, 160 - 80, ST7735_GREEN);
     ST7735_WriteString(5, 80, "RING:", Font_11x18, ST7735_BLACK, ST7735_GREEN);
     ST7735_WriteString(10, 110, "    *", Font_7x10, ST7735_BLACK, ST7735_GREEN);
     ST7735_WriteString(10, 115, "  *   *", Font_7x10, ST7735_BLACK, ST7735_GREEN);
@@ -63,6 +65,7 @@ void HandleOutput(tflite::ErrorReporter *error_reporter, int kind) {
         "  *\n\r"
         " * * * * * * * *\n\r");
 
+    ST7735_FillRectangle(0, 80, ST7735_WIDTH, 160 - 80, ST7735_GREEN);
     ST7735_WriteString(5, 80, "SLOPE:", Font_11x18, ST7735_BLACK, ST7735_GREEN);
     ST7735_WriteString(10, 110, "   *", Font_7x10, ST7735_BLACK, ST7735_GREEN);
     ST7735_WriteString(10, 120, "  *", Font_7x10, ST7735_BLACK, ST7735_GREEN);

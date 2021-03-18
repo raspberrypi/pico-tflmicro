@@ -73,7 +73,7 @@ static bool UpdateData() {
   // printf("norm_x : %.2f , norm_y %.2f , norm_z %.2f \n", norm_x * 1000, norm_y *
   //      1000, norm_z * 1000);
   // printf("%f,%f,%f,%d\n", norm_x*1000, norm_y*1000, norm_z*1000,
-         time_us_32() - last_sample_millis);
+  //       time_us_32() - last_sample_millis);
   last_sample_millis = time_us_32();
 
   if (begin_index >= 600) {
