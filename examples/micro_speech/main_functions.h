@@ -16,6 +16,8 @@ limitations under the License.
 #ifndef TENSORFLOW_LITE_MICRO_EXAMPLES_MICRO_SPEECH_MAIN_FUNCTIONS_H_
 #define TENSORFLOW_LITE_MICRO_EXAMPLES_MICRO_SPEECH_MAIN_FUNCTIONS_H_
 
+#include "tensorflow/lite/micro/micro_error_reporter.h"
+
 // Expose a C friendly interface for main functions.
 #ifdef __cplusplus
 extern "C" {

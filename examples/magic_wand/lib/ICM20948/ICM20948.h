@@ -52,11 +52,22 @@
 #define REG_ADD_GYRO_ZOUT_H 0x37
 #define REG_ADD_GYRO_ZOUT_L 0x38
 #define REG_ADD_EXT_SENS_DATA_00 0x3B
+#define FIFO_EN_1 0x66
+#define FIFO_EN_2 0x67
+#define ACCEL_FIFO_EN
+#define GYRO_Z_FIFO_EN
+#define GYRO_Y_FIFO_EN
+#define GYRO_X_FIFO_EN
+#define TEMP_FIFO_EN
+
 #define REG_ADD_REG_BANK_SEL 0x7F
 #define REG_VAL_REG_BANK_0 0x00
 #define REG_VAL_REG_BANK_1 0x10
 #define REG_VAL_REG_BANK_2 0x20
 #define REG_VAL_REG_BANK_3 0x30
+
+#define FIFO_COUNT_H 0x70
+#define FIFO_COUNT_L 0x71
 
 /* user bank 1 register */
 /* user bank 2 register */
@@ -70,6 +81,7 @@
 #define REG_VAL_BIT_GYRO_FS_1000DPS 0x04 /* bit[2:1] */
 #define REG_VAL_BIT_GYRO_FS_2000DPS 0x06 /* bit[2:1] */
 #define REG_VAL_BIT_GYRO_DLPF 0x01       /* bit[0]   */
+#define REG_ADD_ACCEL_SMPLRT_DIV_1 0x10
 #define REG_ADD_ACCEL_SMPLRT_DIV_2 0x11
 #define REG_ADD_ACCEL_CONFIG 0x14
 #define REG_VAL_BIT_ACCEL_DLPCFG_2 0x10 /* bit[5:3] */
@@ -173,6 +185,7 @@ class ICM20948 {
                          IMU_ST_SENSOR_DATA *pstGyroRawData,
                          IMU_ST_SENSOR_DATA *pstAccelRawData,
                          IMU_ST_SENSOR_DATA *pstMagnRawData);
+  void        setContinuousMode();
 };
 extern ICM20948 IMU;
 

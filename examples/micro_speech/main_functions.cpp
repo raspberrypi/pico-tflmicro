@@ -21,34 +21,40 @@ limitations under the License.
 #include "micro_features/micro_model_settings.h"
 #include "micro_features/model.h"
 #include "recognize_commands.h"
+#include "st7735.h"
 #include "tensorflow/lite/micro/micro_error_reporter.h"
 #include "tensorflow/lite/micro/micro_interpreter.h"
 #include "tensorflow/lite/micro/micro_mutable_op_resolver.h"
 #include "tensorflow/lite/schema/schema_generated.h"
 #include "tensorflow/lite/version.h"
 
+//#include "tensorflow/lite/micro/benchmarks/micro_benchmark.h"
 
 // 全局变量，用于与 Arduino样式的sketch兼容。
 namespace {
-tflite::ErrorReporter *    error_reporter   = nullptr;
-const tflite::Model *      model            = nullptr;
-tflite::MicroInterpreter * interpreter      = nullptr;
-TfLiteTensor *             model_input      = nullptr;
-FeatureProvider *          feature_provider = nullptr;
-RecognizeCommands *        recognizer       = nullptr;
-int32_t                    previous_time    = 0;
+tflite::ErrorReporter *error_reporter = nullptr;
+const tflite::Model *model = nullptr;
+tflite::MicroInterpreter *interpreter = nullptr;
+TfLiteTensor *model_input = nullptr;
+FeatureProvider *feature_provider = nullptr;
+RecognizeCommands *recognizer = nullptr;
+int32_t previous_time = 0;
 
-// 创建一个内存区域以用于输入，输出和中间阵列。
+// Create a memory area for input, output and intermediate arrays.
 // The size of this will depend on the model you're using,
 // and may need to be determined by experimentation.
-constexpr int kTensorArenaSize = 10 * 1024;
-uint8_t       tensor_arena[kTensorArenaSize];
-int8_t        feature_buffer[kFeatureElementCount];
-int8_t *      model_input_buffer = nullptr;
+constexpr int kTensorArenaSize = 10*1024;
+uint8_t tensor_arena[kTensorArenaSize];
+int8_t feature_buffer[kFeatureElementCount];
+int8_t *model_input_buffer = nullptr;
 }  // namespace
 
 // The name of this function is important for Arduino compatibility.
 void setup() {
+
+  ST7735_Init();
+  ST7735_DrawImage(0, 0, 80, 160, arducam_logo);
+
   // Set up logging. Google style is to avoid globals or statics because of
   // lifetime uncertainty, but since this has a trivial destructor it's okay.
   // NOLINTNEXTLINE(runtime-global-variables)
@@ -121,16 +127,30 @@ void setup() {
 
   previous_time = 0;
   SetupAudio();
+
+  ST7735_FillScreen(ST7735_GREEN);
+
+  ST7735_WriteString(5, 20, "Micro", Font_11x18, ST7735_BLACK, ST7735_GREEN);
+  ST7735_WriteString(10, 45, "Speech", Font_11x18, ST7735_BLACK, ST7735_GREEN);
 }
 
 // The name of this function is important for Arduino compatibility.
 void loop() {
   // Fetch the spectrogram for the current time.
-  const int32_t current_time        = LatestAudioTimestamp();
-  int           how_many_new_slices = 0;
+  const int32_t current_time = LatestAudioTimestamp();
+  int how_many_new_slices = 0;
+
+#if EXECUTION_TIME
+  TF_LITE_MICRO_EXECUTION_TIME_BEGIN
+  TF_LITE_MICRO_EXECUTION_TIME_SNIPPET_START(error_reporter)
+#endif
 
   TfLiteStatus feature_status = feature_provider->PopulateFeatureData(
     error_reporter, previous_time, current_time, &how_many_new_slices);
+
+#if EXECUTION_TIME
+  TF_LITE_MICRO_EXECUTION_TIME_SNIPPET_END(error_reporter, "PopulateFeatureData")
+#endif
 
   if (feature_status != kTfLiteOk) {
     TF_LITE_REPORT_ERROR(error_reporter, "Feature generation failed");
@@ -147,7 +167,9 @@ void loop() {
   for (int i = 0; i < kFeatureElementCount; i++) {
     model_input_buffer[i] = feature_buffer[i];
   }
-
+#if EXECUTION_TIME
+  TF_LITE_MICRO_EXECUTION_TIME_SNIPPET_START(error_reporter)
+#endif
   // Run the model on the spectrogram input and make sure it succeeds.
   TfLiteStatus invoke_status = interpreter->Invoke();
   if (invoke_status != kTfLiteOk) {
@@ -155,8 +177,12 @@ void loop() {
     return;
   }
 
+#if EXECUTION_TIME
+  TF_LITE_MICRO_EXECUTION_TIME_SNIPPET_END(error_reporter, "Invoke")
+#endif
+
   // Obtain a pointer to the output tensor
-  TfLiteTensor * output = interpreter->output(0);
+  TfLiteTensor *output = interpreter->output(0);
   // Determine whether a command was recognized based on the output of inference
   const char * found_command  = nullptr;
   uint8_t      score          = 0;
@@ -172,4 +198,18 @@ void loop() {
   // just prints to the error console, but you should replace this with your
   // own function for a real application.
   RespondToCommand(error_reporter, current_time, found_command, score, is_new_command);
+  if (is_new_command) {
+#if 0
+    if (found_command=="yes") {
+      ST7735_FillRectangle(0, 90, ST7735_WIDTH, 70, ST7735_GREEN);
+      ST7735_WriteString(30, 90, found_command, Font_11x18, ST7735_BLACK, ST7735_GREEN);
+    } else if (found_command=="no") {
+      ST7735_FillRectangle(0, 90, ST7735_WIDTH, 70, ST7735_GREEN);
+      ST7735_WriteString(30, 90, found_command, Font_11x18, ST7735_BLACK, ST7735_GREEN);
+    }
+#else
+    ST7735_FillRectangle(0, 90, ST7735_WIDTH, 70, ST7735_GREEN);
+    ST7735_WriteString(5, 90, found_command, Font_11x18, ST7735_BLACK, ST7735_GREEN);
+#endif
+  }
 }

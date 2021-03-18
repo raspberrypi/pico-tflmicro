@@ -19,8 +19,12 @@ limitations under the License.
 #include "tensorflow/lite/c/common.h"
 #include "tensorflow/lite/micro/micro_error_reporter.h"
 
+#define EXECUTION_TIME 1
+
+#if EXECUTION_TIME
 #include "tensorflow/lite/micro/micro_time.h"
 #include <climits>
+
 #define TF_LITE_MICRO_EXECUTION_TIME_BEGIN                                             \
   int32_t start_ticks;                                                                 \
   int32_t duration_ticks;                                                              \
@@ -58,7 +62,7 @@ limitations under the License.
   }                                                                                    \
   TF_LITE_REPORT_ERROR(reporter, "%s took %d ticks (%d ms)", desc, duration_ticks,     \
                        duration_ms);
-
+#endif
 // This is an abstraction around an image source like a camera, and is
 // expected to return 8-bit sample data.  The assumption is that this will be
 // called in a low duty-cycle fashion in a low-power application.  In these

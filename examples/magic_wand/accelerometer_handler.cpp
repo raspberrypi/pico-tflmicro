@@ -17,22 +17,22 @@ limitations under the License.
 #include "constants.h"
 
 #include "pico/stdlib.h"
-#include <ICM20948.h>
+#include "ICM20948.h"
 
-// 缓冲区，保存最后200组3通道值
-float save_data[600] = { 0.0 };
+// Buffer, save the last 200 groups of 3 channel values
+float save_data[600] = {0.0};
 
-// save_data 缓冲区中的最新位置
+// the latest position in the save_data buffer
 int begin_index = 0;
-// 如果没有足够的数据来进行推理，则为True
+// If there is not enough data to make inferences, then True
 auto pending_initial_data = true;
-//// 在下采样期间应多久保存一次测量
-// int sample_every_n;
-//// The number of measurements since we last saved one
-// int sample_skip_counter = 1;
-long last_sample_millis = 0;
+// How often should the measurement be saved during the downsampling period
+int sample_every_n;
+// The number of measurements since we last saved one
+int sample_skip_counter = 1;
+uint32_t last_sample_millis = time_us_32();
 
-ICM20948           IMU;
+ICM20948 IMU;
 IMU_EN_SENSOR_TYPE enMotionSensorType;
 
 TfLiteStatus SetupAccelerometer(tflite::ErrorReporter *error_reporter) {
@@ -42,45 +42,39 @@ TfLiteStatus SetupAccelerometer(tflite::ErrorReporter *error_reporter) {
     TF_LITE_REPORT_ERROR(error_reporter, "Failed to initialize IMU");
     return kTfLiteError;
   }
-  IMU.I2C_WriteOneByte(REG_ADD_USER_CTRL, REG_VAL_BIT_FIFO_EN);
 
-  //  sample_every_n = static_cast<int>(roundf(400 / kTargetHz));
+//  sample_every_n = static_cast<int>(roundf(119/kTargetHz));
 
-    TF_LITE_REPORT_ERROR(error_reporter, "Magic starts!");
+  TF_LITE_REPORT_ERROR(error_reporter, "Magic starts!");
   return kTfLiteOk;
 }
 
 static bool UpdateData() {
   bool new_data = false;
-//  if ((tflite::GetCurrentTimeTicks() - last_sample_millis) * 1000
-//      < 40 * tflite::ticks_per_second()) {
+//  if (!IMU.dataReady()) {
 //    return false;
 //  }
-  sleep_ms(40);
-  if (!IMU.dataReady()) {
-    return false;
-  }
-  last_sample_millis = tflite::GetCurrentTimeTicks();
 
   float x = 0.0f, y = 0.0f, z = 0.0f;
   IMU.icm20948AccelRead(&x, &y, &z);
 
-  // 原始数据处理
-  x = x * 4.0 / 32768.0;
-  y = y * 4.0 / 32768.0;
-  z = z * 4.0 / 32768.0;
-  // 轴调整
-  const float norm_x       = -x;
-  const float norm_y       = -y;
-  const float norm_z       = -z;
-  save_data[begin_index++] = norm_x * 1000;
-  save_data[begin_index++] = norm_y * 1000;
-  save_data[begin_index++] = norm_z * 1000;
+  // raw data processing
+  x = x*4.0/32768.0;
+  y = y*4.0/32768.0;
+  z = z*4.0/32768.0;
+  // Axis adjustment
+  const float norm_x = y;
+  const float norm_y = x;
+  const float norm_z = -z;
+  save_data[begin_index++] = norm_x*1000;
+  save_data[begin_index++] = norm_y*1000;
+  save_data[begin_index++] = norm_z*1000;
 
-  //    printf("norm_x : %.2f , norm_y %.2f , norm_z %.2f \n", norm_x * 1000, norm_y *
-  //    1000,
-  //           norm_z * 1000);
-  //  printf("%f,%f,%f\n", norm_x * 1000, norm_y * 1000, norm_z * 1000);
+  // printf("norm_x : %.2f , norm_y %.2f , norm_z %.2f \n", norm_x * 1000, norm_y *
+  //      1000, norm_z * 1000);
+  // printf("%f,%f,%f,%d\n", norm_x*1000, norm_y*1000, norm_z*1000,
+         time_us_32() - last_sample_millis);
+  last_sample_millis = time_us_32();
 
   if (begin_index >= 600) {
     begin_index = 0;
@@ -91,20 +85,18 @@ static bool UpdateData() {
   return new_data;
 }
 
-bool ReadAccelerometer(tflite::ErrorReporter *error_reporter, float *input, int length,
-                       bool reset_buffer) {
+bool ReadAccelerometer(tflite::ErrorReporter *error_reporter, float *input, int length) {
 #if 0
   // 跟踪我们是否存储了任何新数据
   bool new_data = false;
   // 循环浏览新样本并添加到缓冲区
   float x, y, z;
   int   loop_count = 400;
-  while (loop_count--) {
-    //        if (!IMU.dataReady()) {
-    //          TF_LITE_REPORT_ERROR(error_reporter, "Wait for data");
-    //          continue;
-    //        }
-    IMU.icm20948AccelRead(&x, &y, &z);
+  while (IMU.dataReady()) {
+    if (!IMU.icm20948AccelRead(&x, &y, &z)) {
+      TF_LITE_REPORT_ERROR(error_reporter, "Failed to read data");
+      break;
+    }
     if (sample_skip_counter != sample_every_n) {
       sample_skip_counter += 1;
       continue;
@@ -114,20 +106,12 @@ bool ReadAccelerometer(tflite::ErrorReporter *error_reporter, float *input, int 
     x                        = x * 4.0 / 32768.0;
     y                        = y * 4.0 / 32768.0;
     z                        = z * 4.0 / 32768.0;
-    const float norm_x       = -x;
-    const float norm_y       = -y;
+    const float norm_x       = y;
+    const float norm_y       = x;
     const float norm_z       = -z;
     save_data[begin_index++] = norm_x * 1000;
     save_data[begin_index++] = norm_y * 1000;
     save_data[begin_index++] = norm_z * 1000;
-    // TF_LITE_REPORT_ERROR(error_reporter, "x : %f , y %f , z %f ", x * 8192, y *
-    // 8192, z * 8192);
-    //    printf("norm_x : %.2f , norm_y %.2f , norm_z %.2f \n", norm_x * 1000, norm_y *
-    //    1000,
-    //           norm_z * 1000);
-    // TF_LITE_REPORT_ERROR(error_reporter, "norm_x : %f , norm_y %f, norm_z %f ",
-    //                             norm_x * 1000, norm_y * 1000, norm_z * 1000);
-    //    TF_LITE_REPORT_ERROR(error_reporter, "*********************");
 
     // 由于我们已采样，请重置跳过计数器
     sample_skip_counter = 1;
@@ -138,23 +122,18 @@ bool ReadAccelerometer(tflite::ErrorReporter *error_reporter, float *input, int 
 
     new_data = true;
   }
+#else
+  for (int i = 0; i < 2; i++) {
+    UpdateData();
+  }
 #endif
 
-  //  if (reset_buffer) {
-  //    memset(save_data, 0, 600 * sizeof(float));
-  //    begin_index          = 0;
-  //    pending_initial_data = true;
-  //  }
-  if (!UpdateData()) {
-    return false;
-  }
-  //  sleep_ms(38);
-  // 检查我们是否已准备好进行预测或仍在等待更多初始数据
+  // Check if we are ready to make predictions or are still waiting for more initial data
   if (pending_initial_data && begin_index >= 200) {
     pending_initial_data = false;
   }
 
-  // 如果我们没有足够的数据, 返回 false
+  // If we don't have enough data, return false
   if (pending_initial_data) {
     return false;
   }
@@ -165,7 +144,6 @@ bool ReadAccelerometer(tflite::ErrorReporter *error_reporter, float *input, int 
       ring_array_index += 600;
     }
     input[i] = save_data[ring_array_index];
-    //    input[i] = save_data[i];
   }
   return 1;
 }

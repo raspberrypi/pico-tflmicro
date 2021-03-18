@@ -224,6 +224,13 @@ int ICM20948::dataReady() {
   return I2C_ReadOneByte(REG_ADD_ACCEL_XOUT_L);
 }
 
+void ICM20948::setContinuousMode(){
+  // Enable FIFO
+  I2C_WriteOneByte(REG_ADD_USER_CTRL, REG_VAL_BIT_FIFO_EN);
+  // Set continuous mode
+//  I2C_WriteOneByte()
+}
+
 void ICM20948::icm20948init() {
 
   /* user bank 0 register */
@@ -238,10 +245,12 @@ void ICM20948::icm20948init() {
   I2C_WriteOneByte(REG_ADD_GYRO_CONFIG_1, REG_VAL_BIT_GYRO_DLPCFG_6
                                             | REG_VAL_BIT_GYRO_FS_2000DPS
                                             | REG_VAL_BIT_GYRO_DLPF);
-  I2C_WriteOneByte(REG_ADD_ACCEL_SMPLRT_DIV_2, 0x07);
+  I2C_WriteOneByte( REG_ADD_ACCEL_SMPLRT_DIV_1,  0x00);  // 119 Hz
+  I2C_WriteOneByte( REG_ADD_ACCEL_SMPLRT_DIV_2,  0x07);
   I2C_WriteOneByte(REG_ADD_ACCEL_CONFIG, REG_VAL_BIT_ACCEL_DLPCFG_6
                                            | REG_VAL_BIT_ACCEL_FS_4g
                                            | REG_VAL_BIT_ACCEL_DLPF);
+
 
   /* user bank 0 register */
   I2C_WriteOneByte(REG_ADD_REG_BANK_SEL, REG_VAL_REG_BANK_0);

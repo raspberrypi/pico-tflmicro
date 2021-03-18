@@ -111,25 +111,27 @@ void setup() {
 // The name of this function is important for Arduino compatibility.
 void loop() {
   gpio_put(LED_PIN, 1);
-
+#if EXECUTION_TIME
   TF_LITE_MICRO_EXECUTION_TIME_BEGIN
   TF_LITE_MICRO_EXECUTION_TIME_SNIPPET_START(error_reporter)
+#endif
   // Get image from provider.
   if (kTfLiteOk
       != GetImage(error_reporter, kNumCols, kNumRows, kNumChannels, input->data.int8)) {
     TF_LITE_REPORT_ERROR(error_reporter, "Image capture failed.");
   }
-  TF_LITE_MICRO_EXECUTION_TIME_SNIPPET_END(error_reporter, "GetImage")
   gpio_put(LED_PIN, 0);
-
+#if EXECUTION_TIME
+  TF_LITE_MICRO_EXECUTION_TIME_SNIPPET_END(error_reporter, "GetImage")
   TF_LITE_MICRO_EXECUTION_TIME_SNIPPET_START(error_reporter)
-
+#endif
   // Run the model on this input and make sure it succeeds.
   if (kTfLiteOk != interpreter->Invoke()) {
     TF_LITE_REPORT_ERROR(error_reporter, "Invoke failed.");
   }
+#if EXECUTION_TIME
   TF_LITE_MICRO_EXECUTION_TIME_SNIPPET_END(error_reporter, "Invoke")
-
+#endif
   TfLiteTensor *output = interpreter->output(0);
 
   // Process the inference results.
@@ -138,9 +140,9 @@ void loop() {
   RespondToDetection(error_reporter, person_score, no_person_score);
 
   char array[10];
-  sprintf(array, "%f %%", (person_score + 128) / 256.0 * 100);
-
-  ST7735_WriteString(10, 120, array, Font_16x26, ST7735_GREEN, ST7735_BLACK);
+  sprintf(array, "%d%%", ((person_score + 128) * 100) >> 8);
+  ST7735_FillRectangle(10, 120, ST7735_WIDTH, 40, ST7735_BLACK);
+  ST7735_WriteString(13, 120, array, Font_16x26, ST7735_GREEN, ST7735_BLACK);
 
   TF_LITE_REPORT_ERROR(error_reporter, "**********");
 }

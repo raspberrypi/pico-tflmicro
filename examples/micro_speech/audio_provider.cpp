@@ -39,15 +39,8 @@ TfLiteStatus GetAudioSamples(tflite::ErrorReporter* error_reporter,
   if (isAvailable) {  // read audio Sample data
 
     *audio_samples_size = kMaxAudioSampleSize;
-
-//    printf("audio size:%d\r\n",*audio_samples_size);
-
-//    *audio_samples      = g_audio_data;
     read(audio_samples);
 
-//    for (int i = 0; i < kMaxAudioSampleSize; ++i) {
-//      printf("%d\r\n", (*audio_samples)[i]);
-//    }
     return kTfLiteOk;
   }
 }

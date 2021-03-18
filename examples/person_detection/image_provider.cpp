@@ -23,11 +23,10 @@ limitations under the License.
 #include "pico/stdio.h"
 #include "pico/stdlib.h"
 
-
 struct arducam_config config;
 TfLiteStatus ScreenInit(tflite::ErrorReporter *error_reporter) {
   stdio_init_all();
-  sleep_ms(1000);
+  //  sleep_ms(1000);
   ST7735_Init();
   ST7735_DrawImage(0, 0, 80, 160, arducam_logo);
   sleep_ms(1000);
@@ -53,24 +52,30 @@ TfLiteStatus ScreenInit(tflite::ErrorReporter *error_reporter) {
 
 TfLiteStatus GetImage(tflite::ErrorReporter *error_reporter, int image_width,
                       int image_height, int channels, int8_t *image_data) {
+#if EXECUTION_TIME
   TF_LITE_MICRO_EXECUTION_TIME_BEGIN
 
   TF_LITE_MICRO_EXECUTION_TIME_SNIPPET_START(error_reporter)
+#endif
+
   arducam_capture_frame(&config, (uint8_t *)image_data);
+#if EXECUTION_TIME
   TF_LITE_MICRO_EXECUTION_TIME_SNIPPET_END(error_reporter, "capture_frame")
 
   TF_LITE_MICRO_EXECUTION_TIME_SNIPPET_START(error_reporter)
-  uint8_t *displaybuf = new uint8_t[96 * 96 * 2];
+#endif
+  uint8_t *displayBuf = new uint8_t[96 * 96 * 2];
   uint16_t index      = 0;
   for (int x = 0; x < 96 * 96; x++) {
     uint16_t imageRGB   = ST7735_COLOR565(image_data[x], image_data[x], image_data[x]);
-    displaybuf[index++] = (uint8_t)(imageRGB >> 8) & 0xFF;
-    displaybuf[index++] = (uint8_t)(imageRGB)&0xFF;
+    displayBuf[index++] = (uint8_t)(imageRGB >> 8) & 0xFF;
+    displayBuf[index++] = (uint8_t)(imageRGB)&0xFF;
   }
-  ST7735_DrawImage(0, 0, 96, 96, displaybuf);
-  delete[] displaybuf;
+  ST7735_DrawImage(0, 0, 96, 96, displayBuf);
+  delete[] displayBuf;
+#if EXECUTION_TIME
   TF_LITE_MICRO_EXECUTION_TIME_SNIPPET_END(error_reporter, "Display")
-
+#endif
   for (int i = 0; i < image_width * image_height * channels; ++i) {
     image_data[i] = (uint8_t)image_data[i] - 128;
   }

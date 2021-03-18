@@ -33,6 +33,7 @@ TfLiteStatus
 FeatureProvider::PopulateFeatureData(tflite::ErrorReporter * error_reporter,
                                      int32_t last_time_in_ms, int32_t time_in_ms,
                                      int * how_many_new_slices) {
+
   if (feature_size_ != kFeatureElementCount) {
     TF_LITE_REPORT_ERROR(error_reporter,
                          "Requested feature_data_ size %d doesn't match %d",

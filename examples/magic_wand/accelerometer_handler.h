@@ -21,9 +21,15 @@ limitations under the License.
 #include "tensorflow/lite/c/common.h"
 #include "tensorflow/lite/micro/micro_error_reporter.h"
 
+
+#include <string.h>
+
+#define EXECUTION_TIME 0
+
+#if EXECUTION_TIME
 #include "tensorflow/lite/micro/micro_time.h"
 #include <climits>
-#include <string.h>
+
 #define TF_LITE_MICRO_EXECUTION_TIME_BEGIN                                             \
   int32_t start_ticks;                                                                 \
   int32_t duration_ticks;                                                              \
@@ -61,10 +67,11 @@ limitations under the License.
   }                                                                                    \
   TF_LITE_REPORT_ERROR(reporter, "%s took %d ticks (%d ms)", desc, duration_ticks,     \
                        duration_ms);
+#endif
 
 extern int begin_index;
 extern TfLiteStatus SetupAccelerometer(tflite::ErrorReporter* error_reporter);
 extern bool ReadAccelerometer(tflite::ErrorReporter* error_reporter,
-                              float* input, int length,bool reset_buffer);
+                              float* input, int length);
 
 #endif  // TENSORFLOW_LITE_MICRO_EXAMPLES_MAGIC_WAND_ACCELEROMETER_HANDLER_H_

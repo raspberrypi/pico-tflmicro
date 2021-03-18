@@ -15,7 +15,6 @@ limitations under the License.
 
 #include "main_functions.h"
 #include "pico/stdlib.h"
-#include <stdio.h>
 
 // This is the default main used on systems that have the standard C entry
 // point. Other devices (for example FreeRTOS or ESP32) that have different
@@ -24,16 +23,7 @@ limitations under the License.
 int main(int argc, char *argv[]) {
   stdio_init_all();
   setup();
-  const uint LED_PIN = 25;
-  gpio_init(LED_PIN);
-  gpio_set_dir(LED_PIN, GPIO_OUT);
   while (true) {
-//    printf("Micro Speech Start\n");
-    gpio_put(LED_PIN, 1);
-//    sleep_ms(250);
     loop();
-    gpio_put(LED_PIN, 0);
-//    sleep_ms(250);
-//    printf("Micro Speech End\n");
   }
 }

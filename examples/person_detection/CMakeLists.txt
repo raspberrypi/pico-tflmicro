@@ -8,15 +8,12 @@ set(CMAKE_CXX_STANDARD 11)
 #添加编译子目录
 add_subdirectory(lib/Config)
 add_subdirectory(lib/LCD)
-#add_subdirectory(lib/icm20948)
 add_subdirectory(lib/arducam)
 
-
 #添加头文件目录
-include_directories(./lib/Config)
-include_directories(./lib/LCD)
-#include_directories(./lib/icm20948)
-include_directories(./lib/arducam)
+include_directories(lib/Config)
+include_directories(lib/LCD)
+include_directories(lib/arducam)
 
 add_executable(detection_responder_test_int8 "")
 

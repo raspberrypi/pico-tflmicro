@@ -33,7 +33,7 @@ target_link_libraries(
   hello_world_test
   pico-tflmicro
   hardware_pwm
-  pico-tflmicro_test
+  # pico-tflmicro_test
 )
 
 pico_add_extra_outputs(hello_world_test)
@@ -105,7 +105,7 @@ target_link_libraries(
   output_handler_test
   pico-tflmicro
   hardware_pwm
-  pico-tflmicro_test
+  # pico-tflmicro_test
 )
 
 pico_add_extra_outputs(output_handler_test)

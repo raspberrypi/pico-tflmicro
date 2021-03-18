@@ -30,7 +30,7 @@ limitations under the License.
 
 const uint LED_PIN = 25;
 
-// 全局变量，用于与 Arduino 样式的 sketches 兼容。
+// Global variables, used to be compatible with Arduino style sketches.
 namespace {
 tflite::ErrorReporter *   error_reporter = nullptr;
 const tflite::Model *     model          = nullptr;
@@ -38,29 +38,28 @@ tflite::MicroInterpreter *interpreter    = nullptr;
 TfLiteTensor *            model_input    = nullptr;
 int                       input_length;
 
-// 创建一个内存区域以用于输入，输出和中间阵列。
-// 大小取决于您使用的模型，可能需要通过实验确定。
+// Create a memory area for input, output and intermediate arrays.
+// The size depends on the model you are using and may need to be determined
+// experimentally.
 constexpr int kTensorArenaSize = 60 * 1024;
 uint8_t       tensor_arena[kTensorArenaSize];
 
-// Whether we should clear the buffer next time we fetch data
-bool should_clear_buffer = false;
-
 }  // namespace
 
-// 该函数的名称对于 Arduino 兼容性很重要。
+// The name of this function is very important for Arduino compatibility.
 void setup() {
   ST7735_Init();
   ST7735_DrawImage(0, 0, 80, 160, arducam_logo);
 
-  // 设置日志记录。
-  // Google 的风格是避免由于生命周期的不确定性而导致的全局变量或静态变量，
-  // 但是由于它具有琐碎的析构函数，因此可以。
+  // Set up logging.
+  // Google's style is to avoid global variables or static variables due to the
+  // uncertainty of the life cycle, but because it has a trivial destructor, it can.
   static tflite::MicroErrorReporter micro_error_reporter;  // NOLINT
   error_reporter = &micro_error_reporter;
 
-  // 将模型映射到可用的数据结构中。
-  // 这不涉及任何复制或解析，这是一个非常轻量级的操作。
+  // Map the model to the available data structure.
+  // This does not involve any copying or parsing, which is a very lightweight
+  // operation.
   model = tflite::GetModel(g_magic_wand_model_data);
   if (model->version() != TFLITE_SCHEMA_VERSION) {
     TF_LITE_REPORT_ERROR(error_reporter,
@@ -70,10 +69,11 @@ void setup() {
     return;
   }
 
-  // 仅引入我们需要的操作实现。
-  // 这取决于此图所需的所有操作的完整列表。
-  // 一种更简单的方法是仅使用 AllOpsResolver，但这将导致此图不需要的 op
-  // 实现的代码空间有所损失。
+  // Only introduce the operation implementation we need.
+  // It depends on the complete list of all operations required for this graph.
+  // A simpler method is to use AllOpsResolver only,
+  // but this will result in a loss of code space for op implementations that are not
+  // needed in this figure.
   static tflite::MicroMutableOpResolver<5> micro_op_resolver;  // NOLINT
   micro_op_resolver.AddConv2D();
   micro_op_resolver.AddDepthwiseConv2D();
@@ -81,15 +81,15 @@ void setup() {
   micro_op_resolver.AddMaxPool2D();
   micro_op_resolver.AddSoftmax();
 
-  // 构建一个解释器以运行模型。
+  // Build an interpreter to run the model.
   static tflite::MicroInterpreter static_interpreter(
     model, micro_op_resolver, tensor_arena, kTensorArenaSize, error_reporter);
   interpreter = &static_interpreter;
 
-  // 从 tensor_arena 分配内存用于模型的张量。
+  // Allocate memory from tensor_arena for the tensor of the model.
   interpreter->AllocateTensors();
 
-  // 获取指向模型输入张量的指针。
+  // Get a pointer to the input tensor of the model.
   model_input = interpreter->input(0);
   if ((model_input->dims->size != 4) || (model_input->dims->data[0] != 1)
       || (model_input->dims->data[1] != 128)
@@ -105,21 +105,7 @@ void setup() {
   if (setup_status != kTfLiteOk) {
     TF_LITE_REPORT_ERROR(error_reporter, "Set up failed\n");
   }
-  else {
-    char magicstr[]  = R"(
-___  ___            _            _             _
-|  \/  |           (_)          | |           | |
-| .  . | __ _  __ _ _  ___   ___| |_ __ _ _ __| |_ ___
-| |\/| |/ _` |/ _` | |/ __| / __| __/ _` | '__| __/ __|)";
-    char magicstr2[] = R"(
-| |  | | (_| | (_| | | (__  \__ \ || (_| | |  | |_\__ \_ _ _
-\_|  |_/\__,_|\__, |_|\___| |___/\__\__,_|_|   \__|___(_|_|_)
-               __/ |
-              |___/
-    )";
-    TF_LITE_REPORT_ERROR(error_reporter, magicstr);
-    TF_LITE_REPORT_ERROR(error_reporter, magicstr2);
-  }
+
   ST7735_FillScreen(ST7735_GREEN);
 
   ST7735_WriteString(5, 20, "Magic", Font_11x18, ST7735_BLACK, ST7735_GREEN);
@@ -130,34 +116,40 @@ ___  ___            _            _             _
 }
 
 void loop() {
-  //  TF_LITE_MICRO_EXECUTION_TIME_BEGIN
+#if EXECUTION_TIME
+  TF_LITE_MICRO_EXECUTION_TIME_BEGIN
 
-  //  TF_LITE_MICRO_EXECUTION_TIME_SNIPPET_START(error_reporter)
-  // 尝试从加速度计读取新数据。
-  bool got_data = ReadAccelerometer(error_reporter, model_input->data.f, input_length,
-                                    should_clear_buffer);
+  TF_LITE_MICRO_EXECUTION_TIME_SNIPPET_START(error_reporter)
+#endif
+  // Try to read new data from the accelerometer.
+  bool got_data = ReadAccelerometer(error_reporter, model_input->data.f, input_length);
 
-  // Don't try to clear the buffer again
-  should_clear_buffer = false;
-
-  // 如果没有新数据，请等待下一次。
+  // If there is no new data, please wait for the next time.
   if (!got_data)
     return;
-  //  TF_LITE_MICRO_EXECUTION_TIME_SNIPPET_END(error_reporter,"ReadAccelerometer")
-  //
-  //  TF_LITE_MICRO_EXECUTION_TIME_SNIPPET_START(error_reporter)
+#if EXECUTION_TIME
+  TF_LITE_MICRO_EXECUTION_TIME_SNIPPET_END(error_reporter, "ReadAccelerometer")
 
+  TF_LITE_MICRO_EXECUTION_TIME_SNIPPET_START(error_reporter)
+#endif
   gpio_put(LED_PIN, 1);
-  // 运行推断，并报告任何错误。
+  // Run inference and report any errors.
   TfLiteStatus invoke_status = interpreter->Invoke();
-
-  //  TF_LITE_MICRO_EXECUTION_TIME_SNIPPET_END(error_reporter, "Invoke")
-
+#if EXECUTION_TIME
+  TF_LITE_MICRO_EXECUTION_TIME_SNIPPET_END(error_reporter, "Invoke")
+#endif
   if (invoke_status != kTfLiteOk) {
     TF_LITE_REPORT_ERROR(error_reporter, "Invoke failed on index: %d\n", begin_index);
     return;
   }
 
+  // Analyze the results to get predictions
+  int gesture_index = PredictGesture(interpreter->output(0)->data.f);
+
+  // Produces output
+  HandleOutput(error_reporter, gesture_index);
+
+#if 0
   char   s[64];
   float *f = model_input->data.f;
   float *p = interpreter->output(0)->data.f;
@@ -165,55 +157,18 @@ void loop() {
           f[383], p[0], p[1], p[2]);
   TF_LITE_REPORT_ERROR(error_reporter, s);
 
-  // 分析结果以获得预测
-  int gesture_index = PredictGesture(interpreter->output(0)->data.f);
-
-  // Clear the buffer next time we read data
-  should_clear_buffer = gesture_index < 3;
-
-  // 产生输出
-  HandleOutput(error_reporter, gesture_index);
-
-#if 0
-    if (gesture_index < 3) {
-      if (gesture_index == 0) {
-        ST7735_WriteString(5, 90, "Wing", Font_11x18, ST7735_BLACK, ST7735_GREEN);
-
-      }
-      else if (gesture_index == 1) {
-        ST7735_WriteString(5, 90, "Wing", Font_11x18, ST7735_BLACK, ST7735_GREEN);
-      }
-      else if (gesture_index == 2) {
-        ST7735_WriteString(5, 90, "Wing", Font_11x18, ST7735_BLACK, ST7735_GREEN);
-      }
-    }
-#else
-  if (gesture_index < 3) {
-    ST7735_FillRectangle(0, 90, ST7735_WIDTH, 70, ST7735_GREEN);
-    if (gesture_index == 0) {
-
-      ST7735_WriteString(5, 90, "WING:", Font_7x10, ST7735_BLACK, ST7735_GREEN);
-      //      ST7735_DrawPixel()
-      ST7735_WriteString(10, 110, "*   *   *", Font_7x10, ST7735_BLACK, ST7735_GREEN);
-      ST7735_WriteString(10, 120, " * * * *", Font_7x10, ST7735_BLACK, ST7735_GREEN);
-      ST7735_WriteString(10, 130, "  *   *", Font_7x10, ST7735_BLACK, ST7735_GREEN);
-    }
-    else if (gesture_index == 1) {
-      ST7735_WriteString(10, 90, "RING:", Font_7x10, ST7735_BLACK, ST7735_GREEN);
-      ST7735_WriteString(10, 110, "   *", Font_7x10, ST7735_BLACK, ST7735_GREEN);
-      ST7735_WriteString(10, 115, " *   *", Font_7x10, ST7735_BLACK, ST7735_GREEN);
-      ST7735_WriteString(10, 125, "*     *", Font_7x10, ST7735_BLACK, ST7735_GREEN);
-      ST7735_WriteString(10, 135, " *   *", Font_7x10, ST7735_BLACK, ST7735_GREEN);
-      ST7735_WriteString(10, 140, "   *", Font_7x10, ST7735_BLACK, ST7735_GREEN);
-    }
-    else if (gesture_index == 2) {
-      ST7735_WriteString(5, 90, "SLOPE:", Font_7x10, ST7735_BLACK, ST7735_GREEN);
-      ST7735_WriteString(10, 110, "   *", Font_7x10, ST7735_BLACK, ST7735_GREEN);
-      ST7735_WriteString(10, 120, "  *", Font_7x10, ST7735_BLACK, ST7735_GREEN);
-      ST7735_WriteString(10, 130, " *", Font_7x10, ST7735_BLACK, ST7735_GREEN);
-      ST7735_WriteString(10, 140, "**** ", Font_7x10, ST7735_BLACK, ST7735_GREEN);
-    }
-  }
+//  for (int i = 0; i < 3; i++) {
+//    printf("%d : ", i);
+//    int barNum = static_cast<int>(roundf(p[i] * 10));
+//    for (int k = 0; k < barNum; k++) {
+//      printf("\u2588"); // "█"
+//    }
+//    for (int k = barNum - 1; k < 10; k++) {
+//      printf(" ");
+//    }
+//    printf(" ");
+//  }
+//  printf("\n");
 #endif
   gpio_put(LED_PIN, 0);
 }

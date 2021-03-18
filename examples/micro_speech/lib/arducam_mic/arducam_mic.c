@@ -10,9 +10,9 @@ int16_t g_audio_data[512];
 uint8_t is_dma_buf_12_full = 1;   //1: buf 1 full 2: buf2 full
 uint8_t isAvailable = 0;
 mic_i2s_config_t config= {
-  .data_pin =  6,
-  .LRclk_pin = 7,
-  .clock_pin = 8,
+  .data_pin =  26,
+  .LRclk_pin = 27,
+  .clock_pin = 28,
   .pio = pio0,
   .data_buf =dmabuf_1,
   .data_buf_size = (sizeof(dmabuf_1))/(sizeof(dmabuf_1[0])),
