@@ -5,13 +5,13 @@ project(micro_speech C CXX ASM)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 11)
 
-add_subdirectory(lib/arducam_mic)
-add_subdirectory(lib/LCD)
-add_subdirectory(lib/Config)
-
-include_directories(lib/arducam_mic)
-include_directories(lib/LCD)
-include_directories(lib/Config)
+#add_subdirectory(../../include/arducam_mic)
+#add_subdirectory(../../include/LCD)
+#add_subdirectory(../../include/Config)
+#
+#include_directories(../../include/arducam_mic)
+#include_directories(../../include/LCD)
+#include_directories(../../include/Config)
 
 
 

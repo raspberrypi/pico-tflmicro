@@ -5,15 +5,15 @@ project(person_detection C CXX ASM)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 11)
 
-#添加编译子目录
-add_subdirectory(lib/Config)
-add_subdirectory(lib/LCD)
-add_subdirectory(lib/arducam)
-
-#添加头文件目录
-include_directories(lib/Config)
-include_directories(lib/LCD)
-include_directories(lib/arducam)
+##添加编译子目录
+#add_subdirectory(../../Config)
+#add_subdirectory(../../LCD)
+#add_subdirectory(../../include/arducam)
+#
+##添加头文件目录
+#include_directories(../../Config)
+#include_directories(../../LCD)
+#include_directories(../../include/arducam)
 
 add_executable(detection_responder_test_int8 "")
 
