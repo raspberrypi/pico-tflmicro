@@ -18,6 +18,8 @@ limitations under the License.
 
 #include "tensorflow/lite/micro/micro_error_reporter.h"
 
+#define SCREEN 1
+
 // Expose a C friendly interface for main functions.
 #ifdef __cplusplus
 extern "C" {

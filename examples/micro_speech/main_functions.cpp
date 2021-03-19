@@ -34,28 +34,29 @@ limitations under the License.
 
 // Global variables, used to be compatible with Arduino style sketches.
 namespace {
-tflite::ErrorReporter *error_reporter = nullptr;
-const tflite::Model *model = nullptr;
-tflite::MicroInterpreter *interpreter = nullptr;
-TfLiteTensor *model_input = nullptr;
-FeatureProvider *feature_provider = nullptr;
-RecognizeCommands *recognizer = nullptr;
-int32_t previous_time = 0;
+tflite::ErrorReporter *   error_reporter   = nullptr;
+const tflite::Model *     model            = nullptr;
+tflite::MicroInterpreter *interpreter      = nullptr;
+TfLiteTensor *            model_input      = nullptr;
+FeatureProvider *         feature_provider = nullptr;
+RecognizeCommands *       recognizer       = nullptr;
+int32_t                   previous_time    = 0;
 
 // Create a memory area for input, output and intermediate arrays.
 // The size of this will depend on the model you're using,
 // and may need to be determined by experimentation.
-constexpr int kTensorArenaSize = 10*1024;
-uint8_t tensor_arena[kTensorArenaSize];
-int8_t feature_buffer[kFeatureElementCount];
-int8_t *model_input_buffer = nullptr;
+constexpr int kTensorArenaSize = 10 * 1024;
+uint8_t       tensor_arena[kTensorArenaSize];
+int8_t        feature_buffer[kFeatureElementCount];
+int8_t *      model_input_buffer = nullptr;
 }  // namespace
 
 // The name of this function is important for Arduino compatibility.
 void setup() {
-
+#if SCREEN
   ST7735_Init();
   ST7735_DrawImage(0, 0, 80, 160, arducam_logo);
+#endif
   mic_i2s_init(&config);
 
   // Set up logging. Google style is to avoid globals or statics because of
@@ -129,19 +130,19 @@ void setup() {
   recognizer = &static_recognizer;
 
   previous_time = 0;
-
-
+#if SCREEN
   ST7735_FillScreen(ST7735_GREEN);
 
   ST7735_WriteString(5, 20, "Micro", Font_11x18, ST7735_BLACK, ST7735_GREEN);
   ST7735_WriteString(10, 45, "Speech", Font_11x18, ST7735_BLACK, ST7735_GREEN);
+#endif
 }
 
 // The name of this function is important for Arduino compatibility.
 void loop() {
   // Fetch the spectrogram for the current time.
-  const int32_t current_time = LatestAudioTimestamp();
-  int how_many_new_slices = 0;
+  const int32_t current_time        = LatestAudioTimestamp();
+  int           how_many_new_slices = 0;
 
 #if EXECUTION_TIME
   TF_LITE_MICRO_EXECUTION_TIME_BEGIN
@@ -201,18 +202,21 @@ void loop() {
   // just prints to the error console, but you should replace this with your
   // own function for a real application.
   RespondToCommand(error_reporter, current_time, found_command, score, is_new_command);
+#if SCREEN
   if (is_new_command) {
 
-    if (found_command=="yes") {
-      ST7735_FillRectangle(0, 90, ST7735_WIDTH, 70, ST7735_GREEN);
-      ST7735_WriteString(30, 90, found_command, Font_11x18, ST7735_BLACK, ST7735_GREEN);
-    } else if (found_command=="no") {
+    if (found_command == "yes") {
       ST7735_FillRectangle(0, 90, ST7735_WIDTH, 70, ST7735_GREEN);
       ST7735_WriteString(30, 90, found_command, Font_11x18, ST7735_BLACK, ST7735_GREEN);
     }
-else{
-    ST7735_FillRectangle(0, 90, ST7735_WIDTH, 70, ST7735_GREEN);
-    ST7735_WriteString(1, 90, found_command, Font_11x18, ST7735_BLACK, ST7735_GREEN);
-}
+    else if (found_command == "no") {
+      ST7735_FillRectangle(0, 90, ST7735_WIDTH, 70, ST7735_GREEN);
+      ST7735_WriteString(30, 90, found_command, Font_11x18, ST7735_BLACK, ST7735_GREEN);
+    }
+    else {
+      ST7735_FillRectangle(0, 90, ST7735_WIDTH, 70, ST7735_GREEN);
+      ST7735_WriteString(1, 90, found_command, Font_11x18, ST7735_BLACK, ST7735_GREEN);
+    }
   }
+#endif
 }
