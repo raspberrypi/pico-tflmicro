@@ -1,8 +1,25 @@
 # PICO Arducam Examples
 
-Table of contents
+Table of Contents
 =================
-[toc]
+
+<!--ts-->
+   * [PICO Arducam Examples](#pico-arducam-examples)
+   * [Getting started](#getting-started)
+   * [Quick Pico Setup](#quick-pico-setup)
+      * [Person Detection](#person-detection)
+         * [Test Person Detection](#test-person-detection)
+         * [View output](#view-output)
+      * [Micro Speech](#micro-speech)
+         * [Test Micro Speech](#test-micro-speech)
+         * [View output](#view-output-1)
+      * [Magic Wand](#magic-wand)
+         * [Test Magic Wand](#test-magic-wand)
+         * [View output](#view-output-2)
+
+<!-- Added by: mulong, at: 2021/03/19 15:49:33 CST -->
+
+<!--te-->
 
 # Getting started
 
@@ -75,7 +92,7 @@ App|Description
 
 - Hardware requirements
 
-![IMAGE ALT TEXT](data/Pico4ML.png)
+![pico4ml](img/pico4ml.png)
 
 Learn more here: [pico4ml-an-rp2040-based-platform-for-tiny-machine-learning](https://www.arducam.com/pico4ml-an-rp2040-based-platform-for-tiny-machine-learning/)
 
@@ -84,7 +101,7 @@ Learn more here: [pico4ml-an-rp2040-based-platform-for-tiny-machine-learning](ht
   Doing this allows you to drag a file onto the board to program the flash. Go ahead and connect the Raspberry Pi Pico to
   your Raspberry Pi using a micro-USB cable, making sure that you hold down the BOOTSEL button to force it into
   USB Mass Storage Mode.
-  ![IMAGE ALT TEXT](data/4.png)
+  ![bootsel](img/bootsel.png)
 
 If you are logged in via ssh for example, you may have to mount the mass storage device manually:
 ```bash
@@ -152,7 +169,7 @@ Then you will creat some files under pico-tflmicro/tflmicro/build/examples/micro
 
 ![speech_build](img/speech_build.png)
 
-### Test Person Detection
+### Test Micro Speech
 
 | App                                                          | Description                  |
 | ------------------------------------------------------------ | ---------------------------- |
@@ -243,7 +260,7 @@ Then you will creat some files under pico-tflmicro/tflmicro/build/examples/magic
 
 ![wand_build](img/wand_build.png)
 
-### Test Person Detection
+### Test Magic Wand
 
 | App                                                          | Description                |
 | ------------------------------------------------------------ | -------------------------- |
