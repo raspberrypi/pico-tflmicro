@@ -101,7 +101,7 @@ Learn more here: [pico4ml-an-rp2040-based-platform-for-tiny-machine-learning](ht
   Doing this allows you to drag a file onto the board to program the flash. Go ahead and connect the Raspberry Pi Pico to
   your Raspberry Pi using a micro-USB cable, making sure that you hold down the BOOTSEL button to force it into
   USB Mass Storage Mode.
-  ![IMAGE ALT TEXT](data/4.png)
+  ![bootsel](img/bootsel.png)
 
 If you are logged in via ssh for example, you may have to mount the mass storage device manually:
 ```bash
