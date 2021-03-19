@@ -1,8 +1,25 @@
 # PICO Arducam Examples
 
-Table of contents
+Table of Contents
 =================
-[toc]
+
+<!--ts-->
+   * [PICO Arducam Examples](#pico-arducam-examples)
+   * [Getting started](#getting-started)
+   * [Quick Pico Setup](#quick-pico-setup)
+      * [Person Detection](#person-detection)
+         * [Test Person Detection](#test-person-detection)
+         * [View output](#view-output)
+      * [Micro Speech](#micro-speech)
+         * [Test Micro Speech](#test-micro-speech)
+         * [View output](#view-output-1)
+      * [Magic Wand](#magic-wand)
+         * [Test Magic Wand](#test-magic-wand)
+         * [View output](#view-output-2)
+
+<!-- Added by: mulong, at: 2021/03/19 15:49:33 CST -->
+
+<!--te-->
 
 # Getting started
 
@@ -152,7 +169,7 @@ Then you will creat some files under pico-tflmicro/tflmicro/build/examples/micro
 
 ![speech_build](img/speech_build.png)
 
-### Test Person Detection
+### Test Micro Speech
 
 | App                                                          | Description                  |
 | ------------------------------------------------------------ | ---------------------------- |
@@ -243,7 +260,7 @@ Then you will creat some files under pico-tflmicro/tflmicro/build/examples/magic
 
 ![wand_build](img/wand_build.png)
 
-### Test Person Detection
+### Test Magic Wand
 
 | App                                                          | Description                |
 | ------------------------------------------------------------ | -------------------------- |
