@@ -24,13 +24,6 @@ int16_t g_dummy_audio_data[kMaxAudioSampleSize];
 int32_t g_latest_audio_timestamp = 0;
 }  // namespace
 
-TfLiteStatus SetupAudio() {
-
-  mic_i2s_init(&config);
-
-  return kTfLiteOk;
-}
-
 extern int16_t* g_audio_data;
 
 TfLiteStatus GetAudioSamples(tflite::ErrorReporter* error_reporter,

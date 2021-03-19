@@ -5,115 +5,6 @@ project(micro_speech C CXX ASM)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 11)
 
-#add_subdirectory(../../include/arducam_mic)
-#add_subdirectory(../../include/LCD)
-#add_subdirectory(../../include/Config)
-#
-#include_directories(../../include/arducam_mic)
-#include_directories(../../include/LCD)
-#include_directories(../../include/Config)
-
-
-
-add_executable(micro_speech_all "")
-
-target_include_directories(micro_speech_all
-  PRIVATE
-  ${CMAKE_CURRENT_LIST_DIR}/.
-  )
-
-set_target_properties(
-  micro_speech_all
-  PROPERTIES
-  COMPILE_FLAGS -fno-rtti
-  COMPILE_FLAGS -fno-exceptions
-  COMPILE_FLAGS -fno-threadsafe-statics
-  COMPILE_FLAGS -nostdlib
-)
-
-target_sources(micro_speech_all
-  PRIVATE
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/fft.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/fft_util.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/filterbank.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/filterbank_util.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/frontend.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/frontend_util.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/log_lut.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/log_scale.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/log_scale_util.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/noise_reduction.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/noise_reduction_util.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/pcan_gain_control.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/pcan_gain_control_util.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/window.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/window_util.c
-  ${CMAKE_CURRENT_LIST_DIR}/audio_provider.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/command_responder.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/feature_provider.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/main.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/main_functions.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/micro_features/micro_features_generator.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/micro_features/micro_model_settings.cc
-  ${CMAKE_CURRENT_LIST_DIR}/micro_features/model.cc
-  ${CMAKE_CURRENT_LIST_DIR}/micro_features/no_micro_features_data.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/micro_features/yes_micro_features_data.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/recognize_commands.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/micro/tools/make/downloads/kissfft/kiss_fft.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/micro/tools/make/downloads/kissfft/tools/kiss_fftr.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/bits.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/fft.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/fft_util.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/filterbank.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/filterbank_util.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/frontend.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/frontend_util.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/log_lut.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/log_scale.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/log_scale_util.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/noise_reduction.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/noise_reduction_util.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/pcan_gain_control.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/pcan_gain_control_util.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/window.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/window_util.h
-  ${CMAKE_CURRENT_LIST_DIR}/audio_provider.h
-  ${CMAKE_CURRENT_LIST_DIR}/command_responder.h
-  ${CMAKE_CURRENT_LIST_DIR}/feature_provider.h
-  ${CMAKE_CURRENT_LIST_DIR}/main_functions.h
-  ${CMAKE_CURRENT_LIST_DIR}/micro_features/micro_features_generator.h
-  ${CMAKE_CURRENT_LIST_DIR}/micro_features/micro_model_settings.h
-  ${CMAKE_CURRENT_LIST_DIR}/micro_features/model.h
-  ${CMAKE_CURRENT_LIST_DIR}/micro_features/no_micro_features_data.h
-  ${CMAKE_CURRENT_LIST_DIR}/micro_features/yes_micro_features_data.h
-  ${CMAKE_CURRENT_LIST_DIR}/recognize_commands.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/micro/tools/make/downloads/kissfft/COPYING
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/micro/tools/make/downloads/kissfft/_kiss_fft_guts.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/micro/tools/make/downloads/kissfft/kiss_fft.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/micro/tools/make/downloads/kissfft/tools/kiss_fftr.h
-  )
-
-target_link_libraries(
-  micro_speech_all
-  pico-tflmicro
-  hardware_pwm
-  pico_stdlib
-  arducam_mic
-  hardware_dma
-  hardware_i2c
-  hardware_pio
-  Config
-  LCD
-)
-
-# enable usb output, disable uart output
-pico_enable_stdio_usb(micro_speech_all 1)
-pico_enable_stdio_uart(micro_speech_all 0)
-
-pico_add_extra_outputs(micro_speech_all)
-
-
-
 add_executable(audio_provider_mock_test "")
 
 target_include_directories(audio_provider_mock_test
@@ -321,9 +212,6 @@ target_link_libraries(
   hardware_pwm
   pico_stdlib
   arducam_mic
-  hardware_dma
-  hardware_i2c
-  hardware_pio
   Config
   LCD
 )
@@ -497,6 +385,8 @@ target_link_libraries(
   micro_speech_mock
   pico-tflmicro
   hardware_pwm
+  arducam_mic
+  LCD
 )
 
 pico_add_extra_outputs(micro_speech_mock)
@@ -653,6 +543,7 @@ target_link_libraries(
   pico-tflmicro
   hardware_pwm
   #  pico-tflmicro_test
+  arducam_mic
 )
 
 pico_add_extra_outputs(feature_provider_test)
@@ -730,6 +621,7 @@ target_link_libraries(
   pico-tflmicro
   hardware_pwm
   #  pico-tflmicro_test
+  arducam_mic
 )
 
 pico_add_extra_outputs(audio_provider_test)

@@ -5,16 +5,6 @@ project(person_detection C CXX ASM)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 11)
 
-##添加编译子目录
-#add_subdirectory(../../Config)
-#add_subdirectory(../../LCD)
-#add_subdirectory(../../include/arducam)
-#
-##添加头文件目录
-#include_directories(../../Config)
-#include_directories(../../LCD)
-#include_directories(../../include/arducam)
-
 add_executable(detection_responder_test_int8 "")
 
 target_include_directories(detection_responder_test_int8
@@ -196,6 +186,9 @@ target_link_libraries(
   image_provider_test_int8
   pico-tflmicro
   hardware_pwm
+  arducam
+  Config
+  LCD
 )
 
 pico_add_extra_outputs(image_provider_test_int8)

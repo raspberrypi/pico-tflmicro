@@ -7,16 +7,6 @@ set(CMAKE_CXX_STANDARD 11)
 
 add_executable(gesture_predictor_test "")
 
-##添加编译子目录
-#add_subdirectory(../../include/Config)
-#add_subdirectory(../../include/LCD)
-#add_subdirectory(../../include/ICM20948)
-
-##添加头文件目录
-#include_directories(../../include/Config)
-#include_directories(../../include/LCD)
-#include_directories(../../include/ICM20948)
-
 target_include_directories(gesture_predictor_test
   PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/.
@@ -44,6 +34,9 @@ target_link_libraries(
   pico-tflmicro
   hardware_pwm
   #  pico-tflmicro_test
+  ICM20948
+  Config
+  LCD
 )
 
 pico_add_extra_outputs(gesture_predictor_test)
@@ -77,6 +70,9 @@ target_link_libraries(
   pico-tflmicro
   hardware_pwm
   #  pico-tflmicro_test
+  ICM20948
+  Config
+  LCD
 )
 
 pico_add_extra_outputs(gesture_output_handler_test)
@@ -119,7 +115,6 @@ target_link_libraries(
   pico-tflmicro
   hardware_pwm
   pico_stdlib
-  hardware_i2c
   ICM20948
   Config
   LCD
@@ -165,6 +160,9 @@ target_link_libraries(
   hardware_pwm
   #  pico-tflmicro_test
   pico_stdlib
+  ICM20948
+  Config
+  LCD
 )
 
 # enable usb output, disable uart output
@@ -202,7 +200,9 @@ target_link_libraries(
   pico-tflmicro
   hardware_pwm
   #  pico-tflmicro_test
-  ../../include/ICM20948
+  ICM20948
+  Config
+  LCD
 )
 
 pico_add_extra_outputs(gesture_accelerometer_handler_test)

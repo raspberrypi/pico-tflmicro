@@ -28,9 +28,11 @@ limitations under the License.
 #include "tensorflow/lite/schema/schema_generated.h"
 #include "tensorflow/lite/version.h"
 
+#include "arducam_mic.h"
+
 //#include "tensorflow/lite/micro/benchmarks/micro_benchmark.h"
 
-// 全局变量，用于与 Arduino样式的sketch兼容。
+// Global variables, used to be compatible with Arduino style sketches.
 namespace {
 tflite::ErrorReporter *error_reporter = nullptr;
 const tflite::Model *model = nullptr;
@@ -54,6 +56,7 @@ void setup() {
 
   ST7735_Init();
   ST7735_DrawImage(0, 0, 80, 160, arducam_logo);
+  mic_i2s_init(&config);
 
   // Set up logging. Google style is to avoid globals or statics because of
   // lifetime uncertainty, but since this has a trivial destructor it's okay.
@@ -126,7 +129,7 @@ void setup() {
   recognizer = &static_recognizer;
 
   previous_time = 0;
-  SetupAudio();
+
 
   ST7735_FillScreen(ST7735_GREEN);
 
@@ -199,7 +202,7 @@ void loop() {
   // own function for a real application.
   RespondToCommand(error_reporter, current_time, found_command, score, is_new_command);
   if (is_new_command) {
-#if 0
+
     if (found_command=="yes") {
       ST7735_FillRectangle(0, 90, ST7735_WIDTH, 70, ST7735_GREEN);
       ST7735_WriteString(30, 90, found_command, Font_11x18, ST7735_BLACK, ST7735_GREEN);
@@ -207,9 +210,9 @@ void loop() {
       ST7735_FillRectangle(0, 90, ST7735_WIDTH, 70, ST7735_GREEN);
       ST7735_WriteString(30, 90, found_command, Font_11x18, ST7735_BLACK, ST7735_GREEN);
     }
-#else
+else{
     ST7735_FillRectangle(0, 90, ST7735_WIDTH, 70, ST7735_GREEN);
-    ST7735_WriteString(5, 90, found_command, Font_11x18, ST7735_BLACK, ST7735_GREEN);
-#endif
+    ST7735_WriteString(1, 90, found_command, Font_11x18, ST7735_BLACK, ST7735_GREEN);
+}
   }
 }
