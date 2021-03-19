@@ -92,7 +92,7 @@ App|Description
 
 - Hardware requirements
 
-![IMAGE ALT TEXT](data/Pico4ML.png)
+![pico4ml](img/pico4ml.png)
 
 Learn more here: [pico4ml-an-rp2040-based-platform-for-tiny-machine-learning](https://www.arducam.com/pico4ml-an-rp2040-based-platform-for-tiny-machine-learning/)
 
