@@ -16,7 +16,6 @@ limitations under the License.
 #include "image_provider.h"
 #include "model_settings.h"
 
-#include "DEV_Config.h"
 #include "arducam.h"
 #include "st7735.h"
 

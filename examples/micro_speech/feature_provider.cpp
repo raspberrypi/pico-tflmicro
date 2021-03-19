@@ -21,7 +21,7 @@ limitations under the License.
 
 FeatureProvider::FeatureProvider(int feature_size, int8_t * feature_data)
   : feature_size_(feature_size), feature_data_(feature_data), is_first_run_(true) {
-  // 将要素数据初始化为默认值。
+  // Initialize feature data to default values.
   for (int n = 0; n < feature_size_; ++n) {
     feature_data_[n] = 0;
   }
@@ -41,12 +41,15 @@ FeatureProvider::PopulateFeatureData(tflite::ErrorReporter * error_reporter,
     return kTfLiteError;
   }
 
-  // 只要每个窗口都经过，就将时间逐步量化，因此我们可以弄清楚需要获取哪些音频数据。
+  // As long as each window passes,
+  // the time is gradually quantified,
+  // so we can figure out what audio data needs to be obtained.
   const int last_step    = (last_time_in_ms / kFeatureSliceStrideMs);
   const int current_step = (time_in_ms / kFeatureSliceStrideMs);
 
   int slices_needed = current_step - last_step;
-  // 如果这是第一次运行，请确保我们不使用任何缓存的信息。
+  // If this is the first run,
+  // please make sure that we do not use any cached information.
   if (is_first_run_) {
     TfLiteStatus init_status = InitializeMicroFeatures(error_reporter);
     if (init_status != kTfLiteOk) {
@@ -62,7 +65,9 @@ FeatureProvider::PopulateFeatureData(tflite::ErrorReporter * error_reporter,
 
   const int slices_to_keep = kFeatureSliceCount - slices_needed;
   const int slices_to_drop = kFeatureSliceCount - slices_to_keep;
-  // 如果我们可以避免重新计算某些切片，只需在频谱图中将现有数据上移，即可执行以下操作：
+  // If we can avoid recalculating some slices,
+  // just move the existing data up in the spectrogram
+  // to perform the following operations:
   // last time = 80ms          current time = 120ms
   // +-----------+             +-----------+
   // | data@20ms |         --> | data@60ms |
@@ -83,7 +88,8 @@ FeatureProvider::PopulateFeatureData(tflite::ErrorReporter * error_reporter,
       }
     }
   }
-  // 需要用特征数据填充的任何切片都会提取其适当的音频数据，并为该切片计算特征。
+  // Any slice that needs to be filled with feature data
+  // will extract its appropriate audio data and compute features for that slice.
   if (slices_needed > 0) {
     for (int new_slice = slices_to_keep; new_slice < kFeatureSliceCount; ++new_slice) {
       const int     new_step = (current_step - kFeatureSliceCount + 1) + new_slice;
