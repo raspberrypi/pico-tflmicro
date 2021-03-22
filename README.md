@@ -77,9 +77,8 @@ Then you will creat some files under pico-tflmicro/tflmicro/build/examples/perso
 
 Bin|Description
 ---|---
-[person_detection_int8.uf2](tflmicro/bin/person_detection_int8.uf2) | This is the main program of person_detection, which can be dragged onto the RP2040 USB Mass Storage Device.
-[person_detection_benchmark.uf2](tflmicro/bin/person_detection_benchmark.uf2) | This is the benchmark program of person_detection, you can use it to test the performance of person_detection on pico.
-[image_provider_benchmark.uf2](tflmicro/bin/image_provider_benchmark.uf2) | This is the benchmark program of image_provider, you can use it to test the performance of image data acquisition.
+[person_detection_int8.uf2](bin/person_detection_int8.uf2) | This is the main program of person_detection, which can be dragged onto the RP2040 USB Mass Storage Device.
+[person_detection_benchmark.uf2](bin/person_detection_benchmark.uf2) | This is the benchmark program of person_detection, you can use it to test the performance of person_detection on pico.
 **Tips: If you don't want to compile, you can use the above pre-built uf2 file, you only need to wire the hardware and download uf2 to the device.**
 
 ![persond_build](img/persond_build.png)
@@ -88,7 +87,7 @@ Bin|Description
 
 App|Description
 ---|---
-[person_detection_int8](tflmicro/examples/person_detection/main_functions.cpp) | This is a person detection demo.
+[person_detection_int8](examples/person_detection/main_functions.cpp) | This is a person detection demo.
 
 - Hardware requirements
 
@@ -163,7 +162,7 @@ Then you will creat some files under pico-tflmicro/tflmicro/build/examples/micro
 
 | Bin                                                         | Description                                                  |
 | ----------------------------------------------------------- | ------------------------------------------------------------ |
-| [micro_speech_int8.uf2](tflmicro/bin/micro_speech_int8.uf2) | This is the main program of micro_speech, which can be dragged onto the RP2040 USB Mass Storage Device. |
+| [micro_speech_int8.uf2](bin/micro_speech.uf2) | This is the main program of micro_speech, which can be dragged onto the RP2040 USB Mass Storage Device. |
 
 **Tips: If you don't want to compile, you can use the above pre-built uf2 file, you only need to wire the hardware and download uf2 to the device.**
 
@@ -173,7 +172,7 @@ Then you will creat some files under pico-tflmicro/tflmicro/build/examples/micro
 
 | App                                                          | Description                  |
 | ------------------------------------------------------------ | ---------------------------- |
-| [micro_speech](tflmicro/examples/micro_speech/main_functions.cpp) | This is a micro speech demo. |
+| [micro_speech](examples/micro_speech/main_functions.cpp) | This is a micro speech demo. |
 
 - Hardware requirements
 
@@ -254,7 +253,7 @@ Then you will creat some files under pico-tflmicro/tflmicro/build/examples/magic
 
 | Bin                                           | Description                                                  |
 | --------------------------------------------- | ------------------------------------------------------------ |
-| [magic_wand.uf2](tflmicro/bin/magic_wand.uf2) | This is the main program of magic_wand, which can be dragged onto the RP2040 USB Mass Storage Device. |
+| [magic_wand.uf2](bin/magic_wand.uf2) | This is the main program of magic_wand, which can be dragged onto the RP2040 USB Mass Storage Device. |
 
 **Tips: If you don't want to compile, you can use the above pre-built uf2 file, you only need to wire the hardware and download uf2 to the device.**
 
@@ -264,7 +263,7 @@ Then you will creat some files under pico-tflmicro/tflmicro/build/examples/magic
 
 | App                                                          | Description                |
 | ------------------------------------------------------------ | -------------------------- |
-| [magic_wand](tflmicro/examples/magic_wand/main_functions.cpp) | This is a magic wand demo. |
+| [magic_wand](examples/magic_wand/main_functions.cpp) | This is a magic wand demo. |
 
 - Hardware requirements
 
