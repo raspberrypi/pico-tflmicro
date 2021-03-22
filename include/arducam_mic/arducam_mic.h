@@ -13,6 +13,8 @@
 extern "C" {
 #endif
 
+typedef void (*AUDIO_UPDATE)();
+
 typedef struct mic_i2s_config {
   uint8_t  data_pin;
   uint8_t  LRclk_pin;
@@ -23,11 +25,11 @@ typedef struct mic_i2s_config {
   uint32_t sample_freq;
   PIO      pio;
   uint8_t  pio_sm;
+  AUDIO_UPDATE update;
 } mic_i2s_config_t;
 
 uint8_t mic_i2s_init(mic_i2s_config_t *config);
 void    mic_dma_init(mic_i2s_config_t *config);
-void    read(int16_t **buffer);
 void    update_pio_frequency(mic_i2s_config_t *config);
 // 16bit, monoral, 16000Hz,  linear PCM
 void CreateWavHeader(char *header, int waveDataSize);  // size of header is 44
