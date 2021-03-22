@@ -5,20 +5,19 @@
 #include <string.h>
 //int16_t kMaxAudioSamples = 512;
 int16_t dmabuf_1[512];
-int16_t dmabuf_2[512];
-int16_t g_audio_data[512];
 uint8_t is_dma_buf_12_full = 1;   //1: buf 1 full 2: buf2 full
 uint8_t isAvailable = 0;
+int capture_index = 0;
 mic_i2s_config_t config= {
   .data_pin =  26,
   .LRclk_pin = 27,
   .clock_pin = 28,
   .pio = pio0,
-  .data_buf =dmabuf_1,
-  .data_buf_size = (sizeof(dmabuf_1))/(sizeof(dmabuf_1[0])),
+  .data_buf = dmabuf_1,
+  .data_buf_size = 1024,
   .pio_sm = 0,
   .dma_channel = 0,
-  .sample_freq = 34000,
+  .sample_freq = 32000,
 };
 
 void update_pio_frequency(mic_i2s_config_t* config) {
@@ -46,22 +45,24 @@ uint8_t mic_i2s_init(mic_i2s_config_t* config){
 
 void dma_handler() {
 
-  gpio_put(16, 1);
-  pio_sm_clear_fifos(config.pio,config.pio_sm);
-  pio_sm_set_enabled(config.pio, config.pio_sm, false);
+  // static int sta = 0;
+  // sta = (1+sta)%2;
+  // gpio_put(15, sta);
+  // pio_sm_clear_fifos(config.pio,config.pio_sm);
+  // pio_sm_set_enabled(config.pio, config.pio_sm, false);
   // Clear the interrupt request.
   dma_hw->ints0 = 1u << 0;
+
+  capture_index += 1024;
+  capture_index = capture_index % 8192;
   // Give the channel a new wave table entry to read from, and re-trigger it
-  if(is_dma_buf_12_full==1)
-  {
-    is_dma_buf_12_full = 2;
-    dma_channel_set_write_addr(0, dmabuf_2, true);
-  }else if (is_dma_buf_12_full==2){
-    is_dma_buf_12_full = 1;
-    dma_channel_set_write_addr(0, dmabuf_1, true);
+  dma_channel_set_write_addr(0, config.data_buf + capture_index, true);
+  //isAvailable  = 1; //data has prepared
+  // pio_sm_set_enabled(config.pio, config.pio_sm, true);
+
+  if (config.update) {
+    config.update();
   }
-  isAvailable  = 1; //data has prepared
-  pio_sm_set_enabled(config.pio, config.pio_sm, true);
 }
 void mic_dma_init(mic_i2s_config_t *config) {
   dma_channel_config c = dma_channel_get_default_config(config->dma_channel);
@@ -81,14 +82,4 @@ void mic_dma_init(mic_i2s_config_t *config) {
   dma_channel_set_irq0_enabled(config->dma_channel, true);
   irq_set_exclusive_handler(DMA_IRQ_0, dma_handler);
   irq_set_enabled(DMA_IRQ_0, true);
-}
-
-void read(int16_t **buffer) {
-  if (is_dma_buf_12_full == 2) {
-    memcpy(g_audio_data, dmabuf_1, 1024);
-    *buffer = g_audio_data;
-  } else  if (is_dma_buf_12_full == 1) {
-    memcpy(g_audio_data, dmabuf_2, 1024);
-    *buffer = g_audio_data;
-  }
 }

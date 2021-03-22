@@ -41,15 +41,13 @@ FeatureProvider::PopulateFeatureData(tflite::ErrorReporter * error_reporter,
     return kTfLiteError;
   }
 
-  // As long as each window passes,
-  // the time is gradually quantified,
-  // so we can figure out what audio data needs to be obtained.
-  const int last_step    = (last_time_in_ms / kFeatureSliceStrideMs);
+  // Quantize the time into steps as long as each window stride, so we can
+  // figure out which audio data we need to fetch.
+  const int last_step = (last_time_in_ms / kFeatureSliceStrideMs);
   const int current_step = (time_in_ms / kFeatureSliceStrideMs);
 
   int slices_needed = current_step - last_step;
-  // If this is the first run,
-  // please make sure that we do not use any cached information.
+  // If this is the first call, make sure we don't use any cached information.
   if (is_first_run_) {
     TfLiteStatus init_status = InitializeMicroFeatures(error_reporter);
     if (init_status != kTfLiteOk) {
@@ -88,8 +86,8 @@ FeatureProvider::PopulateFeatureData(tflite::ErrorReporter * error_reporter,
       }
     }
   }
-  // Any slice that needs to be filled with feature data
-  // will extract its appropriate audio data and compute features for that slice.
+  // Any slices that need to be filled in with feature data have their
+  // appropriate audio data pulled, and features calculated for that slice.
   if (slices_needed > 0) {
     for (int new_slice = slices_to_keep; new_slice < kFeatureSliceCount; ++new_slice) {
       const int     new_step = (current_step - kFeatureSliceCount + 1) + new_slice;
