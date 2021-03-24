@@ -96,10 +96,11 @@ App|Description
 Learn more here: [pico4ml-an-rp2040-based-platform-for-tiny-machine-learning](https://www.arducam.com/pico4ml-an-rp2040-based-platform-for-tiny-machine-learning/)
 
 - Load and run person_detection
+
   The simplest method to load software onto a RP2040-based board is by mounting it as a USB Mass Storage Device.
-  Doing this allows you to drag a file onto the board to program the flash. Go ahead and connect the Raspberry Pi Pico to
-  your Raspberry Pi using a micro-USB cable, making sure that you hold down the BOOTSEL button to force it into
-  USB Mass Storage Mode.
+  Doing this allows you to drag a file onto the board to program the flash.
+  Go ahead and connect the Raspberry Pi Pico to your Raspberry Pi using a micro-USB cable,
+  making sure that you hold down the BOOTSEL button to force it into USB Mass Storage Mode.
   ![bootsel](img/bootsel.png)
 
 If you are logged in via ssh for example, you may have to mount the mass storage device manually:
@@ -162,7 +163,7 @@ Then you will creat some files under pico-tflmicro/tflmicro/build/examples/micro
 
 | Bin                                                         | Description                                                  |
 | ----------------------------------------------------------- | ------------------------------------------------------------ |
-| [micro_speech_int8.uf2](bin/micro_speech.uf2) | This is the main program of micro_speech, which can be dragged onto the RP2040 USB Mass Storage Device. |
+ [micro_speech.uf2](bin/micro_speech.uf2) | This is the main program of micro_speech, which can be dragged onto the RP2040 USB Mass Storage Device. |
 
 **Tips: If you don't want to compile, you can use the above pre-built uf2 file, you only need to wire the hardware and download uf2 to the device.**
 
@@ -181,10 +182,11 @@ Then you will creat some files under pico-tflmicro/tflmicro/build/examples/micro
 Learn more here: [pico4ml-an-rp2040-based-platform-for-tiny-machine-learning](https://www.arducam.com/pico4ml-an-rp2040-based-platform-for-tiny-machine-learning/)
 
 - Load and run micro_speech
+  
   The simplest method to load software onto a RP2040-based board is by mounting it as a USB Mass Storage Device.
-  Doing this allows you to drag a file onto the board to program the flash. Go ahead and connect the Raspberry Pi Pico to
-  your Raspberry Pi using a micro-USB cable, making sure that you hold down the BOOTSEL button to force it into
-  USB Mass Storage Mode.
+  Doing this allows you to drag a file onto the board to program the flash. 
+  Go ahead and connect the Raspberry Pi Pico to your Raspberry Pi using a micro-USB cable,
+  making sure that you hold down the BOOTSEL button to force it into USB Mass Storage Mode.
   ![bootsel](img/bootsel.png)
 
 If you are logged in via ssh for example, you may have to mount the mass storage device manually:
@@ -272,10 +274,11 @@ Then you will creat some files under pico-tflmicro/tflmicro/build/examples/magic
 Learn more here: [pico4ml-an-rp2040-based-platform-for-tiny-machine-learning](https://www.arducam.com/pico4ml-an-rp2040-based-platform-for-tiny-machine-learning/)
 
 - Load and run magic_wand
+  
   The simplest method to load software onto a RP2040-based board is by mounting it as a USB Mass Storage Device.
-  Doing this allows you to drag a file onto the board to program the flash. Go ahead and connect the Raspberry Pi Pico to
-  your Raspberry Pi using a micro-USB cable, making sure that you hold down the BOOTSEL button to force it into
-  USB Mass Storage Mode.
+  Doing this allows you to drag a file onto the board to program the flash.
+  Go ahead and connect the Raspberry Pi Pico to your Raspberry Pi using a micro-USB cable,
+  making sure that you hold down the BOOTSEL button to force it into USB Mass Storage Mode.
   ![bootsel](img/bootsel.png)
 
 If you are logged in via ssh for example, you may have to mount the mass storage device manually:
