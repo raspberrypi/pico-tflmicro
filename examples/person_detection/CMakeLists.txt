@@ -151,9 +151,8 @@ target_link_libraries(
     LCD
 
 )
-# enable usb output, disable uart output
-pico_enable_stdio_usb(person_detection_int8 1)
-pico_enable_stdio_uart(person_detection_int8 0)
+
+
 pico_add_extra_outputs(person_detection_int8)
 
 

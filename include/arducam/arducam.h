@@ -9,7 +9,7 @@
 /*spi pin source*/
 //#define SPI_PORT spi0
 #define UART_ID uart0
-#define BAUD_RATE 921600
+#define BAUD_RATE 9600
 #define DATA_BITS 8
 #define STOP_BITS 1
 #define PARITY UART_PARITY_NONE

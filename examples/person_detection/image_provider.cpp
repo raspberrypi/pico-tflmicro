@@ -26,9 +26,11 @@ struct arducam_config config;
 TfLiteStatus ScreenInit(tflite::ErrorReporter *error_reporter) {
   stdio_init_all();
   //  sleep_ms(1000);
-  ST7735_Init();
-  ST7735_DrawImage(0, 0, 80, 160, arducam_logo);
-  sleep_ms(1000);
+#if SCREEN
+    ST7735_Init();
+    ST7735_DrawImage(0, 0, 80, 160, arducam_logo);
+    sleep_ms(1000);
+#endif
 
   config.sccb            = i2c0;
   config.sccb_mode       = I2C_MODE_16_8;
@@ -44,13 +46,17 @@ TfLiteStatus ScreenInit(tflite::ErrorReporter *error_reporter) {
   config.dma_channel     = 0;
   arducam_init(&config);
 
+#if SCREEN
   ST7735_FillScreen(ST7735_BLACK);
+#endif
 
   return kTfLiteOk;
 }
 
 TfLiteStatus GetImage(tflite::ErrorReporter *error_reporter, int image_width,
                       int image_height, int channels, int8_t *image_data) {
+  uint8_t header[2] = {0x55, 0xAA};
+
 #if EXECUTION_TIME
   TF_LITE_MICRO_EXECUTION_TIME_BEGIN
 
@@ -60,7 +66,10 @@ TfLiteStatus GetImage(tflite::ErrorReporter *error_reporter, int image_width,
   arducam_capture_frame(&config, (uint8_t *)image_data);
 #if EXECUTION_TIME
   TF_LITE_MICRO_EXECUTION_TIME_SNIPPET_END(error_reporter, "capture_frame")
+#endif
 
+#if SCREEN
+#if EXECUTION_TIME
   TF_LITE_MICRO_EXECUTION_TIME_SNIPPET_START(error_reporter)
 #endif
   uint8_t *displayBuf = new uint8_t[96 * 96 * 2];
@@ -75,6 +84,13 @@ TfLiteStatus GetImage(tflite::ErrorReporter *error_reporter, int image_width,
 #if EXECUTION_TIME
   TF_LITE_MICRO_EXECUTION_TIME_SNIPPET_END(error_reporter, "Display")
 #endif
+#endif
+
+#ifndef DO_NOT_OUTPUT_TO_UART
+uart_write_blocking(UART_ID, header, 2);
+uart_write_blocking(UART_ID, (uint8_t *)image_data, kMaxImageSize);
+#endif
+
   for (int i = 0; i < image_width * image_height * channels; ++i) {
     image_data[i] = (uint8_t)image_data[i] - 128;
   }

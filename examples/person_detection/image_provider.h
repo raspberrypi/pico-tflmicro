@@ -18,8 +18,9 @@ limitations under the License.
 
 #include "tensorflow/lite/c/common.h"
 #include "tensorflow/lite/micro/micro_error_reporter.h"
+#define SCREEN 0
 
-#define EXECUTION_TIME 1
+#define EXECUTION_TIME 0
 
 #if EXECUTION_TIME
 #include "tensorflow/lite/micro/micro_time.h"
