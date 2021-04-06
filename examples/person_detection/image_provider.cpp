@@ -19,6 +19,8 @@ limitations under the License.
 #include "arducam.h"
 #include "st7735.h"
 
+#include "pico/stdio.h"
+#include "pico/stdlib.h"
 
 struct arducam_config config;
 TfLiteStatus ScreenInit(tflite::ErrorReporter *error_reporter) {
