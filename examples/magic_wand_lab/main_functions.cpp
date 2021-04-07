@@ -19,6 +19,7 @@ limitations under the License.
 #include "magic_wand_model_data.h"
 #include "rasterize_stroke.h"
 #include "imu_provider.h"
+#include "st7735.h"
 
 
 
@@ -53,6 +54,10 @@ namespace {
 }  // namespace
 
 void setup() {
+
+  ST7735_Init();
+  ST7735_DrawImage(0, 0, 80, 160, arducam_logo);
+
   // Start serial
   printf("Started\n");
 
@@ -115,7 +120,10 @@ void setup() {
                          "Bad output tensor parameters in model");
     return;
   }
+  ST7735_FillScreen(ST7735_GREEN);
 
+  ST7735_WriteString(5, 20, "Magic", Font_11x18, ST7735_BLACK, ST7735_GREEN);
+  ST7735_WriteString(30, 45, "Wand", Font_11x18, ST7735_BLACK, ST7735_GREEN);
 }
 
 void loop() {
@@ -188,5 +196,13 @@ void loop() {
     }
     int8_t final_score = (((max_score+128)*100)>>8);
     TF_LITE_REPORT_ERROR(error_reporter, "Found %s (%d%%)", labels[max_index], final_score);
+
+    char str[10];
+    sprintf(str,"%d%%",final_score);
+
+    ST7735_FillRectangle(0, 80, ST7735_WIDTH, 160 - 80, ST7735_GREEN);
+    ST7735_WriteString(35, 90, labels[max_index], Font_11x18, ST7735_BLACK, ST7735_GREEN);
+    ST7735_WriteString(25, 120, str, Font_11x18, ST7735_BLACK, ST7735_GREEN);
+
   }
 }
