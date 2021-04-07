@@ -160,7 +160,7 @@ class ICM20948 {
   static float invSqrt(float x);
 
   static void icm20948init(void);
-  static void icm20948GyroRead(uint16_t *ps16X, uint16_t *ps16Y, uint16_t *ps16Z);
+  static bool icm20948GyroRead(float *ps16X, float *ps16Y, float *ps16Z);
   static bool icm20948AccelRead(float *ps16X, float *ps16Y, float *ps16Z);
   static void icm20948MagRead(uint16_t *ps16X, uint16_t *ps16Y, uint16_t *ps16Z);
   static bool icm20948MagCheck(void);

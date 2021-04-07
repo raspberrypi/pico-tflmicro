@@ -1,4 +1,4 @@
-#include <algorithm>
+#include <iostream>
 //
 // Created by mulong on 2021/2/25.
 //
@@ -27,8 +27,7 @@ void ICM20948::I2C_WriteOneByte(uint8_t reg, uint8_t value) {
 /******************************************************************************
  * IMU module                                                                 *
  ******************************************************************************/
-#define Kp                                                                             \
-  4.50f  // proportional gain governs rate of convergence to accelerometer/magnetometer
+#define Kp 4.50f  // proportional gain governs rate of convergence to accelerometer/magnetometer
 #define Ki 1.0f  // integral gain governs rate of convergence of gyroscope biases
 
 float angles[3];
@@ -91,8 +90,8 @@ bool ICM20948::imuDataGet(IMU_ST_ANGLES_DATA *pstAngles,
                           IMU_ST_SENSOR_DATA *pstAccelRawData,
                           IMU_ST_SENSOR_DATA *pstMagnRawData) {
   uint16_t  MotionVal[9];
-  float    s16Accel[3];
-  uint16_t s16Gyro[3], s16Magn[3];
+  float    s16Accel[3], s16Gyro[3];
+  uint16_t s16Magn[3];
   icm20948AccelRead(&s16Accel[0], &s16Accel[1], &s16Accel[2]);
   icm20948GyroRead(&s16Gyro[0], &s16Gyro[1], &s16Gyro[2]);
   icm20948MagRead(&s16Magn[0], &s16Magn[1], &s16Magn[2]);
@@ -221,7 +220,8 @@ float ICM20948::invSqrt(float x) {
  ******************************************************************************/
 
 int ICM20948::dataReady() {
-  return I2C_ReadOneByte(REG_ADD_ACCEL_XOUT_L);
+//  return I2C_ReadOneByte(REG_ADD_ACCEL_XOUT_L);
+  return I2C_ReadOneByte(0x1A);
 }
 
 void ICM20948::setContinuousMode(){
@@ -273,7 +273,7 @@ bool ICM20948::icm20948Check() {
   return bRet;
 }
 
-void ICM20948::icm20948GyroRead(uint16_t *ps16X, uint16_t *ps16Y, uint16_t *ps16Z) {
+bool ICM20948::icm20948GyroRead(float *ps16X, float *ps16Y, float *ps16Z) {
   uint8_t u8Buf[6];
   int16_t s16Buf[3] = { 0 };
   uint8_t i;
@@ -295,13 +295,23 @@ void ICM20948::icm20948GyroRead(uint16_t *ps16X, uint16_t *ps16Y, uint16_t *ps16
   u8Buf[1]  = I2C_ReadOneByte(REG_ADD_GYRO_ZOUT_H);
   s16Buf[2] = (u8Buf[1] << 8) | u8Buf[0];
 
-  for (i = 0; i < 3; i++) {
-    icm20948CalAvgValue(&sstAvgBuf[i].u8Index, sstAvgBuf[i].s16AvgBuffer, s16Buf[i],
-                        s32OutBuf + i);
+  *ps16X = s16Buf[0] * 2000.0 / 32768.0;
+  *ps16Y = s16Buf[1] * 2000.0 / 32768.0;
+  *ps16Z = s16Buf[2] * 2000.0 / 32768.0;
+  if (*ps16X == 0 && *ps16Y == 0 && *ps16Z == 0) {
+    return false;
   }
-  *ps16X = s32OutBuf[0] - gstGyroOffset.s16X;
-  *ps16Y = s32OutBuf[1] - gstGyroOffset.s16Y;
-  *ps16Z = s32OutBuf[2] - gstGyroOffset.s16Z;
+//  std::cout<<"GyroRead "<<*ps16X<<","<<*ps16Y<<","<<*ps16Z<<std::endl;
+//  std::cout<<"GyroRead :"<<s16Buf[0]<<","<<s16Buf[1]<<","<<s16Buf[2]<<",";
+
+  return true;
+//  for (i = 0; i < 3; i++) {
+//    icm20948CalAvgValue(&sstAvgBuf[i].u8Index, sstAvgBuf[i].s16AvgBuffer, s16Buf[i],
+//                        s32OutBuf + i);
+//  }
+//  *ps16X = s32OutBuf[0] - gstGyroOffset.s16X;
+//  *ps16Y = s32OutBuf[1] - gstGyroOffset.s16Y;
+//  *ps16Z = s32OutBuf[2] - gstGyroOffset.s16Z;
 }
 
 bool ICM20948::icm20948AccelRead(float *ps16X, float *ps16Y, float *ps16Z) {
@@ -309,6 +319,7 @@ bool ICM20948::icm20948AccelRead(float *ps16X, float *ps16Y, float *ps16Z) {
   int16_t                     s16Buf[3] = { 0 };
   uint8_t                     i;
   int32_t                     s32OutBuf[3] = { 0 };
+  //
   static ICM20948_ST_AVG_DATA sstAvgBuf[3];
 
   u8Buf[0]  = I2C_ReadOneByte(REG_ADD_ACCEL_XOUT_L);
@@ -323,9 +334,9 @@ bool ICM20948::icm20948AccelRead(float *ps16X, float *ps16Y, float *ps16Z) {
   u8Buf[1]  = I2C_ReadOneByte(REG_ADD_ACCEL_ZOUT_H);
   s16Buf[2] = (u8Buf[1] << 8) | u8Buf[0];
 
-  *ps16X = s16Buf[0];
-  *ps16Y = s16Buf[1];
-  *ps16Z = s16Buf[2];
+  *ps16X = s16Buf[0] * 4.0 / 32768.0;
+  *ps16Y = s16Buf[1] * 4.0 / 32768.0;
+  *ps16Z = s16Buf[2] * 4.0 / 32768.0;
 
   //  for (i = 0; i < 3; i++)
   //	{
@@ -338,7 +349,8 @@ bool ICM20948::icm20948AccelRead(float *ps16X, float *ps16Y, float *ps16Z) {
   //  *ps16Z = s32OutBuf[2];
   //  printf ("%ld,%ld,%ld\n", s32OutBuf[0], s32OutBuf[1], s32OutBuf[2]);
   //  printf("%f,%f,%f\n",*ps16X,*ps16Y,*ps16Z);
-  //	std::cout<<std::endl<<*ps16X<<std::endl<<*ps16Y<<std::endl<<*ps16Z;
+  //  std::cout<<"AccelRead "<<*ps16X<<","<<*ps16Y<<","<<*ps16Z<<std::endl;
+//  std::cout<<s16Buf[0]<<","<<s16Buf[1]<<","<<s16Buf[2]<<std::endl;
 
   if (*ps16X == 0 && *ps16Y == 0 && *ps16Z == 0) {
     //    *ps16X = NAN;
@@ -460,7 +472,7 @@ void ICM20948::icm20948CalAvgValue(uint8_t *pIndex, int16_t *pAvgBuffer, int16_t
 
 void ICM20948::icm20948GyroOffset() {
   uint8_t  i;
-  uint16_t s16Gx = 0, s16Gy = 0, s16Gz = 0;
+  float s16Gx = 0, s16Gy = 0, s16Gz = 0;
   int32_t  s32TempGx = 0, s32TempGy = 0, s32TempGz = 0;
   for (i = 0; i < 32; i++) {
     icm20948GyroRead(&s16Gx, &s16Gy, &s16Gz);
