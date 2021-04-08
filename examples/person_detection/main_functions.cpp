@@ -49,49 +49,8 @@ constexpr int  kTensorArenaSize = 136 * 1024;
 static uint8_t tensor_arena[kTensorArenaSize];
 }  // namespace
 
-#ifndef DO_NOT_OUTPUT_TO_UART
-// RX interrupt handler
-void on_uart_rx() {
-  uint8_t cameraCommand = 0;
-  while (uart_is_readable(UART_ID)) {
-    cameraCommand = uart_getc(UART_ID);
-    // Can we send it back?
-    if (uart_is_writable(UART_ID)) {
-      uart_putc(UART_ID, cameraCommand);
-    }
-  }
-}
-
-void setup_uart() {
-  // Set up our UART with the required speed.
-  uint baud = uart_init(UART_ID, BAUD_RATE);
-  // Set the TX and RX pins by using the function select on the GPIO
-  // Set datasheet for more information on function select
-  gpio_set_function(UART_TX_PIN, GPIO_FUNC_UART);
-  gpio_set_function(UART_RX_PIN, GPIO_FUNC_UART);
-  // Set our data format
-  uart_set_format(UART_ID, DATA_BITS, STOP_BITS, PARITY);
-  // Turn off FIFO's - we want to do this character by character
-  uart_set_fifo_enabled(UART_ID, false);
-  // Set up a RX interrupt
-  // We need to set up the handler first
-  // Select correct interrupt for the UART we are using
-  int UART_IRQ = UART_ID == uart0 ? UART0_IRQ : UART1_IRQ;
-
-  // And set up and enable the interrupt handlers
-  irq_set_exclusive_handler(UART_IRQ, on_uart_rx);
-  irq_set_enabled(UART_IRQ, true);
-
-  // Now enable the UART to send interrupts - RX only
-  uart_set_irq_enables(UART_ID, true, false);
-}
-#else
-void setup_uart() {}
-#endif
-
 // The name of this function is important for Arduino compatibility.
 void setup() {
-  setup_uart();
   // Set up logging. Google style is to avoid globals or statics because of
   // lifetime uncertainty, but since this has a trivial destructor it's okay.
   // NOLINTNEXTLINE(runtime-global-variables)

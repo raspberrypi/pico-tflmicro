@@ -14,6 +14,7 @@ limitations under the License.
 ==============================================================================*/
 
 #include "detection_responder.h"
+#include <ICM20948.h>
 
 // This dummy implementation writes person and no person scores to the error
 // console. Real applications will want to take some custom action instead, and
@@ -22,4 +23,8 @@ void RespondToDetection(tflite::ErrorReporter* error_reporter,
                         int8_t person_score, int8_t no_person_score) {
   TF_LITE_REPORT_ERROR(error_reporter, "person score:%d no person score %d",
                        person_score, no_person_score);
+#ifndef DO_NOT_OUTPUT_TO_UART
+  uint8_t header[4] = {0x55, 0xBB, (uint8_t)person_score, (uint8_t)no_person_score};
+  uart_write_blocking(uart0, header, 4);
+#endif
 }
