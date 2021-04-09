@@ -437,7 +437,7 @@ include_directories(include/ICM20948)
 #add_subdirectory("examples/keyword_benchmark")
 #add_subdirectory("examples/hello_world")
 #add_subdirectory("examples/person_detection")
-#add_subdirectory("examples/magic_wand")
+add_subdirectory("examples/magic_wand")
 #add_subdirectory("examples/micro_speech")
 add_subdirectory("examples/magic_wand_lab")
 

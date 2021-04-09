@@ -127,15 +127,20 @@ void setup() {
 }
 
 void loop() {
+#if EXECUTION_TIME
+  TF_LITE_MICRO_EXECUTION_TIME_BEGIN
 
-  // make sure IMU data is available then read in data
+  TF_LITE_MICRO_EXECUTION_TIME_SNIPPET_START(error_reporter)
+#endif
+
   int accelerometer_samples_read;
   int gyroscope_samples_read;
 
   ReadAccelerometerAndGyroscope(&accelerometer_samples_read, &gyroscope_samples_read);
-//  if (accelerometer_samples_read >1) {
-//    printf("%d , %d\n", accelerometer_samples_read, gyroscope_samples_read);
-//  }
+
+#if EXECUTION_TIME
+  TF_LITE_MICRO_EXECUTION_TIME_SNIPPET_END(error_reporter, "ReadAccelerometerAndGyroscope")
+#endif
   // Parse and process IMU data
   bool done_just_triggered = false;
   if (gyroscope_samples_read > 0) {
@@ -150,7 +155,6 @@ void loop() {
   }
   // Wait for a gesture to be done
   if (done_just_triggered) {
-      printf("done_just_triggered %d\n",done_just_triggered);
     // Rasterize the gesture
     RasterizeStroke(stroke_points, *stroke_transmit_length, 0.6f, 0.6f, raster_width, raster_height, raster_buffer);
     for (int y = 0; y < raster_height; ++y) {
@@ -177,11 +181,17 @@ void loop() {
     for (int i = 0; i < raster_byte_count; ++i) {
       model_input->data.int8[i] = raster_buffer[i];
     }
+#if EXECUTION_TIME
+  TF_LITE_MICRO_EXECUTION_TIME_SNIPPET_START(error_reporter)
+#endif
     TfLiteStatus invoke_status = interpreter->Invoke();
     if (invoke_status != kTfLiteOk) {
       TF_LITE_REPORT_ERROR(error_reporter, "Invoke failed");
       return;
     }
+#if EXECUTION_TIME
+    TF_LITE_MICRO_EXECUTION_TIME_SNIPPET_END(error_reporter, "Invoke")
+#endif
     TfLiteTensor* output = interpreter->output(0);
 
     // Parse the model output
@@ -194,7 +204,7 @@ void loop() {
         max_index = i;
       }
     }
-    int8_t final_score = (((max_score+128)*100)>>8);
+    int8_t final_score = ((max_score+128)*100)>>8;
     TF_LITE_REPORT_ERROR(error_reporter, "Found %s (%d%%)", labels[max_index], final_score);
 
     char str[10];
@@ -203,6 +213,5 @@ void loop() {
     ST7735_FillRectangle(0, 80, ST7735_WIDTH, 160 - 80, ST7735_GREEN);
     ST7735_WriteString(35, 90, labels[max_index], Font_11x18, ST7735_BLACK, ST7735_GREEN);
     ST7735_WriteString(25, 120, str, Font_11x18, ST7735_BLACK, ST7735_GREEN);
-
   }
 }

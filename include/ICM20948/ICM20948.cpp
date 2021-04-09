@@ -241,12 +241,12 @@ void ICM20948::icm20948init() {
 
   /* user bank 2 register */
   I2C_WriteOneByte(REG_ADD_REG_BANK_SEL, REG_VAL_REG_BANK_2);
-  I2C_WriteOneByte(REG_ADD_GYRO_SMPLRT_DIV, 0x07);
+  I2C_WriteOneByte(REG_ADD_GYRO_SMPLRT_DIV, 0x08);
   I2C_WriteOneByte(REG_ADD_GYRO_CONFIG_1, REG_VAL_BIT_GYRO_DLPCFG_6
                                             | REG_VAL_BIT_GYRO_FS_2000DPS
                                             | REG_VAL_BIT_GYRO_DLPF);
   I2C_WriteOneByte( REG_ADD_ACCEL_SMPLRT_DIV_1,  0x00);  // 119 Hz
-  I2C_WriteOneByte( REG_ADD_ACCEL_SMPLRT_DIV_2,  0x07);
+  I2C_WriteOneByte( REG_ADD_ACCEL_SMPLRT_DIV_2,  0x08);
   I2C_WriteOneByte(REG_ADD_ACCEL_CONFIG, REG_VAL_BIT_ACCEL_DLPCFG_6
                                            | REG_VAL_BIT_ACCEL_FS_4g
                                            | REG_VAL_BIT_ACCEL_DLPF);
@@ -349,7 +349,7 @@ bool ICM20948::icm20948AccelRead(float *ps16X, float *ps16Y, float *ps16Z) {
   //  *ps16Z = s32OutBuf[2];
   //  printf ("%ld,%ld,%ld\n", s32OutBuf[0], s32OutBuf[1], s32OutBuf[2]);
   //  printf("%f,%f,%f\n",*ps16X,*ps16Y,*ps16Z);
-  //  std::cout<<"AccelRead "<<*ps16X<<","<<*ps16Y<<","<<*ps16Z<<std::endl;
+//    std::cout<<"AccelRead "<<-*ps16Y<<","<<*ps16X<<","<<-*ps16Z<<std::endl;
 //  std::cout<<s16Buf[0]<<","<<s16Buf[1]<<","<<s16Buf[2]<<std::endl;
 
   if (*ps16X == 0 && *ps16Y == 0 && *ps16Z == 0) {

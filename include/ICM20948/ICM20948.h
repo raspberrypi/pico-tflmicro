@@ -175,7 +175,7 @@ class ICM20948 {
 
   static bool reserved_addr(uint8_t addr);
 
-  void imuInit(IMU_EN_SENSOR_TYPE *penMotionSensorType);
+  static void imuInit(IMU_EN_SENSOR_TYPE *penMotionSensorType);
 
   static void I2C_WriteOneByte(uint8_t reg, uint8_t value);
   static char I2C_ReadOneByte(uint8_t reg);
