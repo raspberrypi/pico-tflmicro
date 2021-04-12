@@ -14,10 +14,7 @@ limitations under the License.
 ==============================================================================*/
 
 #include "accelerometer_handler.h"
-#include "constants.h"
-
 #include "ICM20948.h"
-#include "pico/stdlib.h"
 
 // Buffer, save the last 200 groups of 3 channel values
 float save_data[600] = { 0.0 };
@@ -30,7 +27,7 @@ auto pending_initial_data = true;
 IMU_EN_SENSOR_TYPE enMotionSensorType;
 
 TfLiteStatus SetupAccelerometer(tflite::ErrorReporter *error_reporter) {
-
+  stdio_init_all();
   ICM20948::imuInit(&enMotionSensorType);
   if (IMU_EN_SENSOR_TYPE_ICM20948 != enMotionSensorType) {
     TF_LITE_REPORT_ERROR(error_reporter, "Failed to initialize IMU");
@@ -65,7 +62,7 @@ static bool UpdateData() {
 
 //   printf("norm_x : %.2f , norm_y %.2f , norm_z %.2f \n", norm_x * 1000, norm_y *
 //        1000, norm_z * 1000);
-   printf("%f\t%f\t%f\n", norm_x*1000, norm_y*1000, norm_z*1000);
+//   printf("%f\t%f\t%f\n", norm_x*1000, norm_y*1000, norm_z*1000);
 //         time_us_32() - last_sample_millis);
 
   if (begin_index >= 600) {
@@ -80,14 +77,10 @@ static bool UpdateData() {
 bool ReadAccelerometer(tflite::ErrorReporter *error_reporter, float *input,
                        int length) {
   bool new_data = false;
-//  int c = 0;
 
-//    for (int i = 0; i < 2; i++) {
   while (ICM20948::dataReady()) {
-//    c +=1;
     new_data = UpdateData();
   }
-//  printf("%d\n",c);
   if (!new_data) {
     return false;
   }

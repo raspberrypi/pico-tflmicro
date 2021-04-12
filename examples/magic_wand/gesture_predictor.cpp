@@ -19,16 +19,16 @@ limitations under the License.
 
 #include "stdio.h"
 namespace {
-// 我们正在使用的平均算法的状态。
+// State for the averaging algorithm we're using.
 float prediction_history[kGestureCount][kPredictionHistoryLength] = {};
 int   prediction_history_index                                    = 0;
 int   prediction_suppression_count                                = 0;
 }  // namespace
 
-// 返回上一次预测的结果
+// Return the result of the last prediction
 // 0: wing("W"), 1: ring("O"), 2: slope("angle"), 3: unknown
-int PredictGesture(float *output) {
-  // 在滚动历史记录缓冲区中记录最新的预测。
+int PredictGesture(float* output) {
+  // Record the latest predictions in our rolling history buffer.
   for (int i = 0; i < kGestureCount; ++i) {
     prediction_history[i][prediction_history_index] = output[i];
   }
