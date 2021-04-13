@@ -3,51 +3,6 @@
 #include <ICM20948.h>
 IMU_EN_SENSOR_TYPE enMotionSensorType;
 
-#define EXECUTION_TIME 0
-
-#if EXECUTION_TIME
-#include "tensorflow/lite/micro/micro_time.h"
-#include <climits>
-
-#define TF_LITE_MICRO_EXECUTION_TIME_BEGIN                                             \
-  int32_t start_ticks;                                                                 \
-  int32_t duration_ticks;                                                              \
-  int32_t duration_ms;
-
-#define TF_LITE_MICRO_EXECUTION_TIME(reporter, func)                                   \
-  if (tflite::ticks_per_second() == 0) {                                               \
-    TF_LITE_REPORT_ERROR(reporter, "no timer implementation found");                   \
-  }                                                                                    \
-  start_ticks = tflite::GetCurrentTimeTicks();                                         \
-  func;                                                                                \
-  duration_ticks = tflite::GetCurrentTimeTicks() - start_ticks;                        \
-  if (duration_ticks > INT_MAX / 1000) {                                               \
-    duration_ms = duration_ticks / (tflite::ticks_per_second() / 1000);                \
-  }                                                                                    \
-  else {                                                                               \
-    duration_ms = (duration_ticks * 1000) / tflite::ticks_per_second();                \
-  }                                                                                    \
-  TF_LITE_REPORT_ERROR(reporter, "%s took %d ticks (%d ms)", #func, duration_ticks,    \
-                       duration_ms);
-
-#define TF_LITE_MICRO_EXECUTION_TIME_SNIPPET_START(reporter)                           \
-  if (tflite::ticks_per_second() == 0) {                                               \
-    TF_LITE_REPORT_ERROR(reporter, "no timer implementation found");                   \
-  }                                                                                    \
-  start_ticks = tflite::GetCurrentTimeTicks();
-
-#define TF_LITE_MICRO_EXECUTION_TIME_SNIPPET_END(reporter, desc)                       \
-  duration_ticks = tflite::GetCurrentTimeTicks() - start_ticks;                        \
-  if (duration_ticks > INT_MAX / 1000) {                                               \
-    duration_ms = duration_ticks / (tflite::ticks_per_second() / 1000);                \
-  }                                                                                    \
-  else {                                                                               \
-    duration_ms = (duration_ticks * 1000) / tflite::ticks_per_second();                \
-  }                                                                                    \
-  TF_LITE_REPORT_ERROR(reporter, "%s took %d ticks (%d ms)", desc, duration_ticks,     \
-                       duration_ms);
-#endif
-
 namespace {
 
 constexpr int stroke_transmit_stride     = 2;
@@ -106,8 +61,8 @@ TfLiteStatus SetupIMU(tflite::ErrorReporter *error_reporter) {
   // If you see an error on this line, make sure you have at least v1.1.0 of the
   // Arduino_LSM9DS1 library installed.
   //  ICM20948::setContinuousMode();
-  acceleration_sample_rate = 1125/(1+8);//119.0f;
-  gyroscope_sample_rate    = 1100/(1+8);//119.0f;
+  acceleration_sample_rate = 1125 / (1 + 8);  // 119.0f;
+  gyroscope_sample_rate    = 1100 / (1 + 8);  // 119.0f;
   TF_LITE_REPORT_ERROR(error_reporter, "Magic starts!");
   return kTfLiteOk;
 }
@@ -124,7 +79,28 @@ void ReadAccelerometerAndGyroscope(int *new_accelerometer_samples,
     float *current_gyroscope_data     = &gyroscope_data[gyroscope_index];
     float *current_gyroscope_data_tmp = &gyroscope_data_tmp[gyroscope_index];
 
-    // Read each sample, removing it from the device's FIFO buffer
+    // Write samples into the buffer and
+    // rotate the axis order to be compatible with the model
+    // (compared to the Arduino Nano BLE Sense,
+    // the sensor orientation on the Pico4ML is different).
+    // The expected direction of the Pico4ML on the wand is that
+    // the USB port faces the user's hand and
+    // the screen faces the user's face:
+    //                  ____
+    //                 |    |<- Pico4ML board
+    //                 | -- |
+    //                 ||  ||  <- Screen
+    //                 | -- |
+    //                 |    |
+    //                  -TT-   <- USB port
+    //                   ||
+    //                   ||<- Wand
+    //                  ....
+    //                   ||
+    //                   ||
+    //                   ()
+    //
+
     if (!ICM20948::icm20948GyroRead(&current_gyroscope_data_tmp[0],
                                     &current_gyroscope_data_tmp[1],
                                     &current_gyroscope_data_tmp[2])) {
@@ -134,8 +110,6 @@ void ReadAccelerometerAndGyroscope(int *new_accelerometer_samples,
     current_gyroscope_data[0] = -current_gyroscope_data_tmp[1];
     current_gyroscope_data[1] = current_gyroscope_data_tmp[0];
     current_gyroscope_data[2] = -current_gyroscope_data_tmp[2];
-//  printf("%f,%f,%f\n",current_gyroscope_data[0]*100,current_gyroscope_data[1]*100,current_gyroscope_data[2]*100);
-
     *new_gyroscope_samples += 1;
 
     const int acceleration_index = (acceleration_data_index % acceleration_data_length);
@@ -152,7 +126,6 @@ void ReadAccelerometerAndGyroscope(int *new_accelerometer_samples,
     current_acceleration_data[0] = -current_acceleration_data_tmp[1];
     current_acceleration_data[1] = current_acceleration_data_tmp[0];
     current_acceleration_data[2] = -current_acceleration_data_tmp[2];
-//  printf("%f,%f,%f\n",current_acceleration_data[0]*1000,current_acceleration_data[1]*1000,current_acceleration_data[2]*1000);
     *new_accelerometer_samples += 1;
   }
 }

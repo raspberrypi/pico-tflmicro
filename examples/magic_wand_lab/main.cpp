@@ -15,7 +15,6 @@ limitations under the License.
 
 #include "main_functions.h"
 #include "pico/stdlib.h"
-#include "ICM20948.h"
 
 // This is the default main used on systems that have the standard C entry
 // point. Other devices (for example FreeRTOS or ESP32) that have different
@@ -24,23 +23,7 @@ limitations under the License.
 int main(int argc, char *argv[]) {
   stdio_init_all();
   setup();
-  uint64_t time ;
   while (true) {
-
-//    float accX = 0.0f, accY = 0.0f, accZ = 0.0f;
-//    ICM20948::icm20948AccelRead(&accX,&accY,&accZ);
-////    printf("%f %f %f\n", accX, accY, accZ);
-//    float norm_accX = -accY, norm_accY = accX, norm_accZ = -accZ;
-//    printf("%f %f %f\n", norm_accX*1000, norm_accY*1000, norm_accZ*1000);
-//    float gyroX = 0.0f, gyroY = 0.0f, gyroZ = 0.0f;
-//    ICM20948::icm20948GyroRead(&gyroX,&gyroY,&gyroZ);
-////    printf("%f %f %f\n", gyroX, gyroY, gyroZ);
-//    float norm_gyroX = -gyroY, norm_gyroY = gyroX, norm_gyroZ = -gyroZ;
-//    printf("%f %f %f\n", norm_gyroX, norm_gyroY, norm_gyroZ);
-//    time = time_us_64();
     loop();
-//    printf("Time: %llu\n",time_us_64()-time);
   }
-
-
 }
