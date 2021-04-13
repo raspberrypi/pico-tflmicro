@@ -174,7 +174,7 @@ Then you will creat some files under pico-tflmicro/tflmicro/build/examples/micro
 
 | Bin                                                         | Description                                                  |
 | ----------------------------------------------------------- | ------------------------------------------------------------ |
-| [micro_speech.uf2](bin/micro_speech.uf2) | This is the main program of micro_speech, which can be dragged onto the RP2040 USB Mass Storage Device. |
+ [micro_speech.uf2](bin/micro_speech.uf2) | This is the main program of micro_speech, which can be dragged onto the RP2040 USB Mass Storage Device. |
 
 **Tips: If you don't want to compile, you can use the above pre-built uf2 file, you only need to wire the hardware and download uf2 to the device.**
 
@@ -423,3 +423,4 @@ minicom -b 115200 -o -D /dev/ttyACM0
 ![minicom_output_wand](img/minicom_output_wand_lab.png)
 
 The magic wand example also outputs the results to the  screen.
+
