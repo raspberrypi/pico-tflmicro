@@ -16,6 +16,9 @@ Table of Contents
       * [Magic Wand](#magic-wand)
          * [Test Magic Wand](#test-magic-wand)
          * [View output](#view-output-2)
+      * [Magic Wand Lab](#magic-wand-lab)
+         * [Test Magic Wand Lab](#test-magic-wand-lab)
+         * [View output](#view-output-3)
 
 <!-- Added by: mulong, at: 2021/03/19 15:49:33 CST -->
 
@@ -369,7 +372,7 @@ Then you will creat some files under pico-tflmicro/tflmicro/build/examples/magic
 
 ![wand_build_lab](img/wand_build_lab.png)
 
-### Test Magic Wand
+### Test Magic Wand Lab
 
 | App                                                          | Description                |
 | ------------------------------------------------------------ | -------------------------- |
