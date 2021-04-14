@@ -133,6 +133,16 @@ void loop() {
     EstimateGyroscopeDrift(current_gyroscope_drift);
     UpdateOrientation(gyroscope_samples_read, current_gravity, current_gyroscope_drift);
     UpdateStroke(gyroscope_samples_read, &done_just_triggered);
+    /*
+    for (int i = 1; i <= stroke_struct_byte_count; i++) {
+      printf("%02x ", stroke_struct_buffer[i]);
+      if (i % 41 == 0) {
+        printf("\n");
+        sleep_ms(100);
+      }
+    }
+    //    printf("\n");
+     */
   }
   if (accelerometer_samples_read > 0) {
     EstimateGravityDirection(current_gravity);
