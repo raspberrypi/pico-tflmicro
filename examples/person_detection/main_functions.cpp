@@ -14,9 +14,7 @@ limitations under the License.
 ==============================================================================*/
 
 #include "main_functions.h"
-#include "pico/stdlib.h"
-#include <arducam.h>
-#include <hardware/irq.h>
+#include <hardware/gpio.h>
 
 #include "detection_responder.h"
 #include "image_provider.h"

@@ -14,7 +14,7 @@ limitations under the License.
 ==============================================================================*/
 
 #include "detection_responder.h"
-#include <ICM20948.h>
+#include <hardware/uart.h>
 
 // This dummy implementation writes person and no person scores to the error
 // console. Real applications will want to take some custom action instead, and
