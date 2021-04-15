@@ -1,7 +1,7 @@
 #ifndef ARDUCAM_MIC_H
 #define ARDUCAM_MIC_H
 #include <stdio.h>
-#include "pico/stdlib.h"
+//#include "pico/stdlib.h"
 #include "hardware/pio.h"
 #include "hardware/dma.h"
 #include "hardware/clocks.h"

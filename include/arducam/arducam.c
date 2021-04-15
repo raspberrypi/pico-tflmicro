@@ -4,7 +4,6 @@
 #include "hardware/pwm.h"
 #include "hm01b0_init.h"
 #include "image.pio.h"
-#include "pico/stdlib.h"
 #include "st7735.h"
 #include <stdio.h>
 

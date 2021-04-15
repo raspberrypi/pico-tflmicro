@@ -1,9 +1,10 @@
-#include <iostream>
+//#include <iostream>
 //
 // Created by mulong on 2021/2/25.
 //
 
 #include "ICM20948.h"
+#include <hardware/gpio.h>
 //#include <string.h>
 
 #define I2C_PORT i2c0
@@ -45,7 +46,7 @@ void ICM20948::imuInit(IMU_EN_SENSOR_TYPE *penMotionSensorType) {
   gpio_pull_up(4);
   gpio_pull_up(5);
   sleep_ms(3000);
-
+#if 0
   printf("\nI2C Bus Scan\n");
   printf("   0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F\n");
   for (int addr = 0; addr < (1 << 7); ++addr) {
@@ -70,6 +71,7 @@ void ICM20948::imuInit(IMU_EN_SENSOR_TYPE *penMotionSensorType) {
     printf(addr % 16 == 15 ? "\n" : "  ");
   }
   printf("Done.\n");
+#endif
 
   bRet = icm20948Check();
   if (true == bRet) {

@@ -56,7 +56,7 @@ static const uint8_t
 
 #ifdef ST7735_IS_160X80
   init_cmds2[] = {            // Init for 7735S, part 2 (160x80 display)
-    3,                        //  3 commands in list:
+    2,                        //  2 commands in list:
     ST7735_CASET  , 4      ,  //  1: Column addr set, 4 args, no delay:
       0x00, 0x00,             //     XSTART = 0
       0x00, 0x4F,             //     XEND = 79

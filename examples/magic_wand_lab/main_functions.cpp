@@ -9,19 +9,39 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
+#include "magic_wand_model_data.h"
 
+#include "hardware/gpio.h"
 #include "tensorflow/lite/micro/micro_error_reporter.h"
 #include "tensorflow/lite/micro/micro_interpreter.h"
 #include "tensorflow/lite/micro/micro_mutable_op_resolver.h"
 #include "tensorflow/lite/schema/schema_generated.h"
 #include "tensorflow/lite/version.h"
+#include <hardware/irq.h>
+#include <hardware/uart.h>
 
 #include "imu_provider.h"
 #include "magic_wand_model_data.h"
 #include "rasterize_stroke.h"
+#include "ring_micro_features_data.h"
+
+#define SCREEN 0
+
+#if SCREEN
 #include "st7735.h"
+#endif
+
+#define UART_ID uart0
+#define BAUD_RATE 9600
+#define DATA_BITS 8
+#define STOP_BITS 1
+#define PARITY UART_PARITY_NONE
+#define UART_TX_PIN 0
+#define UART_RX_PIN 1
 
 namespace {
+bool      linked  = false;
+bool      first   = true;
 
 const int VERSION = 0x00000000;
 
@@ -50,13 +70,48 @@ const char *labels[label_count] = { "0", "1", "2", "3", "4", "5", "6", "7", "8",
 
 }  // namespace
 
-void setup() {
+void on_uart_rx() {
+  uint8_t cameraCommand = 0;
+  while (uart_is_readable(UART_ID)) {
+    cameraCommand = uart_getc(UART_ID);
+    // Can we send it back?
+    if (uart_is_writable(UART_ID)) {
+      uart_putc(UART_ID, cameraCommand);
+    }
+  }
+}
+void setup_uart() {
+  // Set up our UART with the required speed.
+  uart_init(UART_ID, BAUD_RATE);
+  // Set the TX and RX pins by using the function select on the GPIO
+  // Set datasheet for more information on function select
+  gpio_set_function(UART_TX_PIN, GPIO_FUNC_UART);
+  gpio_set_function(UART_RX_PIN, GPIO_FUNC_UART);
+  // Set our data format
+  uart_set_format(UART_ID, DATA_BITS, STOP_BITS, PARITY);
+  // Turn off FIFO's - we want to do this character by character
+  uart_set_fifo_enabled(UART_ID, false);
+  // Set up a RX interrupt
+  // We need to set up the handler first
+  // Select correct interrupt for the UART we are using
+  int UART_IRQ = UART_ID == uart0 ? UART0_IRQ : UART1_IRQ;
 
+  // And set up and enable the interrupt handlers
+  irq_set_exclusive_handler(UART_IRQ, on_uart_rx);
+  irq_set_enabled(UART_IRQ, true);
+
+  // Now enable the UART to send interrupts - RX only
+  uart_set_irq_enables(UART_ID, true, false);
+}
+
+void setup() {
+//  setup_uart();
+#if SCREEN
   ST7735_Init();
   ST7735_DrawImage(0, 0, 80, 160, arducam_logo);
-
+#endif
   // Start serial
-  printf("Started\n");
+  //  printf("Started\n");
 
   // Set up logging. Google style is to avoid globals or statics because of
   // lifetime uncertainty, but since this has a trivial destructor it's okay.
@@ -70,10 +125,10 @@ void setup() {
   // copying or parsing, it's a very lightweight operation.
   model = tflite::GetModel(g_magic_wand_model_data);
   if (model->version() != TFLITE_SCHEMA_VERSION) {
-    TF_LITE_REPORT_ERROR(error_reporter,
-                         "Model provided is schema version %d not equal "
-                         "to supported version %d.",
-                         model->version(), TFLITE_SCHEMA_VERSION);
+    //    TF_LITE_REPORT_ERROR(error_reporter,
+    //                         "Model provided is schema version %d not equal "
+    //                         "to supported version %d.",
+    //                         model->version(), TFLITE_SCHEMA_VERSION);
     return;
   }
 
@@ -103,7 +158,7 @@ void setup() {
       || (model_input->dims->data[2] != raster_width)
       || (model_input->dims->data[3] != raster_channels)
       || (model_input->type != kTfLiteInt8)) {
-    TF_LITE_REPORT_ERROR(error_reporter, "Bad input tensor parameters in model");
+    //    TF_LITE_REPORT_ERROR(error_reporter, "Bad input tensor parameters in model");
     return;
   }
 
@@ -112,13 +167,17 @@ void setup() {
   if ((model_output->dims->size != 2) || (model_output->dims->data[0] != 1)
       || (model_output->dims->data[1] != label_count)
       || (model_output->type != kTfLiteInt8)) {
-    TF_LITE_REPORT_ERROR(error_reporter, "Bad output tensor parameters in model");
+    //    TF_LITE_REPORT_ERROR(error_reporter, "Bad output tensor parameters in model");
     return;
   }
+#if SCREEN
   ST7735_FillScreen(ST7735_GREEN);
 
   ST7735_WriteString(5, 20, "Magic", Font_11x18, ST7735_BLACK, ST7735_GREEN);
   ST7735_WriteString(30, 45, "Wand", Font_11x18, ST7735_BLACK, ST7735_GREEN);
+#endif
+  gpio_init(22);
+  gpio_set_dir(22, GPIO_IN);
 }
 
 void loop() {
@@ -133,16 +192,27 @@ void loop() {
     EstimateGyroscopeDrift(current_gyroscope_drift);
     UpdateOrientation(gyroscope_samples_read, current_gravity, current_gyroscope_drift);
     UpdateStroke(gyroscope_samples_read, &done_just_triggered);
-    /*
-    for (int i = 1; i <= stroke_struct_byte_count; i++) {
-      printf("%02x ", stroke_struct_buffer[i]);
-      if (i % 41 == 0) {
-        printf("\n");
-        sleep_ms(100);
+    if (gpio_get(22)) {
+      if (!linked) {
+        sleep_ms(5000);
       }
+      linked = true;
+
+//      if (first) {
+//        first = false;
+        for (uint16_t i=0; i < stroke_struct_byte_count; i++) {
+//          uart_write_blocking(UART_ID, micro_data+i, 1);
+          uart_write_blocking(UART_ID, stroke_struct_buffer+i, 1);
+          if (i % 164 == 0) {
+            sleep_ms(100);
+          }
+        }
+//      }
     }
-    //    printf("\n");
-     */
+    else {
+      linked = false;
+//      first = true;
+    }
   }
   if (accelerometer_samples_read > 0) {
     EstimateGravityDirection(current_gravity);
@@ -171,7 +241,7 @@ void loop() {
         line[x] = output;
       }
       line[raster_width] = 0;
-      printf("%s\n", line);
+      //      printf("%s\n", line);
     }
 
     // Pass to the model and run the interpreter
@@ -182,7 +252,7 @@ void loop() {
 
     TfLiteStatus invoke_status = interpreter->Invoke();
     if (invoke_status != kTfLiteOk) {
-      TF_LITE_REPORT_ERROR(error_reporter, "Invoke failed");
+      //      TF_LITE_REPORT_ERROR(error_reporter, "Invoke failed");
       return;
     }
 
@@ -199,9 +269,9 @@ void loop() {
       }
     }
     int8_t final_score = ((max_score + 128) * 100) >> 8;
-    TF_LITE_REPORT_ERROR(error_reporter, "Found %s (%d%%)", labels[max_index],
-                         final_score);
-
+//    TF_LITE_REPORT_ERROR(error_reporter, "Found %s (%d%%)", labels[max_index],
+//                         final_score);
+#if SCREEN
     char str[10];
     sprintf(str, "%d%%", final_score);
 
@@ -209,5 +279,6 @@ void loop() {
     ST7735_WriteString(35, 90, labels[max_index], Font_11x18, ST7735_BLACK,
                        ST7735_GREEN);
     ST7735_WriteString(25, 120, str, Font_11x18, ST7735_BLACK, ST7735_GREEN);
+#endif
   }
 }

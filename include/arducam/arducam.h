@@ -2,7 +2,7 @@
 #define _ARDUCAM__H
 #include "hardware/i2c.h"
 #include "hardware/pio.h"
-#include "pico/stdio.h"
+//#include "pico/stdio.h"
 #include "stdint.h"
 #define SOFTWARE_I2C 1
 

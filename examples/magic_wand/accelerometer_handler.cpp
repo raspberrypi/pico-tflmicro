@@ -15,6 +15,7 @@ limitations under the License.
 
 #include "accelerometer_handler.h"
 #include "ICM20948.h"
+#include <pico/stdio.h>
 
 // Buffer, save the last 200 groups of 3 channel values
 float save_data[600] = { 0.0 };

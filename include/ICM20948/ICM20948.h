@@ -8,9 +8,9 @@
 #define _ICM20948_H_
 
 #include "hardware/i2c.h"
-#include "pico/stdlib.h"
-#include <math.h>
-#include <stdio.h>
+//#include "pico/stdlib.h"
+#include <cmath>
+#include <cstdio>
 
 // typedef uint8_t bool;
 #define true 1
