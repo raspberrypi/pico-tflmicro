@@ -159,19 +159,18 @@ class ICM20948 {
                              float mx, float my, float mz);
   static float invSqrt(float x);
 
-  static void icm20948init(void);
+  static void icm20948init();
   static bool icm20948GyroRead(float *ps16X, float *ps16Y, float *ps16Z);
   static bool icm20948AccelRead(float *ps16X, float *ps16Y, float *ps16Z);
-  static void icm20948MagRead(uint16_t *ps16X, uint16_t *ps16Y, uint16_t *ps16Z);
-  static bool icm20948MagCheck(void);
+  static bool icm20948MagRead(float *ps16X, float *ps16Y, float *ps16Z);  static bool icm20948MagCheck(void);
   static void icm20948CalAvgValue(uint8_t *pIndex, int16_t *pAvgBuffer, int16_t InVal,
                                   int32_t *pOutVal);
-  static void icm20948GyroOffset(void);
+  static void icm20948GyroOffset();
   static void icm20948ReadSecondary(uint8_t u8I2CAddr, uint8_t u8RegAddr, uint8_t u8Len,
                                     uint8_t *pu8data);
   static void icm20948WriteSecondary(uint8_t u8I2CAddr, uint8_t u8RegAddr,
                                      uint8_t u8data);
-  static bool icm20948Check(void);
+  static bool icm20948Check();
 
   static bool reserved_addr(uint8_t addr);
 
@@ -185,7 +184,8 @@ class ICM20948 {
                          IMU_ST_SENSOR_DATA *pstGyroRawData,
                          IMU_ST_SENSOR_DATA *pstAccelRawData,
                          IMU_ST_SENSOR_DATA *pstMagnRawData);
-  void        setContinuousMode();
+  static void        setContinuousMode();
+
 };
 extern ICM20948 IMU;
 

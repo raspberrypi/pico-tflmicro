@@ -1,10 +1,11 @@
-//#include <iostream>
 //
 // Created by mulong on 2021/2/25.
 //
 
 #include "ICM20948.h"
 #include <hardware/gpio.h>
+
+#include <cmath>
 //#include <string.h>
 
 #define I2C_PORT i2c0
@@ -91,9 +92,8 @@ bool ICM20948::imuDataGet(IMU_ST_ANGLES_DATA *pstAngles,
                           IMU_ST_SENSOR_DATA *pstGyroRawData,
                           IMU_ST_SENSOR_DATA *pstAccelRawData,
                           IMU_ST_SENSOR_DATA *pstMagnRawData) {
-  uint16_t  MotionVal[9];
-  float    s16Accel[3], s16Gyro[3];
-  uint16_t s16Magn[3];
+  double  MotionVal[9];
+  float    s16Accel[3], s16Gyro[3], s16Magn[3];
   icm20948AccelRead(&s16Accel[0], &s16Accel[1], &s16Accel[2]);
   icm20948GyroRead(&s16Gyro[0], &s16Gyro[1], &s16Gyro[2]);
   icm20948MagRead(&s16Magn[0], &s16Magn[1], &s16Magn[2]);
@@ -112,11 +112,11 @@ bool ICM20948::imuDataGet(IMU_ST_ANGLES_DATA *pstAngles,
                 (float)MotionVal[5], (float)MotionVal[6], (float)MotionVal[7],
                 MotionVal[8]);
 
-  pstAngles->fPitch = asin(-2 * q1 * q3 + 2 * q0 * q2) * 57.3;  // pitch
+  pstAngles->fPitch = std::asin(-2 * q1 * q3 + 2 * q0 * q2) * 57.3;  // pitch
   pstAngles->fRoll =
-    atan2(2 * q2 * q3 + 2 * q0 * q1, -2 * q1 * q1 - 2 * q2 * q2 + 1) * 57.3;  // roll
+    std::atan2(2 * q2 * q3 + 2 * q0 * q1, -2 * q1 * q1 - 2 * q2 * q2 + 1) * 57.3;  // roll
   pstAngles->fYaw =
-    atan2(-2 * q1 * q2 - 2 * q0 * q3, 2 * q2 * q2 + 2 * q3 * q3 - 1) * 57.3;
+    std::atan2(-2 * q1 * q2 - 2 * q0 * q3, 2 * q2 * q2 + 2 * q3 * q3 - 1) * 57.3;
 
   pstGyroRawData->s16X = s16Gyro[0];
   pstGyroRawData->s16Y = s16Gyro[1];
@@ -166,7 +166,7 @@ void ICM20948::imuAHRSupdate(float gx, float gy, float gz, float ax, float ay, f
   hx = 2 * mx * (0.5f - q2q2 - q3q3) + 2 * my * (q1q2 - q0q3) + 2 * mz * (q1q3 + q0q2);
   hy = 2 * mx * (q1q2 + q0q3) + 2 * my * (0.5f - q1q1 - q3q3) + 2 * mz * (q2q3 - q0q1);
   hz = 2 * mx * (q1q3 - q0q2) + 2 * my * (q2q3 + q0q1) + 2 * mz * (0.5f - q1q1 - q2q2);
-  bx = sqrt((hx * hx) + (hy * hy));
+  bx = std::sqrt((hx * hx) + (hy * hy));
   bz = hz;
 
   // estimated direction of gravity and flux (v and w)
@@ -363,7 +363,7 @@ bool ICM20948::icm20948AccelRead(float *ps16X, float *ps16Y, float *ps16Z) {
   return true;
 }
 
-void ICM20948::icm20948MagRead(uint16_t *ps16X, uint16_t *ps16Y, uint16_t *ps16Z) {
+bool ICM20948::icm20948MagRead(float *ps16X, float *ps16Y, float *ps16Z) {
   uint8_t counter = 20;
   uint8_t u8Data[MAG_DATA_LEN];
   int16_t s16Buf[3] = { 0 };
@@ -390,6 +390,11 @@ void ICM20948::icm20948MagRead(uint16_t *ps16X, uint16_t *ps16Y, uint16_t *ps16Z
     s16Buf[2] = ((int16_t)u8Data[5] << 8) | u8Data[4];
   }
 
+  *ps16X = s16Buf[0] * 4.0 * 100.0 / 32768.0;
+  *ps16Y = s16Buf[1] * 4.0 * 100.0 / 32768.0;
+  *ps16Z = s16Buf[2] * 4.0 * 100.0 / 32768.0;
+
+/*
   for (i = 0; i < 3; i++) {
     icm20948CalAvgValue(&sstAvgBuf[i].u8Index, sstAvgBuf[i].s16AvgBuffer, s16Buf[i],
                         s32OutBuf + i);
@@ -398,6 +403,8 @@ void ICM20948::icm20948MagRead(uint16_t *ps16X, uint16_t *ps16Y, uint16_t *ps16Z
   *ps16X = s32OutBuf[0];
   *ps16Y = -s32OutBuf[1];
   *ps16Z = -s32OutBuf[2];
+  */
+  return true;
 }
 
 void ICM20948::icm20948ReadSecondary(uint8_t u8I2CAddr, uint8_t u8RegAddr,
@@ -478,9 +485,9 @@ void ICM20948::icm20948GyroOffset() {
   int32_t  s32TempGx = 0, s32TempGy = 0, s32TempGz = 0;
   for (i = 0; i < 32; i++) {
     icm20948GyroRead(&s16Gx, &s16Gy, &s16Gz);
-    s32TempGx += s16Gx;
-    s32TempGy += s16Gy;
-    s32TempGz += s16Gz;
+    s32TempGx += (uint16_t)s16Gx;
+    s32TempGy += (uint16_t)s16Gy;
+    s32TempGz += (uint16_t)s16Gz;
     sleep_ms(10);
   }
   gstGyroOffset.s16X = s32TempGx >> 5;

@@ -9,7 +9,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
-#include "magic_wand_model_data.h"
 
 #include "hardware/gpio.h"
 #include "tensorflow/lite/micro/micro_error_reporter.h"
@@ -22,8 +21,8 @@ limitations under the License.
 
 #include "imu_provider.h"
 #include "magic_wand_model_data.h"
+#include "micro_features_data.h"
 #include "rasterize_stroke.h"
-#include "ring_micro_features_data.h"
 
 #define SCREEN 0
 
@@ -40,9 +39,9 @@ limitations under the License.
 #define UART_RX_PIN 1
 
 namespace {
-bool      linked  = false;
-bool      first   = true;
-
+bool linked = false;
+bool first  = true;
+// uint8_t  header =
 const int VERSION = 0x00000000;
 
 // Constants for image rasterization
@@ -69,43 +68,7 @@ constexpr int label_count       = 10;
 const char *labels[label_count] = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" };
 
 }  // namespace
-
-void on_uart_rx() {
-  uint8_t cameraCommand = 0;
-  while (uart_is_readable(UART_ID)) {
-    cameraCommand = uart_getc(UART_ID);
-    // Can we send it back?
-    if (uart_is_writable(UART_ID)) {
-      uart_putc(UART_ID, cameraCommand);
-    }
-  }
-}
-void setup_uart() {
-  // Set up our UART with the required speed.
-  uart_init(UART_ID, BAUD_RATE);
-  // Set the TX and RX pins by using the function select on the GPIO
-  // Set datasheet for more information on function select
-  gpio_set_function(UART_TX_PIN, GPIO_FUNC_UART);
-  gpio_set_function(UART_RX_PIN, GPIO_FUNC_UART);
-  // Set our data format
-  uart_set_format(UART_ID, DATA_BITS, STOP_BITS, PARITY);
-  // Turn off FIFO's - we want to do this character by character
-  uart_set_fifo_enabled(UART_ID, false);
-  // Set up a RX interrupt
-  // We need to set up the handler first
-  // Select correct interrupt for the UART we are using
-  int UART_IRQ = UART_ID == uart0 ? UART0_IRQ : UART1_IRQ;
-
-  // And set up and enable the interrupt handlers
-  irq_set_exclusive_handler(UART_IRQ, on_uart_rx);
-  irq_set_enabled(UART_IRQ, true);
-
-  // Now enable the UART to send interrupts - RX only
-  uart_set_irq_enables(UART_ID, true, false);
-}
-
 void setup() {
-//  setup_uart();
 #if SCREEN
   ST7735_Init();
   ST7735_DrawImage(0, 0, 80, 160, arducam_logo);
@@ -198,22 +161,26 @@ void loop() {
       }
       linked = true;
 
-//      if (first) {
-//        first = false;
-        for (uint16_t i=0; i < stroke_struct_byte_count; i++) {
-//          uart_write_blocking(UART_ID, micro_data+i, 1);
-          uart_write_blocking(UART_ID, stroke_struct_buffer+i, 1);
-          if (i % 164 == 0) {
-            sleep_ms(100);
-          }
+      //      if (first) {
+      //        first = false;
+      for (uint16_t i = 0; i < stroke_struct_byte_count; i++) {
+          uart_write_blocking(UART_ID, micro_data1 + i, 1);
+//        uart_write_blocking(UART_ID, stroke_struct_buffer + i, 1);
+        if (i == 7) {
+          sleep_ms(20);
+        } else if (i > 7 and (i - 7) % 20 == 0) {
+          sleep_ms(20);
         }
-//      }
+      }
+      //      }
     }
     else {
       linked = false;
-//      first = true;
+      //      first = true;
     }
   }
+
+
   if (accelerometer_samples_read > 0) {
     EstimateGravityDirection(current_gravity);
     UpdateVelocity(accelerometer_samples_read, current_gravity);

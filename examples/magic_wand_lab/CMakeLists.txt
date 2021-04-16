@@ -32,7 +32,7 @@ target_sources(magic_wand_lab
   ${CMAKE_CURRENT_LIST_DIR}/rasterize_stroke.cpp
   ${CMAKE_CURRENT_LIST_DIR}/rasterize_stroke.h
   ${CMAKE_CURRENT_LIST_DIR}/micro_features_data.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/ring_micro_features_data.h
+  ${CMAKE_CURRENT_LIST_DIR}/micro_features_data.h
   )
 
 target_link_libraries(
