@@ -1,9 +1,8 @@
 #ifndef _ARDUCAM__H
 #define _ARDUCAM__H
 #include "hardware/i2c.h"
-#include <hardware/pio.h>
 #include <hardware/uart.h>
-
+#include <hardware/pio.h>
 #include "stdint.h"
 #define SOFTWARE_I2C 1
 

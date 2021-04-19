@@ -15,7 +15,7 @@ limitations under the License.
 
 #include "image_provider.h"
 #include "model_settings.h"
-#include <pico/stdio.h>
+#include <pico/stdio_uart.h>
 
 #include "arducam.h"
 #include "st7735.h"
@@ -23,7 +23,7 @@ limitations under the License.
 
 struct arducam_config config;
 TfLiteStatus ScreenInit(tflite::ErrorReporter *error_reporter) {
-  stdio_init_all();
+  stdio_uart_init();
   //  sleep_ms(1000);
 #if SCREEN
     ST7735_Init();

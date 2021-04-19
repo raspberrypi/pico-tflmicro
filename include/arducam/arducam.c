@@ -4,7 +4,6 @@
 #include "hardware/pwm.h"
 #include "hm01b0_init.h"
 #include "image.pio.h"
-#include "st7735.h"
 #include <stdio.h>
 
 int PIN_LED = 25;
@@ -219,7 +218,7 @@ void arducam_init(struct arducam_config *config) {
   image_program_init(config->pio, config->pio_sm, offset, config->pin_y2_pio_base);
 }
 void arducam_capture_frame(struct arducam_config *config, uint8_t *image) {
-  uint16_t x, y, i, j, index;  // init 0
+  uint16_t x, y, index;  // init 0
   uint8_t  image_buf[324 * 324];
   //  uint8_t  image_tmp[162 * 162];
   config->image_buf      = image_buf;
@@ -247,7 +246,11 @@ void arducam_capture_frame(struct arducam_config *config, uint8_t *image) {
 
 #if 1
   index        = 0;
+<<<<<<< HEAD
   for (y = 66; y < 258; y+=2) {
+=======
+  for (y = 0; y < 258; y+=2) {
+>>>>>>> a380587 (magic_wang_lab Streamline the code)
     for (x = 66+ (1 + x) % 2; x < 258; x += 2) {
       image[index++] = config->image_buf[y * 324 + x];
     }
