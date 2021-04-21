@@ -18,6 +18,7 @@ limitations under the License.
 #include "tensorflow/lite/version.h"
 #include <hardware/irq.h>
 #include <hardware/uart.h>
+#include <pico/stdio_uart.h>
 
 #include "imu_provider.h"
 #include "magic_wand_model_data.h"
@@ -30,19 +31,11 @@ limitations under the License.
 #include "st7735.h"
 #endif
 
-#define UART_ID uart0
-#define BAUD_RATE 9600
-#define DATA_BITS 8
-#define STOP_BITS 1
-#define PARITY UART_PARITY_NONE
-#define UART_TX_PIN 0
-#define UART_RX_PIN 1
-
 namespace {
-bool linked = false;
-bool first  = true;
-// uint8_t  header =
-const int VERSION = 0x00000000;
+bool      linked     = false;
+bool      first      = true;
+uint16_t  send_index = 0;
+uint8_t   output[328] = {0};
 
 // Constants for image rasterization
 constexpr int raster_width      = 32;
@@ -74,6 +67,7 @@ void setup() {
   ST7735_DrawImage(0, 0, 80, 160, arducam_logo);
 #endif
   // Start serial
+  stdio_uart_init();
   //  printf("Started\n");
 
   // Set up logging. Google style is to avoid globals or statics because of
@@ -160,33 +154,33 @@ void loop() {
         sleep_ms(5000);
       }
       linked = true;
+      if (send_index == 0) {
+        memcpy(output,micro_data1,328);
+        //uart_write_blocking(uart0, micro_data1, 8);
+        uart_write_blocking(uart0, output, 8);
 
-      //      if (first) {
-      //        first = false;
-      for (uint16_t i = 0; i < stroke_struct_byte_count; i++) {
-          uart_write_blocking(UART_ID, micro_data1 + i, 1);
-//        uart_write_blocking(UART_ID, stroke_struct_buffer + i, 1);
-        if (i == 7) {
-          sleep_ms(20);
-        } else if (i > 7 and (i - 7) % 20 == 0) {
-          sleep_ms(20);
-        }
+        send_index += 8;
       }
-      //      }
+      else {
+        //uart_write_blocking(uart0, micro_data1 + send_index, 20);
+        uart_write_blocking(uart0, output + send_index, 20);
+        send_index += 20;
+      }
+      if (send_index == 328) {
+        send_index = 0;
+      }
     }
     else {
       linked = false;
-      //      first = true;
     }
   }
-
 
   if (accelerometer_samples_read > 0) {
     EstimateGravityDirection(current_gravity);
     UpdateVelocity(accelerometer_samples_read, current_gravity);
   }
   // Wait for a gesture to be done
-  if (done_just_triggered) {
+  if (done_just_triggered and !gpio_get(22)) {
     // Rasterize the gesture
     RasterizeStroke(stroke_points, *stroke_transmit_length, 0.6f, 0.6f, raster_width,
                     raster_height, raster_buffer);
