@@ -246,11 +246,7 @@ void arducam_capture_frame(struct arducam_config *config, uint8_t *image) {
 
 #if 1
   index        = 0;
-<<<<<<< HEAD
   for (y = 66; y < 258; y+=2) {
-=======
-  for (y = 0; y < 258; y+=2) {
->>>>>>> a380587 (magic_wang_lab Streamline the code)
     for (x = 66+ (1 + x) % 2; x < 258; x += 2) {
       image[index++] = config->image_buf[y * 324 + x];
     }

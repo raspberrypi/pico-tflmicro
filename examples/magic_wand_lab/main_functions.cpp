@@ -19,8 +19,6 @@ limitations under the License.
 #include <hardware/irq.h>
 #include <hardware/uart.h>
 #include <pico/stdio.h>
-#include <pico/stdio_uart.h>
-#include <pico/stdio_usb.h>
 
 #include "imu_provider.h"
 #include "magic_wand_model_data.h"
@@ -237,9 +235,8 @@ void loop() {
         max_index = i;
       }
     }
-    int8_t final_score = ((max_score + 128) * 100) >> 8;
     TF_LITE_REPORT_ERROR(error_reporter, "Found %s (%d%%)", labels[max_index],
-                         final_score);
+                         ((max_score + 128) * 100) >> 8);
 #if SCREEN
     char str[10];
     sprintf(str, "%d%%", final_score);

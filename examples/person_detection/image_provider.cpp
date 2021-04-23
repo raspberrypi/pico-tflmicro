@@ -15,7 +15,6 @@ limitations under the License.
 
 #include "image_provider.h"
 #include "model_settings.h"
-#include <pico/stdio_uart.h>
 
 #include "arducam.h"
 #include "st7735.h"
@@ -23,8 +22,6 @@ limitations under the License.
 
 struct arducam_config config;
 TfLiteStatus ScreenInit(tflite::ErrorReporter *error_reporter) {
-  stdio_uart_init();
-  //  sleep_ms(1000);
 #if SCREEN
     ST7735_Init();
     ST7735_DrawImage(0, 0, 80, 160, arducam_logo);
@@ -71,7 +68,7 @@ TfLiteStatus GetImage(tflite::ErrorReporter *error_reporter, int image_width,
 #if EXECUTION_TIME
   TF_LITE_MICRO_EXECUTION_TIME_SNIPPET_START(error_reporter)
 #endif
-  uint8_t *displayBuf = new uint8_t[96 * 96 * 2];
+  auto *displayBuf = new uint8_t[96 * 96 * 2];
   uint16_t index      = 0;
   for (int x = 0; x < 96 * 96; x++) {
     uint16_t imageRGB   = ST7735_COLOR565(image_data[x], image_data[x], image_data[x]);

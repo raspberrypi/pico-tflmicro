@@ -15,6 +15,8 @@ limitations under the License.
 
 #include "main_functions.h"
 #include <hardware/gpio.h>
+#include <pico/stdio.h>
+#include <st7735.h>
 
 #include "detection_responder.h"
 #include "image_provider.h"
@@ -49,6 +51,7 @@ static uint8_t tensor_arena[kTensorArenaSize];
 
 // The name of this function is important for Arduino compatibility.
 void setup() {
+  stdio_init_all();
   // Set up logging. Google style is to avoid globals or statics because of
   // lifetime uncertainty, but since this has a trivial destructor it's okay.
   // NOLINTNEXTLINE(runtime-global-variables)
@@ -109,7 +112,7 @@ void setup() {
 
 // The name of this function is important for Arduino compatibility.
 void loop() {
-  gpio_put(LED_PIN, true);
+  gpio_put(LED_PIN, !gpio_get(LED_PIN));
 #if EXECUTION_TIME
   TF_LITE_MICRO_EXECUTION_TIME_BEGIN
   TF_LITE_MICRO_EXECUTION_TIME_SNIPPET_START(error_reporter)
@@ -119,7 +122,6 @@ void loop() {
       != GetImage(error_reporter, kNumCols, kNumRows, kNumChannels, input->data.int8)) {
     TF_LITE_REPORT_ERROR(error_reporter, "Image capture failed.");
   }
-  gpio_put(LED_PIN, false);
 #if EXECUTION_TIME
   TF_LITE_MICRO_EXECUTION_TIME_SNIPPET_END(error_reporter, "GetImage")
   TF_LITE_MICRO_EXECUTION_TIME_SNIPPET_START(error_reporter)
