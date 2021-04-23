@@ -25,7 +25,7 @@ limitations under the License.
 #include "micro_features_data.h"
 #include "rasterize_stroke.h"
 
-#define SCREEN 0
+#define SCREEN 1
 
 #if SCREEN
 #include "st7735.h"
@@ -208,7 +208,7 @@ void loop() {
         line[x] = output;
       }
       line[raster_width] = 0;
-      printf("%s/n", line);
+      printf("%s\n", line);
     }
 
     // Pass to the model and run the interpreter
@@ -239,7 +239,7 @@ void loop() {
                          ((max_score + 128) * 100) >> 8);
 #if SCREEN
     char str[10];
-    sprintf(str, "%d%%", final_score);
+    sprintf(str, "%d%%", ((max_score + 128) * 100) >> 8);
 
     ST7735_FillRectangle(0, 80, ST7735_WIDTH, 160 - 80, ST7735_GREEN);
     ST7735_WriteString(35, 90, labels[max_index], Font_11x18, ST7735_BLACK,
