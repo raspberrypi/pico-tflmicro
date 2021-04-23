@@ -46,7 +46,7 @@ target_link_libraries(
 )
 
 # enable usb output, disable uart output
-#pico_enable_stdio_usb(magic_wand_lab 1)
-#pico_enable_stdio_uart(magic_wand_lab 0)
+pico_enable_stdio_usb(magic_wand_lab 1)
+pico_enable_stdio_uart(magic_wand_lab 1)
 
 pico_add_extra_outputs(magic_wand_lab)

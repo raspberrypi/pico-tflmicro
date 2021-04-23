@@ -18,7 +18,9 @@ limitations under the License.
 #include "tensorflow/lite/version.h"
 #include <hardware/irq.h>
 #include <hardware/uart.h>
+#include <pico/stdio.h>
 #include <pico/stdio_uart.h>
+#include <pico/stdio_usb.h>
 
 #include "imu_provider.h"
 #include "magic_wand_model_data.h"
@@ -32,10 +34,10 @@ limitations under the License.
 #endif
 
 namespace {
-bool      linked     = false;
-bool      first      = true;
-uint16_t  send_index = 0;
-uint8_t   output[328] = {0};
+bool     linked                        = false;
+bool     first                         = true;
+uint16_t send_index                    = 0;
+uint8_t  stroke_struct_buffer_tmp[328] = { 0 };
 
 // Constants for image rasterization
 constexpr int raster_width      = 32;
@@ -67,7 +69,11 @@ void setup() {
   ST7735_DrawImage(0, 0, 80, 160, arducam_logo);
 #endif
   // Start serial
-  stdio_uart_init();
+  stdio_init_all();
+  //  stdio_usb_init();
+
+  //  stdio_uart_init();
+
   //  printf("Started\n");
 
   // Set up logging. Google style is to avoid globals or statics because of
@@ -82,10 +88,10 @@ void setup() {
   // copying or parsing, it's a very lightweight operation.
   model = tflite::GetModel(g_magic_wand_model_data);
   if (model->version() != TFLITE_SCHEMA_VERSION) {
-    //    TF_LITE_REPORT_ERROR(error_reporter,
-    //                         "Model provided is schema version %d not equal "
-    //                         "to supported version %d.",
-    //                         model->version(), TFLITE_SCHEMA_VERSION);
+    TF_LITE_REPORT_ERROR(error_reporter,
+                         "Model provided is schema version %d not equal "
+                         "to supported version %d.",
+                         model->version(), TFLITE_SCHEMA_VERSION);
     return;
   }
 
@@ -115,7 +121,7 @@ void setup() {
       || (model_input->dims->data[2] != raster_width)
       || (model_input->dims->data[3] != raster_channels)
       || (model_input->type != kTfLiteInt8)) {
-    //    TF_LITE_REPORT_ERROR(error_reporter, "Bad input tensor parameters in model");
+    TF_LITE_REPORT_ERROR(error_reporter, "Bad input tensor parameters in model");
     return;
   }
 
@@ -124,7 +130,7 @@ void setup() {
   if ((model_output->dims->size != 2) || (model_output->dims->data[0] != 1)
       || (model_output->dims->data[1] != label_count)
       || (model_output->type != kTfLiteInt8)) {
-    //    TF_LITE_REPORT_ERROR(error_reporter, "Bad output tensor parameters in model");
+    TF_LITE_REPORT_ERROR(error_reporter, "Bad output tensor parameters in model");
     return;
   }
 #if SCREEN
@@ -135,9 +141,12 @@ void setup() {
 #endif
   gpio_init(22);
   gpio_set_dir(22, GPIO_IN);
+  gpio_init(25);
+  gpio_set_dir(25, GPIO_OUT);
 }
 
 void loop() {
+  gpio_put(25, !gpio_get(25));
   int accelerometer_samples_read;
   int gyroscope_samples_read;
 
@@ -155,15 +164,14 @@ void loop() {
       }
       linked = true;
       if (send_index == 0) {
-        memcpy(output,micro_data1,328);
-        //uart_write_blocking(uart0, micro_data1, 8);
-        uart_write_blocking(uart0, output, 8);
-
+        memcpy(stroke_struct_buffer_tmp, stroke_struct_buffer, 328);
+        // uart_write_blocking(uart0, micro_data, 8);
+        uart_write_blocking(uart0, stroke_struct_buffer_tmp, 8);
         send_index += 8;
       }
       else {
-        //uart_write_blocking(uart0, micro_data1 + send_index, 20);
-        uart_write_blocking(uart0, output + send_index, 20);
+        // uart_write_blocking(uart0, micro_data1 + send_index, 20);
+        uart_write_blocking(uart0, stroke_struct_buffer_tmp + send_index, 20);
         send_index += 20;
       }
       if (send_index == 328) {
@@ -202,7 +210,7 @@ void loop() {
         line[x] = output;
       }
       line[raster_width] = 0;
-      //      printf("%s\n", line);
+      printf("%s/n", line);
     }
 
     // Pass to the model and run the interpreter
@@ -213,7 +221,7 @@ void loop() {
 
     TfLiteStatus invoke_status = interpreter->Invoke();
     if (invoke_status != kTfLiteOk) {
-      //      TF_LITE_REPORT_ERROR(error_reporter, "Invoke failed");
+      TF_LITE_REPORT_ERROR(error_reporter, "Invoke failed");
       return;
     }
 
@@ -230,8 +238,8 @@ void loop() {
       }
     }
     int8_t final_score = ((max_score + 128) * 100) >> 8;
-//    TF_LITE_REPORT_ERROR(error_reporter, "Found %s (%d%%)", labels[max_index],
-//                         final_score);
+    TF_LITE_REPORT_ERROR(error_reporter, "Found %s (%d%%)", labels[max_index],
+                         final_score);
 #if SCREEN
     char str[10];
     sprintf(str, "%d%%", final_score);

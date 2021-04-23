@@ -18,7 +18,7 @@ limitations under the License.
 
 //// Expose a C friendly interface for main functions.
 //#ifdef __cplusplus
-//extern "C" {
+// extern "C" {
 //#endif
 
 // Initializes all data needed for the example. The name is important, and needs
