@@ -18,7 +18,7 @@ limitations under the License.
 #include "tensorflow/lite/version.h"
 #include <hardware/irq.h>
 #include <hardware/uart.h>
-#include <pico/stdio.h>
+#include <pico/stdio_usb.h>
 
 #include "imu_provider.h"
 #include "magic_wand_model_data.h"
@@ -31,6 +31,13 @@ limitations under the License.
 #include "st7735.h"
 #endif
 
+#define UART_ID uart0
+#define BAUD_RATE 115200
+#define DATA_BITS 8
+#define STOP_BITS 1
+#define PARITY UART_PARITY_NONE
+#define UART_TX_PIN 0
+#define UART_RX_PIN 1
 namespace {
 bool     linked                        = false;
 bool     first                         = true;
@@ -59,20 +66,83 @@ tflite::MicroInterpreter *interpreter    = nullptr;
 // -------------------------------------------------------------------------------- //
 constexpr int label_count       = 10;
 const char *labels[label_count] = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" };
-
 }  // namespace
+
+#ifndef DO_NOT_OUTPUT_TO_UART
+// RX interrupt handler
+uint8_t command[32]   = { 0 };
+bool    start_flag    = false;
+int     receive_index = 0;
+uint8_t previous_ch   = 0;
+
+void on_uart_rx() {
+  uint8_t cameraCommand = 0;
+  while (uart_is_readable(UART_ID)) {
+    cameraCommand = uart_getc(UART_ID);
+    //    printf("%c \n", cameraCommand);
+    if (start_flag) {
+      command[receive_index++] = cameraCommand;
+    }
+    if (cameraCommand == 0xf4 && previous_ch == 0xf5) {
+      start_flag = true;
+    }
+    else if (cameraCommand == 0x0a && previous_ch == 0x0d) {
+      start_flag = false;
+      // add terminator
+      command[receive_index - 2] = '\0';
+
+      receive_index = 0;
+      if (strcmp("IND=BLECONNECTED", (const char *)command) == 0) {
+        linked = true;
+      }
+      else if (strcmp("IND=BLEDISCONNECTED", (const char *)command) == 0) {
+        linked = false;
+      }
+      printf("%s\n", command);
+    }
+    previous_ch = cameraCommand;
+  }
+}
+
+void setup_uart() {
+  // Set up our UART with the required speed.
+  uint baud = uart_init(UART_ID, BAUD_RATE);
+  // Set the TX and RX pins by using the function select on the GPIO
+  // Set datasheet for more information on function select
+  gpio_set_function(UART_TX_PIN, GPIO_FUNC_UART);
+  gpio_set_function(UART_RX_PIN, GPIO_FUNC_UART);
+  // Set our data format
+  uart_set_format(UART_ID, DATA_BITS, STOP_BITS, PARITY);
+  // Turn off FIFO's - we want to do this character by character
+  uart_set_fifo_enabled(UART_ID, false);
+  // Set up a RX interrupt
+  // We need to set up the handler first
+  // Select correct interrupt for the UART we are using
+  int UART_IRQ = UART_ID == uart0 ? UART0_IRQ : UART1_IRQ;
+
+  // And set up and enable the interrupt handlers
+  irq_set_exclusive_handler(UART_IRQ, on_uart_rx);
+  irq_set_enabled(UART_IRQ, true);
+
+  // Now enable the UART to send interrupts - RX only
+  uart_set_irq_enables(UART_ID, true, false);
+}
+#else
+void setup_uart() {}
+#endif
+
 void setup() {
+  gpio_init(25);
+  gpio_set_dir(25, GPIO_OUT);
+  gpio_put(25, !gpio_get(25));
+
 #if SCREEN
   ST7735_Init();
   ST7735_DrawImage(0, 0, 80, 160, arducam_logo);
 #endif
   // Start serial
-  stdio_init_all();
-  //  stdio_usb_init();
-
-  //  stdio_uart_init();
-
-  //  printf("Started\n");
+  setup_uart();
+  stdio_usb_init();
 
   // Set up logging. Google style is to avoid globals or statics because of
   // lifetime uncertainty, but since this has a trivial destructor it's okay.
@@ -137,10 +207,7 @@ void setup() {
   ST7735_WriteString(5, 20, "Magic", Font_11x18, ST7735_BLACK, ST7735_GREEN);
   ST7735_WriteString(30, 45, "Wand", Font_11x18, ST7735_BLACK, ST7735_GREEN);
 #endif
-  gpio_init(22);
-  gpio_set_dir(22, GPIO_IN);
-  gpio_init(25);
-  gpio_set_dir(25, GPIO_OUT);
+  gpio_put(25, !gpio_get(25));
 }
 
 void loop() {
@@ -156,29 +223,21 @@ void loop() {
     EstimateGyroscopeDrift(current_gyroscope_drift);
     UpdateOrientation(gyroscope_samples_read, current_gravity, current_gyroscope_drift);
     UpdateStroke(gyroscope_samples_read, &done_just_triggered);
-    if (gpio_get(22)) {
-      if (!linked) {
+#if 1
+    if (linked) {
+      if (first) {
         sleep_ms(5000);
+        first = false;
       }
-      linked = true;
-      if (send_index == 0) {
-        memcpy(stroke_struct_buffer_tmp, stroke_struct_buffer, 328);
-        // uart_write_blocking(uart0, micro_data, 8);
-        uart_write_blocking(uart0, stroke_struct_buffer_tmp, 8);
-        send_index += 8;
-      }
-      else {
-        // uart_write_blocking(uart0, micro_data1 + send_index, 20);
-        uart_write_blocking(uart0, stroke_struct_buffer_tmp + send_index, 20);
-        send_index += 20;
-      }
-      if (send_index == 328) {
-        send_index = 0;
+      if (send_index++ % 16 == 0) {
+        uart_write_blocking(UART_ID, stroke_struct_buffer, 328);
       }
     }
     else {
-      linked = false;
+      first      = true;
+      send_index = 0;
     }
+#endif
   }
 
   if (accelerometer_samples_read > 0) {
@@ -186,7 +245,7 @@ void loop() {
     UpdateVelocity(accelerometer_samples_read, current_gravity);
   }
   // Wait for a gesture to be done
-  if (done_just_triggered and !gpio_get(22)) {
+  if (done_just_triggered and !linked) {
     // Rasterize the gesture
     RasterizeStroke(stroke_points, *stroke_transmit_length, 0.6f, 0.6f, raster_width,
                     raster_height, raster_buffer);

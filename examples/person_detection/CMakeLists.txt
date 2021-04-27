@@ -152,7 +152,7 @@ target_link_libraries(
 
 )
 
-pico_enable_stdio_uart(person_detection_int8 1)
+pico_enable_stdio_uart(person_detection_int8 0)
 pico_enable_stdio_usb(person_detection_int8 1)
 pico_add_extra_outputs(person_detection_int8)
 

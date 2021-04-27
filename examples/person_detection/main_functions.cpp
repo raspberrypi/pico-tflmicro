@@ -15,7 +15,9 @@ limitations under the License.
 
 #include "main_functions.h"
 #include <hardware/gpio.h>
-#include <pico/stdio.h>
+#include <hardware/irq.h>
+#include <hardware/uart.h>
+#include <pico/stdio_usb.h>
 #include <st7735.h>
 
 #include "detection_responder.h"
@@ -29,7 +31,13 @@ limitations under the License.
 #include "tensorflow/lite/version.h"
 
 const uint LED_PIN = 25;
-
+#define UART_ID uart0
+#define BAUD_RATE 115200
+#define DATA_BITS 8
+#define STOP_BITS 1
+#define PARITY UART_PARITY_NONE
+#define UART_TX_PIN 0
+#define UART_RX_PIN 1
 // Globals, used for compatibility with Arduino-style sketches.
 namespace {
 tflite::ErrorReporter *   error_reporter = nullptr;
@@ -49,9 +57,56 @@ constexpr int  kTensorArenaSize = 136 * 1024;
 static uint8_t tensor_arena[kTensorArenaSize];
 }  // namespace
 
+#ifndef DO_NOT_OUTPUT_TO_UART
+// RX interrupt handler
+void on_uart_rx() {
+  char cameraCommand = 0;
+  while (uart_is_readable(UART_ID)) {
+    cameraCommand = uart_getc(UART_ID);
+    // Can we send it back?
+    if (uart_is_writable(UART_ID)) {
+      uart_putc(UART_ID, cameraCommand);
+    }
+  }
+}
+
+void setup_uart() {
+  // Set up our UART with the required speed.
+  uint baud = uart_init(UART_ID, BAUD_RATE);
+  // Set the TX and RX pins by using the function select on the GPIO
+  // Set datasheet for more information on function select
+  gpio_set_function(UART_TX_PIN, GPIO_FUNC_UART);
+  gpio_set_function(UART_RX_PIN, GPIO_FUNC_UART);
+  // Set our data format
+  uart_set_format(UART_ID, DATA_BITS, STOP_BITS, PARITY);
+  // Turn off FIFO's - we want to do this character by character
+  uart_set_fifo_enabled(UART_ID, false);
+  // Set up a RX interrupt
+  // We need to set up the handler first
+  // Select correct interrupt for the UART we are using
+  int UART_IRQ = UART_ID == uart0 ? UART0_IRQ : UART1_IRQ;
+
+  // And set up and enable the interrupt handlers
+  irq_set_exclusive_handler(UART_IRQ, on_uart_rx);
+  irq_set_enabled(UART_IRQ, true);
+
+  // Now enable the UART to send interrupts - RX only
+  uart_set_irq_enables(UART_ID, true, false);
+}
+#else
+void setup_uart() {}
+#endif
+
+
 // The name of this function is important for Arduino compatibility.
 void setup() {
-  stdio_init_all();
+  gpio_init(LED_PIN);
+  gpio_set_dir(LED_PIN, GPIO_OUT);
+  gpio_put(LED_PIN, !gpio_get(LED_PIN));
+
+  setup_uart();
+  stdio_usb_init();
+
   // Set up logging. Google style is to avoid globals or statics because of
   // lifetime uncertainty, but since this has a trivial destructor it's okay.
   // NOLINTNEXTLINE(runtime-global-variables)
@@ -105,9 +160,8 @@ void setup() {
   if (setup_status != kTfLiteOk) {
     TF_LITE_REPORT_ERROR(error_reporter, "Set up failed\n");
   }
+  gpio_put(LED_PIN, !gpio_get(LED_PIN));
 
-  gpio_init(LED_PIN);
-  gpio_set_dir(LED_PIN, GPIO_OUT);
 }
 
 // The name of this function is important for Arduino compatibility.
@@ -146,5 +200,5 @@ void loop() {
   ST7735_FillRectangle(10, 120, ST7735_WIDTH, 40, ST7735_BLACK);
   ST7735_WriteString(13, 120, array, Font_16x26, ST7735_GREEN, ST7735_BLACK);
 #endif
-//  TF_LITE_REPORT_ERROR(error_reporter, "**********");
+  TF_LITE_REPORT_ERROR(error_reporter, "**********");
 }
