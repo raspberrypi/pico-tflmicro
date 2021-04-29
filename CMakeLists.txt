@@ -420,16 +420,14 @@ target_sources(pico-tflmicro_test
 #  ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/testing/test_conv_model.h
 #  )
 
-add_subdirectory(include/arducam)
+add_subdirectory(include/arducam_hm01b0)
 add_subdirectory(include/arducam_mic)
-add_subdirectory(include/LCD)
-add_subdirectory(include/Config)
+add_subdirectory(include/LCD_st7735)
 add_subdirectory(include/ICM20948)
 
-include_directories(include/arducam)
+include_directories(include/arducam_hm01b0)
 include_directories(include/arducam_mic)
-include_directories(include/LCD)
-include_directories(include/Config)
+include_directories(include/LCD_st7735)
 include_directories(include/ICM20948)
 
 

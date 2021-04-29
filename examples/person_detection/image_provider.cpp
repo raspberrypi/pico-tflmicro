@@ -17,16 +17,15 @@ limitations under the License.
 #include "model_settings.h"
 #include <pico/stdio.h>
 
-#include "arducam.h"
-#include "st7735.h"
-
+#include "LCD_st7735.h"
+#include "arducam_hm01b0.h"
 
 struct arducam_config config;
 TfLiteStatus ScreenInit(tflite::ErrorReporter *error_reporter) {
 #if SCREEN
-    ST7735_Init();
-    ST7735_DrawImage(0, 0, 80, 160, arducam_logo);
-    sleep_ms(1000);
+  ST7735_Init();
+  ST7735_DrawImage(0, 0, 80, 160, arducam_logo);
+  sleep_ms(1000);
 #endif
 
   config.sccb            = i2c0;

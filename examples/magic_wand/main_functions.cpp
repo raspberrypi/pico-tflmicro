@@ -14,8 +14,8 @@ limitations under the License.
 ==============================================================================*/
 
 #include "main_functions.h"
+#include "LCD_st7735.h"
 #include "pico/stdlib.h"
-#include "st7735.h"
 
 #include "accelerometer_handler.h"
 #include "constants.h"

@@ -212,8 +212,7 @@ target_link_libraries(
   hardware_pwm
   pico_stdlib
   arducam_mic
-  Config
-  LCD
+  LCD_st7735
 )
 
 # enable usb output, disable uart output
@@ -386,7 +385,7 @@ target_link_libraries(
   pico-tflmicro
   hardware_pwm
   arducam_mic
-  LCD
+  LCD_st7735
 )
 
 pico_add_extra_outputs(micro_speech_mock)

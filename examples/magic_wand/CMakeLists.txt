@@ -35,8 +35,7 @@ target_link_libraries(
   hardware_pwm
   #  pico-tflmicro_test
   ICM20948
-  Config
-  LCD
+  LCD_st7735
 )
 
 pico_add_extra_outputs(gesture_predictor_test)
@@ -71,8 +70,7 @@ target_link_libraries(
   hardware_pwm
   #  pico-tflmicro_test
   ICM20948
-  Config
-  LCD
+  LCD_st7735
 )
 
 pico_add_extra_outputs(gesture_output_handler_test)
@@ -116,8 +114,7 @@ target_link_libraries(
   hardware_pwm
   pico_stdlib
   ICM20948
-  Config
-  LCD
+  LCD_st7735
 )
 
 # enable usb output, disable uart output
@@ -161,8 +158,7 @@ target_link_libraries(
   #  pico-tflmicro_test
   pico_stdlib
   ICM20948
-  Config
-  LCD
+  LCD_st7735
 )
 
 # enable usb output, disable uart output
@@ -201,8 +197,7 @@ target_link_libraries(
   hardware_pwm
   #  pico-tflmicro_test
   ICM20948
-  Config
-  LCD
+  LCD_st7735
 )
 
 pico_add_extra_outputs(gesture_accelerometer_handler_test)

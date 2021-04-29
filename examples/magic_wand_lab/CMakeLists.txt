@@ -41,8 +41,7 @@ target_link_libraries(
   hardware_pwm
   pico_stdlib
   ICM20948
-  Config
-  LCD
+  LCD_st7735
 )
 
 # enable usb output, disable uart output

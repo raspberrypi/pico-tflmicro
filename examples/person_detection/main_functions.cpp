@@ -14,11 +14,11 @@ limitations under the License.
 ==============================================================================*/
 
 #include "main_functions.h"
+#include <LCD_st7735.h>
 #include <hardware/gpio.h>
 #include <hardware/irq.h>
 #include <hardware/uart.h>
 #include <pico/stdio_usb.h>
-#include <st7735.h>
 
 #include "detection_responder.h"
 #include "image_provider.h"

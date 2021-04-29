@@ -141,14 +141,13 @@ target_sources(person_detection_int8
     )
 
 target_link_libraries(
-    person_detection_int8
-    pico-tflmicro
-    hardware_pwm
-    hardware_pio
-    pico_stdlib
-    arducam
-    Config
-    LCD
+  person_detection_int8
+  pico-tflmicro
+  hardware_pwm
+  hardware_pio
+  pico_stdlib
+  arducam_hm01b0
+  LCD_st7735
 
 )
 
@@ -186,9 +185,8 @@ target_link_libraries(
   image_provider_test_int8
   pico-tflmicro
   hardware_pwm
-  arducam
-  Config
-  LCD
+  arducam_hm01b0
+  LCD_st7735
 )
 
 pico_add_extra_outputs(image_provider_test_int8)

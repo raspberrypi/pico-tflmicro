@@ -14,7 +14,7 @@ limitations under the License.
 ==============================================================================*/
 
 #include "output_handler.h"
-#include "st7735.h"
+#include "LCD_st7735.h"
 
 void HandleOutput(tflite::ErrorReporter *error_reporter, int kind) {
   if (kind==0) {

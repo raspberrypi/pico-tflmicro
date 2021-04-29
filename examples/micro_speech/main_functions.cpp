@@ -15,19 +15,18 @@ limitations under the License.
 
 #include "main_functions.h"
 
+#include "LCD_st7735.h"
 #include "audio_provider.h"
 #include "command_responder.h"
 #include "feature_provider.h"
 #include "micro_features/micro_model_settings.h"
 #include "micro_features/model.h"
 #include "recognize_commands.h"
-#include "st7735.h"
 #include "tensorflow/lite/micro/micro_error_reporter.h"
 #include "tensorflow/lite/micro/micro_interpreter.h"
 #include "tensorflow/lite/micro/micro_mutable_op_resolver.h"
 #include "tensorflow/lite/schema/schema_generated.h"
 #include "tensorflow/lite/version.h"
-
 
 // Global variables, used to be compatible with Arduino style sketches.
 namespace {

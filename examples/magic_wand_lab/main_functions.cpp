@@ -28,7 +28,7 @@ limitations under the License.
 #define SCREEN 1
 
 #if SCREEN
-#include "st7735.h"
+#include "LCD_st7735.h"
 #endif
 
 #define UART_ID uart0
