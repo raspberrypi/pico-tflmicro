@@ -33,7 +33,9 @@ Table of Contents
 [person_detection_int8.uf2](bin/person_detection_int8.uf2) | This is the main program of person_detection, which can be dragged onto the RP2040 USB Mass Storage Device.
 [person_detection_benchmark.uf2](bin/person_detection_benchmark.uf2) | This is the benchmark program of person_detection, you can use it to test the performance of person_detection on pico.
 | [micro_speech.uf2](bin/micro_speech.uf2) | This is the main program of micro_speech, which can be dragged onto the RP2040 USB Mass Storage Device. |
-| [magic_wand.uf2](bin/magic_wand.uf2) | This is the main program of magic_wand, which can be dragged onto the RP2040 USB Mass Storage Device. |
+| [pico4ml_magic_wand.uf2](bin/pico4ml_magic_wand.uf2) | This is the main program of magic_wand, which can be dragged onto the RP2040 USB Mass Storage Device(Arducam Pico4ML). |
+| [pico4ml_ble_magic_wand.uf2](bin/pico4ml_ble_magic_wand.uf2) | This is the main program of magic_wand, which can be dragged onto the RP2040 USB Mass Storage Device(Arducam Pico4ML-BLE). |
+| [magic_wand_ble.uf2](bin/magic_wand_ble.uf2) | This is the main program of magic_wand_ble, which can be dragged onto the RP2040 USB Mass Storage Device(Arducam Pico4ML-BLE). |
 
 
 
@@ -261,19 +263,21 @@ cmake ..
 
 ```bash
 make
-# or only make  magic_wand
 ```
+
+> or only `make pico4ml_magic_wand`i f you use the Pico4ML
+> if you use the Pico4ML-BLE please `make pico4ml_ble_magic_wand`
 
 ![tflmicro_make_output](img/tflmicro_make_output.png)
 Then you will creat some files under pico-tflmicro/tflmicro/build/examples/magic_wand path
 
 | Bin                                           | Description                                                  |
 | --------------------------------------------- | ------------------------------------------------------------ |
-| [magic_wand.uf2](bin/magic_wand.uf2) | This is the main program of magic_wand, which can be dragged onto the RP2040 USB Mass Storage Device. |
-
+| [pico4ml_magic_wand.uf2](bin/pico4ml_magic_wand.uf2) | This is the main program of magic_wand, which can be dragged onto the RP2040 USB Mass Storage Device(Arducam Pico4ML). |
+| [pico4ml_ble_magic_wand.uf2](bin/pico4ml_ble_magic_wand.uf2) | This is the main program of magic_wand, which can be dragged onto the RP2040 USB Mass Storage Device(Arducam Pico4ML-BLE). |
 **Tips: If you don't want to compile, you can use the above pre-built uf2 file, you only need to wire the hardware and download uf2 to the device.**
 
-![wand_build](img/wand_build.png)
+![wand_build](img/pico4ml_wand_build.png)
 
 ### Test Magic Wand
 
@@ -311,10 +315,11 @@ $ ls /mnt/pico/
 INDEX.HTM INFO_UF2.TXT
 ```
 
-Copy your magic_wand.uf2 onto RP2040:
+Copy your pico4ml_magic_wand.uf2 or pico4ml_ble_magic_wand.uf2 onto RP2040:
 
 ```bash
-sudo cp examples/magic_wand/magic_wand.uf2 /mnt/pico
+sudo cp examples/magic_wand/pico4ml_magic_wand.uf2 /mnt/pico 
+# or sudo cp examples/magic_wand/pico4ml_ble_magic_wand.uf2 /mnt/pico 
 sudo sync
 ```
 
@@ -370,7 +375,7 @@ Then you will creat some files under pico-tflmicro/tflmicro/build/examples/magic
 
 **Tips: If you don't want to compile, you can use the above pre-built uf2 file, you only need to wire the hardware and download uf2 to the device.**
 
-![wand_build_lab](img/wand_build_lab.png)
+![wand_build_lab](img/wand_build_ble.png)
 
 ### Test Magic Wand Ble
 

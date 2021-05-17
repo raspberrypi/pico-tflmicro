@@ -203,9 +203,10 @@ void setup() {
   }
 #if SCREEN
   ST7735_FillScreen(ST7735_GREEN);
+  ST7735_DrawImage(0,0,80,40,(uint8_t*)IMU_ICM20948);
 
-  ST7735_WriteString(5, 20, "Magic", Font_11x18, ST7735_BLACK, ST7735_GREEN);
-  ST7735_WriteString(30, 45, "Wand", Font_11x18, ST7735_BLACK, ST7735_GREEN);
+  ST7735_WriteString(5, 45, "Magic", Font_11x18, ST7735_BLACK, ST7735_GREEN);
+  ST7735_WriteString(30, 70, "Wand", Font_11x18, ST7735_BLACK, ST7735_GREEN);
 #endif
   gpio_put(25, !gpio_get(25));
 }
@@ -226,7 +227,7 @@ void loop() {
 #if 1
     if (linked) {
       if (first) {
-        sleep_ms(5000);
+//        sleep_ms(5000);
         first = false;
       }
       if (send_index++ % 16 == 0) {
@@ -300,10 +301,10 @@ void loop() {
     char str[10];
     sprintf(str, "%d%%", ((max_score + 128) * 100) >> 8);
 
-    ST7735_FillRectangle(0, 80, ST7735_WIDTH, 160 - 80, ST7735_GREEN);
-    ST7735_WriteString(35, 90, labels[max_index], Font_11x18, ST7735_BLACK,
+    ST7735_FillRectangle(0, 90, ST7735_WIDTH, 160 - 90, ST7735_GREEN);
+    ST7735_WriteString(35, 100, labels[max_index], Font_11x18, ST7735_BLACK,
                        ST7735_GREEN);
-    ST7735_WriteString(25, 120, str, Font_11x18, ST7735_BLACK, ST7735_GREEN);
+    ST7735_WriteString(25, 130, str, Font_11x18, ST7735_BLACK, ST7735_GREEN);
 #endif
   }
 }

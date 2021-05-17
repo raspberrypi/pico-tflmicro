@@ -76,15 +76,15 @@ target_link_libraries(
 pico_add_extra_outputs(gesture_output_handler_test)
 
 
-add_executable(magic_wand "")
+add_executable(pico4ml_magic_wand "")
 
-target_include_directories(magic_wand
+target_include_directories(pico4ml_magic_wand
   PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/.
   )
 
 set_target_properties(
-  magic_wand
+  pico4ml_magic_wand
   PROPERTIES
   COMPILE_FLAGS -fno-rtti
   COMPILE_FLAGS -fno-exceptions
@@ -92,7 +92,7 @@ set_target_properties(
   COMPILE_FLAGS -nostdlib
 )
 
-target_sources(magic_wand
+target_sources(pico4ml_magic_wand
   PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/accelerometer_handler.cpp
   ${CMAKE_CURRENT_LIST_DIR}/gesture_predictor.cpp
@@ -109,7 +109,7 @@ target_sources(magic_wand
   )
 
 target_link_libraries(
-  magic_wand
+  pico4ml_magic_wand
   pico-tflmicro
   hardware_pwm
   pico_stdlib
@@ -118,11 +118,57 @@ target_link_libraries(
 )
 
 # enable usb output, disable uart output
-pico_enable_stdio_usb(magic_wand 1)
-pico_enable_stdio_uart(magic_wand 0)
+pico_enable_stdio_usb(pico4ml_magic_wand 1)
+pico_enable_stdio_uart(pico4ml_magic_wand 0)
 
-pico_add_extra_outputs(magic_wand)
+pico_add_extra_outputs(pico4ml_magic_wand)
 
+add_executable(pico4ml_ble_magic_wand "")
+
+target_include_directories(pico4ml_ble_magic_wand
+  PRIVATE
+  ${CMAKE_CURRENT_LIST_DIR}/.
+  )
+
+set_target_properties(
+  pico4ml_ble_magic_wand
+  PROPERTIES
+  COMPILE_FLAGS -fno-rtti
+  COMPILE_FLAGS -fno-exceptions
+  COMPILE_FLAGS -fno-threadsafe-statics
+  COMPILE_FLAGS -nostdlib
+)
+
+target_sources(pico4ml_ble_magic_wand
+  PRIVATE
+  ${CMAKE_CURRENT_LIST_DIR}/pico4ml_ble_accelerometer_handler.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/gesture_predictor.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/magic_wand_model_data.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/main.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/pico4ml_ble_main_functions.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/output_handler.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/accelerometer_handler.h
+  ${CMAKE_CURRENT_LIST_DIR}/constants.h
+  ${CMAKE_CURRENT_LIST_DIR}/gesture_predictor.h
+  ${CMAKE_CURRENT_LIST_DIR}/magic_wand_model_data.h
+  ${CMAKE_CURRENT_LIST_DIR}/main_functions.h
+  ${CMAKE_CURRENT_LIST_DIR}/output_handler.h
+  )
+
+target_link_libraries(
+  pico4ml_ble_magic_wand
+  pico-tflmicro
+  hardware_pwm
+  pico_stdlib
+  ICM20948
+  LCD_st7735
+)
+
+# enable usb output, disable uart output
+pico_enable_stdio_usb(pico4ml_ble_magic_wand 1)
+pico_enable_stdio_uart(pico4ml_ble_magic_wand 0)
+
+pico_add_extra_outputs(pico4ml_ble_magic_wand)
 
 add_executable(magic_wand_test "")
 

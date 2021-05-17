@@ -108,8 +108,8 @@ void ReadAccelerometerAndGyroscope(int *new_accelerometer_samples,
       break;
     }
     current_gyroscope_data[0] = -current_gyroscope_data_tmp[1];
-    current_gyroscope_data[1] = current_gyroscope_data_tmp[0];
-    current_gyroscope_data[2] = -current_gyroscope_data_tmp[2];
+    current_gyroscope_data[1] = -current_gyroscope_data_tmp[0];
+    current_gyroscope_data[2] = current_gyroscope_data_tmp[2];
     *new_gyroscope_samples += 1;
 
     const int acceleration_index = (acceleration_data_index % acceleration_data_length);
@@ -124,8 +124,8 @@ void ReadAccelerometerAndGyroscope(int *new_accelerometer_samples,
       break;
     }
     current_acceleration_data[0] = -current_acceleration_data_tmp[1];
-    current_acceleration_data[1] = current_acceleration_data_tmp[0];
-    current_acceleration_data[2] = -current_acceleration_data_tmp[2];
+    current_acceleration_data[1] = -current_acceleration_data_tmp[0];
+    current_acceleration_data[2] = current_acceleration_data_tmp[2];
     *new_accelerometer_samples += 1;
   }
 }
