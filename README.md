@@ -16,8 +16,8 @@ Table of Contents
       * [Magic Wand](#magic-wand)
          * [Test Magic Wand](#test-magic-wand)
          * [View output](#view-output-2)
-      * [Magic Wand Lab](#magic-wand-lab)
-         * [Test Magic Wand Lab](#test-magic-wand-lab)
+      * [Magic Wand Ble](#magic-wand-ble)
+         * [Test Magic Wand Ble](#test-magic-wand-ble)
          * [View output](#view-output-3)
 
 <!-- Added by: mulong, at: 2021/03/19 15:49:33 CST -->
@@ -337,7 +337,7 @@ The magic wand example also outputs the results to the  screen.
 ![Ring](img/Slope.gif)
 
 
-## Magic Wand Lab
+## Magic Wand Ble
 
 - Download pico-tflmicro
 
@@ -358,7 +358,7 @@ cmake ..
 
 ```bash
 make
-# or only make  magic_wand_lab
+# or only make  magic_wand_ble
 ```
 
 ![tflmicro_make_output](img/tflmicro_make_output.png)
@@ -366,17 +366,17 @@ Then you will creat some files under pico-tflmicro/tflmicro/build/examples/magic
 
 | Bin                                           | Description                                                  |
 | --------------------------------------------- | ------------------------------------------------------------ |
-| [magic_wand_lab.uf2](bin/magic_wand_lab.uf2) | This is the main program of magic_wand_lab, which can be dragged onto the RP2040 USB Mass Storage Device. |
+| [magic_wand_ble.uf2](bin/magic_wand_ble.uf2) | This is the main program of magic_wand_ble, which can be dragged onto the RP2040 USB Mass Storage Device. |
 
 **Tips: If you don't want to compile, you can use the above pre-built uf2 file, you only need to wire the hardware and download uf2 to the device.**
 
 ![wand_build_lab](img/wand_build_lab.png)
 
-### Test Magic Wand Lab
+### Test Magic Wand Ble
 
 | App                                                          | Description                |
 | ------------------------------------------------------------ | -------------------------- |
-| [magic_wand_lab](examples/magic_wand_lab/main_functions.cpp) | This is a magic wand demo. |
+| [magic_wand_ble](examples/magic_wand_ble/main_functions.cpp) | This is a magic wand demo. |
 
 - Hardware requirements
 
@@ -384,7 +384,7 @@ Then you will creat some files under pico-tflmicro/tflmicro/build/examples/magic
 
 Learn more here: [pico4ml-an-rp2040-based-platform-for-tiny-machine-learning](https://www.arducam.com/pico4ml-an-rp2040-based-platform-for-tiny-machine-learning/)
 
-- Load and run magic_wand_lab
+- Load and run magic_wand_ble
   
   The simplest method to load software onto a RP2040-based board is by mounting it as a USB Mass Storage Device.
   Doing this allows you to drag a file onto the board to program the flash.
@@ -408,10 +408,10 @@ $ ls /mnt/pico/
 INDEX.HTM INFO_UF2.TXT
 ```
 
-Copy your magic_wand_lab.uf2 onto RP2040:
+Copy your magic_wand_ble.uf2 onto RP2040:
 
 ```bash
-sudo cp examples/magic_wand/magic_wand_lab.uf2 /mnt/pico
+sudo cp examples/magic_wand/magic_wand_ble.uf2 /mnt/pico
 sudo sync
 ```
 
