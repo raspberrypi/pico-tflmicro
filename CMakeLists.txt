@@ -376,7 +376,7 @@ target_sources(pico-tflmicro_test
   PUBLIC
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/benchmarks/keyword_scrambled_model_data.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/testing/test_conv_model.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/testing/util_test.cpp
+  #${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/testing/util_test.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/testing/micro_test.h
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/testing/test_conv_model.h
 )
