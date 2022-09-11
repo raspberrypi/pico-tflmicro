@@ -95,7 +95,7 @@ sleep 10
 #Testing OutputTensorLength5
 #1/2 tests passed
 #~~~SOME TESTS FAILED~~
-#openocd -f interface/raspberrypi-swd.cfg -f target/rp2040.cfg -c "program tests/kernel_circular_buffer_test/kernel_circular_buffer_test.elf verify reset exit"
+openocd -f interface/raspberrypi-swd.cfg -f target/rp2040.cfg -c "program tests/kernel_circular_buffer_test/kernel_circular_buffer_test.elf verify reset exit"
 
 #sleep 10
 #*********************************************
@@ -112,7 +112,7 @@ openocd -f interface/raspberrypi-swd.cfg -f target/rp2040.cfg -c "program tests/
 
 sleep 10
 
-openocd -f interface/raspberrypi-swd.cfg -f target/rp2040.cfg -c "program examples/hello_world/hello_world.elf verify reset exit"
+#openocd -f interface/raspberrypi-swd.cfg -f target/rp2040.cfg -c "program examples/hello_world/hello_world.elf verify reset exit"
 
 sleep 10
 

@@ -1,3 +1,7 @@
+Testing TestAudioProviderMock
+1/1 tests passed
+~~~ALL TESTS PASSED~~~
+
 Testing TestAudioProvider
 Testing TestTimer
 2/2 tests passed
@@ -141,44 +145,212 @@ Testing TestRecordsPersistentBufferData
 6/6 tests passed
 ~~~ALL TESTS PASSED~~~
 
-127
+Testing MeanFloat2DKeepDims
+Testing MeanInt82DKeepDims
+Testing MeanUInt82DKeepDims
+Testing MeanFloat3DKeepDims
+Testing MeanInt83DKeepDims
+Testing MeanUInt83DKeepDims
+Testing MeanFloat4DKeepDims
+Testing MeanInt84DKeepDims
+Testing MeanUInt84DKeepDims
+Testing MeanFloat4DWithoutKeepDims
+Testing MeanInt84DWithoutKeepDims
+Testing MeanUInt84DWithoutKeepDims
+Testing MeanFloat4DWithoutKeepDimsWithPrecision
+Testing FloatMaxOpTestNotKeepDims
+Testing FloatMaxOpTestKeepDims
+Testing Int8MaxOpTestKeepDims
+Testing Int8MaxOpTestWithoutKeepDims
+Testing MeanInt84DWithoutKeepDimsWithPrecision
+Testing MeanUInt84DWithoutKeepDimsWithPrecision
+19/19 tests passed
+~~~ALL TESTS PASSED~~~
 
-175
+Testing SimpleReluTestFloat
+Testing SimpleRelu6TestFloat
+Testing SimpleReluTestUint8
+Testing SimpleRelu6TestUint8
+Testing SimpleReluTestInt8
+Testing SimpleRelu6TestInt8
+6/6 tests passed
+~~~ALL TESTS PASSED~~~
 
-198
+Testing ReshapeWithMismatchedDimensionsShouldFail
+/home/devel/xx/xxx/pico-tflmicro/src/tensorflow/lite/micro/kernels/reshape.cpp:70 num_input_elements != num_output_elements (8 != 2)
+/home/devel/xx/xxx/pico-tflmicro/src/tensorflow/lite/micro/kernels/reshape.cpp:70 num_input_elements != num_output_elements (8 != 2)
+/home/devel/xx/xxx/pico-tflmicro/src/tensorflow/lite/micro/kernels/reshape.cpp:77 ReshapeOutput(context, node) != kTfLiteOk (1 != 0)
+Testing ReshapeWithTooManyDimensionsShouldFail
+Testing ReshapeWithTooManySpecialDimensionsShouldFail
+/home/devel/xx/xxx/pico-tflmicro/src/tensorflow/lite/micro/kernels/reshape.cpp:58 stretch_dim != -1 (0 != -1)
+/home/devel/xx/xxx/pico-tflmicro/src/tensorflow/lite/micro/kernels/reshape.cpp:58 stretch_dim != -1 (0 != -1)
+/home/devel/xx/xxx/pico-tflmicro/src/tensorflow/lite/micro/kernels/reshape.cpp:77 ReshapeOutput(context, node) != kTfLiteOk (1 != 0)
+Testing ReshapeWithInvalidShapeShouldFail
+/home/devel/xx/xxx/pico-tflmicro/src/tensorflow/lite/micro/kernels/reshape.cpp:70 num_input_elements != num_output_elements (4 != 2)
+/home/devel/xx/xxx/pico-tflmicro/src/tensorflow/lite/micro/kernels/reshape.cpp:70 num_input_elements != num_output_elements (4 != 2)
+/home/devel/xx/xxx/pico-tflmicro/src/tensorflow/lite/micro/kernels/reshape.cpp:77 ReshapeOutput(context, node) != kTfLiteOk (1 != 0)
+Testing ReshapeWithRegularShapesShouldSucceed
+Testing ReshapeWithStretchDimensionShouldSucceed
+Testing ReshapeWithScalarOutputShouldSucceed
+Testing ReshapeWithLegacyScalarOutputShouldSucceed
+/home/devel/xx/xxx/pico-tflmicro/src/tensorflow/lite/micro/kernels/reshape.cpp:70 num_input_elements != num_output_elements (1 != 0)
+/home/devel/xx/xxx/pico-tflmicro/src/tensorflow/lite/micro/kernels/reshape.cpp:70 num_input_elements != num_output_elements (1 != 0)
+/home/devel/xx/xxx/pico-tflmicro/src/tensorflow/lite/micro/kernels/reshape.cpp:77 ReshapeOutput(context, node) != kTfLiteOk (1 != 0)
+8/8 tests passed
+~~~ALL TESTS PASSED~~~
 
-234
+Testing FloatAddNoActivation
+Testing FloatAddActivationRelu1
+Testing FloatAddVariousInputShapes
+Testing FloatAddWithScalarBroadcast
+Testing QuantizedAddNoActivationUint8
+Testing QuantizedAddNoActivationInt8
+Testing QuantizedAddActivationRelu1Uint8
+Testing QuantizedAddActivationRelu1Int8
+Testing QuantizedAddVariousInputShapesUint8
+Testing QuantizedAddVariousInputShapesInt8
+Testing QuantizedAddWithScalarBroadcastUint8
+Testing QuantizedAddWithScalarBroadcastFloat
+Testing QuantizedAddWithScalarBroadcastInt8
+Testing QuantizedAddWithMixedBroadcastUint8
+Testing QuantizedAddWithMixedBroadcastInt8
+15/15 tests passed
+~~~ALL TESTS PASSED~~~
 
-250
+Testing HorizontalResize
+Testing HorizontalResizeUInt8
+Testing HorizontalResizeInt8
+Testing VerticalResize
+Testing VerticalResizeUInt8
+Testing VerticalResizeInt8
+Testing TwoDimensionalResize
+Testing TwoDimensionalResizeUInt8
+Testing TwoDimensionalResizeInt8
+Testing TwoDimensionalResizeWithTwoBatches
+Testing TwoDimensionalResizeWithTwoBatchesUInt8
+Testing TwoDimensionalResizeWithTwoBatchesInt8
+Testing ThreeDimensionalResize
+Testing ThreeDimensionalResizeUInt8
+Testing ThreeDimensionalResizeInt8
+15/15 tests passed
+~~~ALL TESTS PASSED~~~
 
-260
+Testing GetMaxArgFloat
+Testing GetMinArgFloat
+Testing GetMaxArgUInt8
+Testing GetMinArgUInt8
+Testing GetMaxArgInt8
+Testing GetMinArgInt8
+Testing GetMaxArgMulDimensions
+Testing GetMinArgMulDimensions
+Testing GetMaxArgNegativeAxis
+9/9 tests passed
+~~~ALL TESTS PASSED~~~
 
-249
+Testing SingleDim
+Testing MultiDims
+2/2 tests passed
+~~~ALL TESTS PASSED~~~
 
-232
+Testing SingleDim
+Testing MultiDims
+2/2 tests passed
+~~~ALL TESTS PASSED~~~
 
-195
+Testing TestShape0
+Testing TestShape1
+Testing TestShape2
+Testing TestShape3
+Testing TestShape4
+Testing TestShape5
+6/6 tests passed
+~~~ALL TESTS PASSED~~~
 
-157
+Testing OutputTensorLength4
+tflite::testing::kTfLiteAbort == status failed at /home/devel/xx/xxx/pico-tflmicro/tests/kernel_circular_buffer_test/circular_buffer_test.cpp:106 (-9 vs 247)
+tflite::testing::kTfLiteAbort == status failed at /home/devel/xx/xxx/pico-tflmicro/tests/kernel_circular_buffer_test/circular_buffer_test.cpp:106 (-9 vs 247)
+tflite::testing::kTfLiteAbort == status failed at /home/devel/xx/xxx/pico-tflmicro/tests/kernel_circular_buffer_test/circular_buffer_test.cpp:106 (-9 vs 247)
+Testing OutputTensorLength5
+1/2 tests passed
+~~~SOME TESTS FAILED~~~
 
-128
+Testing Softmax1DFloatShouldMatchGolden
+Testing Softmax1DQuantizedUInt8ShouldMatchGolden
+Testing Softmax1DQuantizedInt8ShouldMatchGolden
+Testing Softmax1DQuantizedInt16ShouldMatchGolden
+Testing Softmax2DFloatShouldMatchGolden
+Testing Softmax2DQuantizedUInt8ShouldMatchGolden
+Testing Softmax2DQuantizedInt8ShouldMatchGolden
+Testing Softmax2DQuantizedInt16ShouldMatchGolden
+Testing Softmax3DFloatShouldMatchGolden
+Testing Softmax3DQuantizedUInt8ShouldMatchGolden
+Testing Softmax3DQuantizedInt8ShouldMatchGolden
+Testing Softmax3DQuantizedInt16ShouldMatchGolden
+Testing Softmax4DFloatShouldMatchGolden
+Testing Softmax4DQuantizedUInt8ShouldMatchGolden
+Testing Softmax4DQuantizedInt8ShouldMatchGolden
+Testing Softmax4DQuantizedInt16ShouldMatchGolden
+16/16 tests passed
+~~~ALL TESTS PASSED~~~
 
-88
+Testing EqualBool
+Testing EqualFloat
+Testing EqualInt
+Testing EqualBroadcast
+Testing EqualBroadcastTwoD
+Testing NotEqualBool
+Testing NotEqualFloat
+Testing NotEqualInt
+Testing NotEqualBroadcast
+Testing NotEqualBroadcastTwoD
+Testing GreaterFloat
+Testing GreaterInt
+Testing GreaterBroadcast
+Testing GreaterBroadcastTwoD
+Testing GreaterEqualFloat
+Testing GreaterEqualInt
+Testing GreaterEqualBroadcast
+Testing GreaterEqualBroadcastTwoD
+Testing LessFloat
+Testing LessInt
+Testing LessBroadcast
+Testing LessBroadcastTwoD
+Testing LessEqualFloat
+Testing LessEqualInt
+Testing LessEqualBroadcast
+Testing LessEqualBroadcastTwoD
+Testing EqualQuantizedUInt8
+Testing EqualQuantizedInt8
+Testing NotEqualQuantizedUInt8
+Testing NotEqualQuantizedInt8
+Testing GreaterQuantizedUInt8
+Testing GreaterQuantizedUInt8SmallRange
+Testing GreaterUInt8EqualQuantized
+Testing LessQuantizedUInt8
+Testing LessEqualQuantizedUInt8
+Testing EqualQuantizedUInt8WithBroadcast
+Testing NotEqualQuantizedUInt8WithBroadcast
+Testing NotEqualQuantizedInt8WithBroadcast
+Testing GreaterQuantizedUInt8WithBroadcast
+Testing GreaterQuantizedInt8WithBroadcast
+Testing GreaterEqualQuantizedUInt8WithBroadcast
+Testing GreaterEqualQuantizedInt8WithBroadcast
+Testing LessQuantizedUInt8WithBroadcast
+Testing LessQuantizedInt8WithBroadcast
+Testing LessEqualQuantizedUInt8WithBroadcast
+Testing LessEqualQuantizedInt8WithBroadcast
+46/46 tests passed
+~~~ALL TESTS PASSED~~~
 
-59
+Testing TwoSplitFourDimensionalAxisZero
+Testing TwoSplitFourDimensionalAxisOne
+Testing TwoSplitFourDimensionalAxisTwo
+Testing TwoSplitFourDimensionalAxisThree
+Testing TwoSplitFourDimensionalNegativeAxis
+Testing FourSplit
+Testing TwoSplitOneDimensional
+Testing TwoSplitFourDimensionalQuantized
+Testing TwoSplitFourDimensionalQuantized32
+9/9 tests passed
+~~~ALL TESTS PASSED~~~
 
-28
-
-4
-
--14
-
-2
-
-32
-
-59
-
-82
-
- 
