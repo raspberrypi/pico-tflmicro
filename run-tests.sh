@@ -51,10 +51,72 @@ openocd -f interface/raspberrypi-swd.cfg -f target/rp2040.cfg -c "program tests/
 
 sleep 10
 
+openocd -f interface/raspberrypi-swd.cfg -f target/rp2040.cfg -c "program tests/kernel_reduce_test/kernel_reduce_test.elf verify reset exit"
+
+sleep 10
+
+openocd -f interface/raspberrypi-swd.cfg -f target/rp2040.cfg -c "program tests/kernel_activations_test/kernel_activations_test.elf verify reset exit"
+
+sleep 10
+
+openocd -f interface/raspberrypi-swd.cfg -f target/rp2040.cfg -c "program tests/kernel_reshape_test/kernel_reshape_test.elf verify reset exit"
+
+sleep 10
+
+openocd -f interface/raspberrypi-swd.cfg -f target/rp2040.cfg -c "program tests/kernel_add_test/kernel_add_test.elf verify reset exit"
+
+sleep 10
+
+openocd -f interface/raspberrypi-swd.cfg -f target/rp2040.cfg -c "program tests/kernel_resize_nearest_neighbor_test/kernel_resize_nearest_neighbor_test.elf verify reset exit"
+
+sleep 10
+
+openocd -f interface/raspberrypi-swd.cfg -f target/rp2040.cfg -c "program tests/kernel_arg_min_max_test/kernel_arg_min_max_test.elf verify reset exit"
+
+sleep 10
+
+openocd -f interface/raspberrypi-swd.cfg -f target/rp2040.cfg -c "program tests/kernel_round_test/kernel_round_test.elf verify reset exit"
+
+sleep 10
+
+openocd -f interface/raspberrypi-swd.cfg -f target/rp2040.cfg -c "program tests/kernel_ceil_test/kernel_ceil_test.elf verify reset exit"
+
+sleep 10
+
+openocd -f interface/raspberrypi-swd.cfg -f target/rp2040.cfg -c "program tests/kernel_shape_test/kernel_shape_test.elf verify reset exit"
+
+sleep 10
+
+#*********************************************
+#Testing OutputTensorLength4
+#tflite::testing::kTfLiteAbort == status failed at /home/devel/xx/pico-tflmicro/)
+#tflite::testing::kTfLiteAbort == status failed at /home/devel/xx/pico-tflmicro/)
+#tflite::testing::kTfLiteAbort == status failed at /home/devel/xx/pico-tflmicro/)
+#Testing OutputTensorLength5
+#1/2 tests passed
+#~~~SOME TESTS FAILED~~
+#openocd -f interface/raspberrypi-swd.cfg -f target/rp2040.cfg -c "program tests/kernel_circular_buffer_test/kernel_circular_buffer_test.elf verify reset exit"
+
+#sleep 10
+#*********************************************
+
+openocd -f interface/raspberrypi-swd.cfg -f target/rp2040.cfg -c "program tests/kernel_softmax_test/kernel_softmax_test.elf verify reset exit"
+
+sleep 10
+
+openocd -f interface/raspberrypi-swd.cfg -f target/rp2040.cfg -c "program tests/kernel_comparisons_test/kernel_comparisons_test.elf verify reset exit"
+
+sleep 10
+
+openocd -f interface/raspberrypi-swd.cfg -f target/rp2040.cfg -c "program tests/kernel_split_test/kernel_split_test.elf verify reset exit"
+
+sleep 10
+
 openocd -f interface/raspberrypi-swd.cfg -f target/rp2040.cfg -c "program examples/hello_world/hello_world.elf verify reset exit"
 
 sleep 10
+
+
+
 echo "Tests Done"
 
-#	kernel_svdf_test
-# 	recording_micro_allocator_test
