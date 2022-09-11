@@ -1,0 +1,184 @@
+Testing TestAudioProvider
+Testing TestTimer
+2/2 tests passed
+~~~ALL TESTS PASSED~~~
+
+Testing TestCallability
+Heard foo (0) @0ms
+1/1 tests passed
+~~~ALL TESTS PASSED~~~
+
+Testing TestFeatureProvider
+1/1 tests passed
+~~~ALL TESTS PASSED~~~
+
+InitializeKeywordRunner() took 0 ticks (0 ms)
+KeywordRunNIerations(1) took 0 ticks (0 ms)
+KeywordRunNIerations(10) took 34487 ticks (34 ms)
+Testing TestReverseSortInPlace
+Testing TestGreedyBasics
+Testing TestGreedyMedium
+Planner buffer ID: 0, calculated offset: 50, size required: 10, first_time_created: 0, last_time_used: 1
+Planner buffer ID: 1, calculated offset: 70, size required: 20, first_time_created: 1, last_time_used: 2
+Planner buffer ID: 2, calculated offset: 40, size required: 30, first_time_created: 2, last_time_used: 3
+Planner buffer ID: 3, calculated offset: 0, size required: 40, first_time_created: 3, last_time_used: 4
+Planner buffer ID: 4, calculated offset: 0, size required: 50, first_time_created: 0, last_time_used: 1
+44444444444444444444444444444444444444444444000000000...........................
+44444444444444444444444444444444444444444444000000000.........111111111111111111
+...................................222222222222222222222222222111111111111111111
+33333333333333333333333333333333333222222222222222222222222222..................
+33333333333333333333333333333333333.............................................
+Testing TestPersonDetectionModel
+Planner buffer ID: 0, calculated offset: 55296, size required: 9216, first_time_created: 0, last_time_used: 29
+Planner buffer ID: 1, calculated offset: 0, size required: 3, first_time_created: 28, last_time_used: 29
+Planner buffer ID: 2, calculated offset: 2304, size required: 256, first_time_created: 27, last_time_used: 28
+Planner buffer ID: 3, calculated offset: 0, size required: 2304, first_time_created: 26, last_time_used: 27
+Planner buffer ID: 4, calculated offset: 2304, size required: 2304, first_time_created: 25, last_time_used: 26
+Planner buffer ID: 5, calculated offset: 0, size required: 2304, first_time_created: 24, last_time_used: 25
+Planner buffer ID: 6, calculated offset: 4608, size required: 1152, first_time_created: 23, last_time_used: 24
+Planner buffer ID: 7, calculated offset: 0, size required: 4608, first_time_created: 22, last_time_used: 23
+Planner buffer ID: 8, calculated offset: 4608, size required: 4608, first_time_created: 21, last_time_used: 22
+Planner buffer ID: 9, calculated offset: 0, size required: 4608, first_time_created: 20, last_time_used: 21
+Planner buffer ID: 10, calculated offset: 4608, size required: 4608, first_time_created: 19, last_time_used: 20
+Planner buffer ID: 11, calculated offset: 0, size required: 4608, first_time_created: 18, last_time_used: 19
+Planner buffer ID: 12, calculated offset: 4608, size required: 4608, first_time_created: 17, last_time_used: 18
+Planner buffer ID: 13, calculated offset: 0, size required: 4608, first_time_created: 16, last_time_used: 17
+Planner buffer ID: 14, calculated offset: 4608, size required: 4608, first_time_created: 15, last_time_used: 16
+Planner buffer ID: 15, calculated offset: 0, size required: 4608, first_time_created: 14, last_time_used: 15
+Planner buffer ID: 16, calculated offset: 4608, size required: 4608, first_time_created: 13, last_time_used: 14
+Planner buffer ID: 17, calculated offset: 0, size required: 4608, first_time_created: 12, last_time_used: 13
+Planner buffer ID: 18, calculated offset: 9216, size required: 2304, first_time_created: 11, last_time_used: 12
+Planner buffer ID: 19, calculated offset: 0, size required: 9216, first_time_created: 10, last_time_used: 11
+Planner buffer ID: 20, calculated offset: 9216, size required: 9216, first_time_created: 9, last_time_used: 10
+Planner buffer ID: 21, calculated offset: 0, size required: 9216, first_time_created: 8, last_time_used: 9
+Planner buffer ID: 22, calculated offset: 18432, size required: 4608, first_time_created: 7, last_time_used: 8
+Planner buffer ID: 23, calculated offset: 0, size required: 18432, first_time_created: 6, last_time_used: 7
+Planner buffer ID: 24, calculated offset: 18432, size required: 18432, first_time_created: 5, last_time_used: 6
+Planner buffer ID: 25, calculated offset: 0, size required: 18432, first_time_created: 4, last_time_used: 5
+Planner buffer ID: 26, calculated offset: 36864, size required: 9216, first_time_created: 3, last_time_used: 4
+Planner buffer ID: 27, calculated offset: 0, size required: 36864, first_time_created: 2, last_time_used: 3
+Planner buffer ID: 28, calculated offset: 36864, size required: 18432, first_time_created: 1, last_time_used: 2
+Planner buffer ID: 29, calculated offset: 0, size required: 18432, first_time_created: 0, last_time_used: 1
+tttttttttttttttttttttt..............................................000000000000
+tttttttttttttttttttttt.......................sssssssssssssssssssssss000000000000
+rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrsssssssssssssssssssssss000000000000
+rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrqqqqqqqqqqqq...........000000000000
+pppppppppppppppppppppp.......................qqqqqqqqqqqq...........000000000000
+ppppppppppppppppppppppooooooooooooooooooooooo.......................000000000000
+nnnnnnnnnnnnnnnnnnnnnnooooooooooooooooooooooo.......................000000000000
+nnnnnnnnnnnnnnnnnnnnnnmmmmmm........................................000000000000
+lllllllllll...........mmmmmm........................................000000000000
+lllllllllllkkkkkkkkkkk..............................................000000000000
+jjjjjjjjjjjkkkkkkkkkkk..............................................000000000000
+jjjjjjjjjjjiii......................................................000000000000
+hhhhh......iii......................................................000000000000
+hhhhhgggggg.........................................................000000000000
+fffffgggggg.........................................................000000000000
+fffffeeeeee.........................................................000000000000
+dddddeeeeee.........................................................000000000000
+dddddcccccc.........................................................000000000000
+bbbbbcccccc.........................................................000000000000
+bbbbbaaaaaa.........................................................000000000000
+99999aaaaaa.........................................................000000000000
+99999888888.........................................................000000000000
+77777888888.........................................................000000000000
+7777766.............................................................000000000000
+55...66.............................................................000000000000
+55444...............................................................000000000000
+33444...............................................................000000000000
+332.................................................................000000000000
+..2.................................................................000000000000
+....................................................................000000000000
+Testing TestOverlapCase
+Planner buffer ID: 0, calculated offset: 0, size required: 100, first_time_created: 0, last_time_used: 1
+Planner buffer ID: 1, calculated offset: 0, size required: 50, first_time_created: 2, last_time_used: 3
+Planner buffer ID: 2, calculated offset: 100, size required: 20, first_time_created: 1, last_time_used: 2
+000000000000000000000000000000000000000000000000000000000000000000..............
+00000000000000000000000000000000000000000000000000000000000000000022222222222222
+111111111111111111111111111111111.................................22222222222222
+111111111111111111111111111111111...............................................
+Testing TestSmallScratch
+Too many buffers (max is 1)
+6/6 tests passed
+~~~ALL TESTS PASSED~~~
+
+Testing SimpleReluTestFloat
+Testing SimpleRelu6TestFloat
+Testing SimpleReluTestUint8
+Testing SimpleRelu6TestUint8
+Testing SimpleReluTestInt8
+Testing SimpleRelu6TestInt8
+6/6 tests passed
+~~~ALL TESTS PASSED~~~
+
+Testing SvdfFloat2x2Input2x4OutputShouldMatchGolden
+Testing SvdfQuantized2x2Input2x4OutputShouldMatchGolden
+Testing SvdfFloat1x16Input64x1OutputShouldMatchGolden
+Testing SvdfFloat1x16Input64x1OutputReluShouldMatchGolden
+Testing SvdfQuantized1x16Input64x1OutputShouldMatchGolden
+Testing SvdfQuantized1x16Input64x1OutputReluShouldMatchGolden
+6/6 tests passed
+~~~ALL TESTS PASSED~~~
+
+Testing TestRecordsTfLiteEvalTensorArrayData
+[RecordingMicroAllocator] Arena allocation total 8412 bytes
+[RecordingMicroAllocator] Arena allocation head 7752 bytes
+[RecordingMicroAllocator] Arena allocation tail 660 bytes
+[RecordingMicroAllocator] 'TfLiteEvalTensor data' used 180 bytes with alignment overhead (requested 180 bytes for 15 allocations)
+[RecordingMicroAllocator] 'NodeAndRegistration struct' used 196 bytes with alignment overhead (requested 196 bytes for 7 NodeAndRegistration structs)
+[RecordingMicroAllocator] 'Operator runtime data' used 128 bytes with alignment overhead (requested 128 bytes for 5 OpData structs)
+[RecordingMicroAllocator] Arena allocation total 8412 bytes
+[RecordingMicroAllocator] Arena allocation head 7752 bytes
+[RecordingMicroAllocator] Arena allocation tail 660 bytes
+[RecordingMicroAllocator] 'TfLiteEvalTensor data' used 180 bytes with alignment overhead (requested 180 bytes for 15 allocations)
+[RecordingMicroAllocator] 'NodeAndRegistration struct' used 196 bytes with alignment overhead (requested 196 bytes for 7 NodeAndRegistration structs)
+[RecordingMicroAllocator] 'Operator runtime data' used 128 bytes with alignment overhead (requested 128 bytes for 5 OpData structs)
+Testing TestRecordsNodeAndRegistrationArrayData
+Testing TestRecordsMultiTenantAllocations
+Testing TestRecordsPersistentTfLiteTensorData
+Testing TestRecordsPersistentTfLiteTensorQuantizationData
+Testing TestRecordsPersistentBufferData
+6/6 tests passed
+~~~ALL TESTS PASSED~~~
+
+127
+
+175
+
+198
+
+234
+
+250
+
+260
+
+249
+
+232
+
+195
+
+157
+
+128
+
+88
+
+59
+
+28
+
+4
+
+-14
+
+2
+
+32
+
+59
+
+82
+
+ 
