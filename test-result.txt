@@ -18,7 +18,7 @@ Testing TestFeatureProvider
 
 InitializeKeywordRunner() took 0 ticks (0 ms)
 KeywordRunNIerations(1) took 0 ticks (0 ms)
-KeywordRunNIerations(10) took 34487 ticks (34 ms)
+KeywordRunNIerations(10) took 34509 ticks (34 ms)
 Testing TestReverseSortInPlace
 Testing TestGreedyBasics
 Testing TestGreedyMedium
@@ -115,90 +115,6 @@ Testing SimpleRelu6TestInt8
 6/6 tests passed
 ~~~ALL TESTS PASSED~~~
 
-Testing SvdfFloat2x2Input2x4OutputShouldMatchGolden
-Testing SvdfQuantized2x2Input2x4OutputShouldMatchGolden
-Testing SvdfFloat1x16Input64x1OutputShouldMatchGolden
-Testing SvdfFloat1x16Input64x1OutputReluShouldMatchGolden
-Testing SvdfQuantized1x16Input64x1OutputShouldMatchGolden
-Testing SvdfQuantized1x16Input64x1OutputReluShouldMatchGolden
-6/6 tests passed
-~~~ALL TESTS PASSED~~~
-
-Testing TestRecordsTfLiteEvalTensorArrayData
-[RecordingMicroAllocator] Arena allocation total 8412 bytes
-[RecordingMicroAllocator] Arena allocation head 7752 bytes
-[RecordingMicroAllocator] Arena allocation tail 660 bytes
-[RecordingMicroAllocator] 'TfLiteEvalTensor data' used 180 bytes with alignment overhead (requested 180 bytes for 15 allocations)
-[RecordingMicroAllocator] 'NodeAndRegistration struct' used 196 bytes with alignment overhead (requested 196 bytes for 7 NodeAndRegistration structs)
-[RecordingMicroAllocator] 'Operator runtime data' used 128 bytes with alignment overhead (requested 128 bytes for 5 OpData structs)
-[RecordingMicroAllocator] Arena allocation total 8412 bytes
-[RecordingMicroAllocator] Arena allocation head 7752 bytes
-[RecordingMicroAllocator] Arena allocation tail 660 bytes
-[RecordingMicroAllocator] 'TfLiteEvalTensor data' used 180 bytes with alignment overhead (requested 180 bytes for 15 allocations)
-[RecordingMicroAllocator] 'NodeAndRegistration struct' used 196 bytes with alignment overhead (requested 196 bytes for 7 NodeAndRegistration structs)
-[RecordingMicroAllocator] 'Operator runtime data' used 128 bytes with alignment overhead (requested 128 bytes for 5 OpData structs)
-Testing TestRecordsNodeAndRegistrationArrayData
-Testing TestRecordsMultiTenantAllocations
-Testing TestRecordsPersistentTfLiteTensorData
-Testing TestRecordsPersistentTfLiteTensorQuantizationData
-Testing TestRecordsPersistentBufferData
-6/6 tests passed
-~~~ALL TESTS PASSED~~~
-
-Testing MeanFloat2DKeepDims
-Testing MeanInt82DKeepDims
-Testing MeanUInt82DKeepDims
-Testing MeanFloat3DKeepDims
-Testing MeanInt83DKeepDims
-Testing MeanUInt83DKeepDims
-Testing MeanFloat4DKeepDims
-Testing MeanInt84DKeepDims
-Testing MeanUInt84DKeepDims
-Testing MeanFloat4DWithoutKeepDims
-Testing MeanInt84DWithoutKeepDims
-Testing MeanUInt84DWithoutKeepDims
-Testing MeanFloat4DWithoutKeepDimsWithPrecision
-Testing FloatMaxOpTestNotKeepDims
-Testing FloatMaxOpTestKeepDims
-Testing Int8MaxOpTestKeepDims
-Testing Int8MaxOpTestWithoutKeepDims
-Testing MeanInt84DWithoutKeepDimsWithPrecision
-Testing MeanUInt84DWithoutKeepDimsWithPrecision
-19/19 tests passed
-~~~ALL TESTS PASSED~~~
-
-Testing SimpleReluTestFloat
-Testing SimpleRelu6TestFloat
-Testing SimpleReluTestUint8
-Testing SimpleRelu6TestUint8
-Testing SimpleReluTestInt8
-Testing SimpleRelu6TestInt8
-6/6 tests passed
-~~~ALL TESTS PASSED~~~
-
-Testing ReshapeWithMismatchedDimensionsShouldFail
-/home/devel/xx/xxx/pico-tflmicro/src/tensorflow/lite/micro/kernels/reshape.cpp:70 num_input_elements != num_output_elements (8 != 2)
-/home/devel/xx/xxx/pico-tflmicro/src/tensorflow/lite/micro/kernels/reshape.cpp:70 num_input_elements != num_output_elements (8 != 2)
-/home/devel/xx/xxx/pico-tflmicro/src/tensorflow/lite/micro/kernels/reshape.cpp:77 ReshapeOutput(context, node) != kTfLiteOk (1 != 0)
-Testing ReshapeWithTooManyDimensionsShouldFail
-Testing ReshapeWithTooManySpecialDimensionsShouldFail
-/home/devel/xx/xxx/pico-tflmicro/src/tensorflow/lite/micro/kernels/reshape.cpp:58 stretch_dim != -1 (0 != -1)
-/home/devel/xx/xxx/pico-tflmicro/src/tensorflow/lite/micro/kernels/reshape.cpp:58 stretch_dim != -1 (0 != -1)
-/home/devel/xx/xxx/pico-tflmicro/src/tensorflow/lite/micro/kernels/reshape.cpp:77 ReshapeOutput(context, node) != kTfLiteOk (1 != 0)
-Testing ReshapeWithInvalidShapeShouldFail
-/home/devel/xx/xxx/pico-tflmicro/src/tensorflow/lite/micro/kernels/reshape.cpp:70 num_input_elements != num_output_elements (4 != 2)
-/home/devel/xx/xxx/pico-tflmicro/src/tensorflow/lite/micro/kernels/reshape.cpp:70 num_input_elements != num_output_elements (4 != 2)
-/home/devel/xx/xxx/pico-tflmicro/src/tensorflow/lite/micro/kernels/reshape.cpp:77 ReshapeOutput(context, node) != kTfLiteOk (1 != 0)
-Testing ReshapeWithRegularShapesShouldSucceed
-Testing ReshapeWithStretchDimensionShouldSucceed
-Testing ReshapeWithScalarOutputShouldSucceed
-Testing ReshapeWithLegacyScalarOutputShouldSucceed
-/home/devel/xx/xxx/pico-tflmicro/src/tensorflow/lite/micro/kernels/reshape.cpp:70 num_input_elements != num_output_elements (1 != 0)
-/home/devel/xx/xxx/pico-tflmicro/src/tensorflow/lite/micro/kernels/reshape.cpp:70 num_input_elements != num_output_elements (1 != 0)
-/home/devel/xx/xxx/pico-tflmicro/src/tensorflow/lite/micro/kernels/reshape.cpp:77 ReshapeOutput(context, node) != kTfLiteOk (1 != 0)
-8/8 tests passed
-~~~ALL TESTS PASSED~~~
-
 Testing FloatAddNoActivation
 Testing FloatAddActivationRelu1
 Testing FloatAddVariousInputShapes
@@ -214,24 +130,6 @@ Testing QuantizedAddWithScalarBroadcastFloat
 Testing QuantizedAddWithScalarBroadcastInt8
 Testing QuantizedAddWithMixedBroadcastUint8
 Testing QuantizedAddWithMixedBroadcastInt8
-15/15 tests passed
-~~~ALL TESTS PASSED~~~
-
-Testing HorizontalResize
-Testing HorizontalResizeUInt8
-Testing HorizontalResizeInt8
-Testing VerticalResize
-Testing VerticalResizeUInt8
-Testing VerticalResizeInt8
-Testing TwoDimensionalResize
-Testing TwoDimensionalResizeUInt8
-Testing TwoDimensionalResizeInt8
-Testing TwoDimensionalResizeWithTwoBatches
-Testing TwoDimensionalResizeWithTwoBatchesUInt8
-Testing TwoDimensionalResizeWithTwoBatchesInt8
-Testing ThreeDimensionalResize
-Testing ThreeDimensionalResizeUInt8
-Testing ThreeDimensionalResizeInt8
 15/15 tests passed
 ~~~ALL TESTS PASSED~~~
 
@@ -252,20 +150,6 @@ Testing MultiDims
 2/2 tests passed
 ~~~ALL TESTS PASSED~~~
 
-Testing SingleDim
-Testing MultiDims
-2/2 tests passed
-~~~ALL TESTS PASSED~~~
-
-Testing TestShape0
-Testing TestShape1
-Testing TestShape2
-Testing TestShape3
-Testing TestShape4
-Testing TestShape5
-6/6 tests passed
-~~~ALL TESTS PASSED~~~
-
 Testing OutputTensorLength4
 tflite::testing::kTfLiteAbort == status failed at /home/devel/xx/xxx/pico-tflmicro/tests/kernel_circular_buffer_test/circular_buffer_test.cpp:106 (-9 vs 247)
 tflite::testing::kTfLiteAbort == status failed at /home/devel/xx/xxx/pico-tflmicro/tests/kernel_circular_buffer_test/circular_buffer_test.cpp:106 (-9 vs 247)
@@ -273,25 +157,6 @@ tflite::testing::kTfLiteAbort == status failed at /home/devel/xx/xxx/pico-tflmic
 Testing OutputTensorLength5
 1/2 tests passed
 ~~~SOME TESTS FAILED~~~
-
-Testing Softmax1DFloatShouldMatchGolden
-Testing Softmax1DQuantizedUInt8ShouldMatchGolden
-Testing Softmax1DQuantizedInt8ShouldMatchGolden
-Testing Softmax1DQuantizedInt16ShouldMatchGolden
-Testing Softmax2DFloatShouldMatchGolden
-Testing Softmax2DQuantizedUInt8ShouldMatchGolden
-Testing Softmax2DQuantizedInt8ShouldMatchGolden
-Testing Softmax2DQuantizedInt16ShouldMatchGolden
-Testing Softmax3DFloatShouldMatchGolden
-Testing Softmax3DQuantizedUInt8ShouldMatchGolden
-Testing Softmax3DQuantizedInt8ShouldMatchGolden
-Testing Softmax3DQuantizedInt16ShouldMatchGolden
-Testing Softmax4DFloatShouldMatchGolden
-Testing Softmax4DQuantizedUInt8ShouldMatchGolden
-Testing Softmax4DQuantizedInt8ShouldMatchGolden
-Testing Softmax4DQuantizedInt16ShouldMatchGolden
-16/16 tests passed
-~~~ALL TESTS PASSED~~~
 
 Testing EqualBool
 Testing EqualFloat
@@ -342,6 +207,342 @@ Testing LessEqualQuantizedInt8WithBroadcast
 46/46 tests passed
 ~~~ALL TESTS PASSED~~~
 
+Testing TwoInputsAllAxesCombinations
+Testing TwoInputsQuantizedUint8
+Testing ThreeDimensionalTwoInputsDifferentShapes
+3/3 tests passed
+~~~ALL TESTS PASSED~~~
+
+Testing SimpleTestFloat
+Testing InputAndFilterSameWidthHeight
+Testing SimpleTestQuantized
+Testing InputOutputDifferentTypeIsError
+/home/devel/xx/xxx/pico-tflmicro/src/tensorflow/lite/micro/kernels/cmsis-nn/conv.cpp:422 input->type != output->type (1 != 9)
+Testing HybridModeIsError
+/home/devel/xx/xxx/pico-tflmicro/src/tensorflow/lite/micro/kernels/cmsis-nn/conv.cpp Hybrid models are not supported on TFLite Micro.
+Testing SimpleTestDilatedQuantized
+Testing SimpleTestQuantizedPerChannel
+Testing SimpleTestDilatedQuantizedPerChannel
+Testing SimpleTestQuantizedPerChannelRelu6
+Testing Kernel1x1QuantizedPerChannel
+Testing Kernel1x1QuantizedPerChannelRelu6
+Testing BroadcastPerLayerQuantizationToPerChannelShouldMatchGolden
+Testing FilterDimsNotMatchingAffineQuantization
+/home/devel/xx/xxx/pico-tflmicro/src/tensorflow/lite/kernels/kernel_util.cpp:230 affine_quantization->scale->size != num_channels (2 != 3)
+/home/devel/xx/xxx/pico-tflmicro/src/tensorflow/lite/kernels/kernel_util.cpp:230 affine_quantization->scale->size != num_channels (4 != 3)
+Testing Int8Input32x1Filter32x32ShouldMatchGolden
+14/14 tests passed
+~~~ALL TESTS PASSED~~~
+
+Testing SimpleTest
+Testing SimpleTestQuantized
+Testing SimpleTestDilatedQuantized
+Testing SimpleTestRelu
+Testing SimpleTestReluQuantized
+Testing SimpleTestQuantizedOptimizedFilterWidth
+Testing SimpleTestQuantizedPerChannel
+Testing SimpleTestQuantizedPerChannelDepthMultiplier1
+Testing TestQuantizedPerChannelDepthMultiplier1Relu6
+Testing SimpleTestDilatedQuantizedPerChannel
+Testing TestQuantizedPerChannelCompareWithFloat
+Testing PerChannelBroadcastQuantizationParams
+Testing FilterDimsNotMatchingAffineQuantization
+/home/devel/xx/xxx/pico-tflmicro/src/tensorflow/lite/micro/kernels/cmsis-nn/depthwise_conv.cpp:141 affine_quantization->scale->size == 1 || affine_quantization->scale->size == f was not true.
+/home/devel/xx/xxx/pico-tflmicro/src/tensorflow/lite/micro/kernels/cmsis-nn/depthwise_conv.cpp:143 affine_quantization->scale->size != affine_quantization->zero_point->size (4 != 2)
+Testing Int8Input32x4Filter32x4ShouldMatchGolden
+14/14 tests passed
+~~~ALL TESTS PASSED~~~
+
+Testing DequantizeOpTestUint8
+Testing DequantizeOpTestInt8
+Testing DequantizeOpTestInt16
+Testing DequantizeOpTestInt8ToInt32
+Testing DequantizeOpTestInt16ToInt32
+5/5 tests passed
+~~~ALL TESTS PASSED~~~
+
+Testing DetectionPostprocessFloatFastNMS
+Testing DetectionPostprocessQuantizedFastNMS
+Testing DetectionPostprocessFloatRegularNMS
+Testing DetectionPostprocessQuantizedRegularNMS
+Testing DetectionPostprocessFloatFastNMSwithNoBackgroundClassAndKeypoints
+Testing DetectionPostprocessFloatRegularNMSwithNoBackgroundClassAndKeypoints
+Testing DetectionPostprocessFloatFastNMSWithBackgroundClassAndKeypoints
+Testing DetectionPostprocessQuantizedFastNMSwithNoBackgroundClassAndKeypoints
+8/8 tests passed
+~~~ALL TESTS PASSED~~~
+
+Testing Abs
+Testing Sin
+Testing Cos
+Testing Log
+Testing Sqrt
+Testing Rsqrt
+Testing Square
+Testing LogicalNot
+8/8 tests passed
+~~~ALL TESTS PASSED~~~
+
+Testing FloorOpSingleDimFloat32
+Testing FloorOpMultiDimFloat32
+2/2 tests passed
+~~~ALL TESTS PASSED~~~
+
+Testing SimpleTest
+Testing SimpleTestQuantizedUInt8
+Testing SimpleTestQuantizedInt8
+Testing SimpleTest4DInputQuantizedInt8
+Testing SimpleTestQuantizedInt8Relu
+Testing SimpleTestQuantizedUInt8Relu
+Testing SimpleTest4DInput
+Testing SimpleTest4DInputQuantizedUInt8
+Testing Representative1x64Input1x16Output
+Testing Representative1x64Input1x16OutputQuantizedUInt8
+Testing Representative1x64Input1x16OutputQuantizedInt8
+11/11 tests passed
+~~~ALL TESTS PASSED~~~
+
+Testing SimpleHardSwishTestFloat
+Testing SimpleHardSwishTestInt8
+Testing SimpleHardSwishTestUint8
+Testing SimpleHardSwishTestQuantizedBias
+4/4 tests passed
+~~~ALL TESTS PASSED~~~
+
+Testing SimpleFloatTest
+Testing ZerosVectorFloatTest
+Testing SimpleFloatWithRankLessThanFourTest
+Testing MultipleBatchFloatTest
+Testing ZerosVectorUint8Test
+Testing SimpleUint8Test
+Testing SimpleInt8Test
+Testing ZerosVectorInt8Test
+Testing MultipleBatchUint8Test
+Testing MultipleBatchInt8Test
+10/10 tests passed
+~~~ALL TESTS PASSED~~~
+
+Testing LogicalOr
+Testing BroadcastLogicalOr
+Testing LogicalAnd
+Testing BroadcastLogicalAnd
+4/4 tests passed
+~~~ALL TESTS PASSED~~~
+
+Testing LogisticFloatBasicShouldMatchGolden
+Testing LogisticQuantizedInt8BasicShouldMatchGolden
+Testing LogisticFloatWideRangeShouldMatchGolden
+Testing LogisticQuantizedInt8WideRangeShouldMatchGolden
+4/4 tests passed
+~~~ALL TESTS PASSED~~~
+
+Testing FloatTest
+Testing Uint8Test
+Testing FloatWithBroadcastTest
+Testing Int32WithBroadcastTest
+4/4 tests passed
+~~~ALL TESTS PASSED~~~
+
+Testing SimpleFloatNoAcativationShouldMatchGolden
+Testing SimpleFloatReluShouldMatchGolden
+Testing SimpleInt8NoAcativationShouldMatchGolden
+Testing SimpleUInt8NoAcativationShouldMatchGolden
+Testing BroadcastFloatNoActivationShouldMatchGolden
+Testing BroadcastFloatReluShouldMatchGolden
+Testing BroadcastInt8NoAcativationShouldMatchGolden
+Testing BroadcastUInt8NoAcativationShouldMatchGolden
+8/8 tests passed
+~~~ALL TESTS PASSED~~~
+
+Testing NegOpSingleFloat
+Testing NegOpFloat
+2/2 tests passed
+~~~ALL TESTS PASSED~~~
+
+Testing Test2DFloat
+Testing Test4DFloat
+Testing Test2DFloatV2
+Testing Test2DUInt8
+Testing Test2DUInt8V2
+Testing Test2DInt8
+Testing Test2DInt8V2
+Testing Test2DInt8V2ExpectFailurePadValueQuantizationMismatch
+/home/devel/xx/xxx/pico-tflmicro/src/tensorflow/lite/micro/kernels/pad.cpp:127 static_cast<double>(output->params.scale) != static_cast<double>(constant_values->params.scale) (0 != 1072693248)
+Testing Test2DInt8ExpectFailureQuantizationRangeExcludesZero
+/home/devel/xx/xxx/pico-tflmicro/src/tensorflow/lite/micro/kernels/pad.cpp:119 output->params.zero_point <= std::numeric_limits<int8_t>::max() was not true.
+9/9 tests passed
+~~~ALL TESTS PASSED~~~
+
+Testing PackFloatThreeInputs
+Testing PackFloatThreeInputsDifferentAxis
+Testing PackFloatThreeInputsNegativeAxis
+Testing PackFloatMultilDimensions
+Testing PackQuantizedMultilDimensions
+Testing PackQuantized32MultilDimensions
+6/6 tests passed
+~~~ALL TESTS PASSED~~~
+
+Testing SimpleAveragePoolTestFloat
+Testing SimpleAveragePoolTestUint8
+Testing SimpleAveragePoolTestInt8PaddingValidStride2ActNone
+Testing SimpleAveragePoolTestInt8PaddingValidStride1Stride2Relu
+Testing SimpleAveragePoolTestInt8PaddingValidStride2Stride1ReluN1To1
+Testing SimpleAveragePoolTestInt8PaddingValidStride2Relu6
+Testing SimpleAveragePoolTestInt8PaddingSameStride1ActNone
+Testing SimpleMaxPoolTestFloat
+Testing SimpleMaxPoolTestFloatRelu
+Testing SimpleMaxPoolTestFloatReluN1To1
+Testing SimpleMaxPoolTestFloatRelu6
+Testing SimpleMaxPoolTestPaddingSameStride1
+Testing SimpleMaxPoolTestPaddingValidStride1
+Testing SimpleMaxPoolTestUInt8ActNone
+Testing MaxPoolTestUInt8ActRelu
+Testing MaxPoolTestUInt8ActReluN1To1
+Testing MaxPoolTestUInt8ActRelu6
+Testing MaxPoolTestUInt8PaddingSameStride1
+Testing MaxPoolTestUInt8PaddingValidStride1
+Testing SimpleMaxPoolTestInt8ActNone
+Testing MaxPoolTestInt8ActRelu
+Testing MaxPoolTestInt8ActReluN1To1
+Testing MaxPoolTestInt8ActRelu6
+Testing MaxPoolTestUInt8PaddingSameStride1
+Testing MaxPoolTestUInt8PaddingValidStride1
+25/25 tests passed
+~~~ALL TESTS PASSED~~~
+
+Testing FloatPreluActivationsOpTest
+Testing QuantizedUint8PreluActivationsOpTest
+Testing QuantizedInt8PreluActivationsOpTest
+3/3 tests passed
+~~~ALL TESTS PASSED~~~
+
+Testing QuantizationUtilTest_SafeCast
+Testing QuantizationUtilTest_ChooseQuantizationParams
+Testing QuantizationUtilTest_ChooseQuantizationParamsZeroPointOnMinBoundary
+Testing QuantizationUtilTest_ChooseQuantizationParamsEmptyRangeZero
+Testing QuantizationUtilTest_ChooseQuantizationParamsZeroPointOnMaxBoundary
+Testing QuantizationUtilTest_IntegerFrExp
+Testing QuantizationUtilTest_IntegerFrExpVersusDouble
+Testing QuantizationUtilTest_DoubleFromFractionAndShift
+Testing QuantizationUtilTest_IntegerDoubleMultiply
+Testing QuantizationUtilTest_IntegerDoubleCompare
+Testing QuantizationUtilTest_PreprocessSoftmaxScaling
+Testing QuantizationUtilTest_CalculateInputRadius
+Testing QuantizationUtilTest_QuantizeMultiplierArray
+13/13 tests passed
+~~~ALL TESTS PASSED~~~
+
+Testing QuantizeOpTestUint8
+Testing QuantizeOpTestUint8NoScale
+Testing QuantizeOpTestInt8
+Testing QuantizeOpTestInt8NoScale
+Testing QuantizeOpTestInt16
+Testing QuantizeOpTestInt16NoScale
+Testing QuantizeOpTestInt16toInt16
+Testing QuantizeOpTestInt16toInt16NoZeroPoint
+Testing QuantizeOpTestInt8toInt8
+Testing QuantizeOpTestInt8toInt8NoZeroPoint
+Testing QuantizeOpTestInt16toInt8
+Testing QuantizeOpTestInt16toInt32
+12/12 tests passed
+~~~ALL TESTS PASSED~~~
+
+Testing MeanFloat2DKeepDims
+Testing MeanInt82DKeepDims
+Testing MeanUInt82DKeepDims
+Testing MeanFloat3DKeepDims
+Testing MeanInt83DKeepDims
+Testing MeanUInt83DKeepDims
+Testing MeanFloat4DKeepDims
+Testing MeanInt84DKeepDims
+Testing MeanUInt84DKeepDims
+Testing MeanFloat4DWithoutKeepDims
+Testing MeanInt84DWithoutKeepDims
+Testing MeanUInt84DWithoutKeepDims
+Testing MeanFloat4DWithoutKeepDimsWithPrecision
+Testing FloatMaxOpTestNotKeepDims
+Testing FloatMaxOpTestKeepDims
+Testing Int8MaxOpTestKeepDims
+Testing Int8MaxOpTestWithoutKeepDims
+Testing MeanInt84DWithoutKeepDimsWithPrecision
+Testing MeanUInt84DWithoutKeepDimsWithPrecision
+19/19 tests passed
+~~~ALL TESTS PASSED~~~
+
+Testing ReshapeWithMismatchedDimensionsShouldFail
+/home/devel/xx/xxx/pico-tflmicro/src/tensorflow/lite/micro/kernels/reshape.cpp:70 num_input_elements != num_output_elements (8 != 2)
+/home/devel/xx/xxx/pico-tflmicro/src/tensorflow/lite/micro/kernels/reshape.cpp:70 num_input_elements != num_output_elements (8 != 2)
+/home/devel/xx/xxx/pico-tflmicro/src/tensorflow/lite/micro/kernels/reshape.cpp:77 ReshapeOutput(context, node) != kTfLiteOk (1 != 0)
+Testing ReshapeWithTooManyDimensionsShouldFail
+Testing ReshapeWithTooManySpecialDimensionsShouldFail
+/home/devel/xx/xxx/pico-tflmicro/src/tensorflow/lite/micro/kernels/reshape.cpp:58 stretch_dim != -1 (0 != -1)
+/home/devel/xx/xxx/pico-tflmicro/src/tensorflow/lite/micro/kernels/reshape.cpp:58 stretch_dim != -1 (0 != -1)
+/home/devel/xx/xxx/pico-tflmicro/src/tensorflow/lite/micro/kernels/reshape.cpp:77 ReshapeOutput(context, node) != kTfLiteOk (1 != 0)
+Testing ReshapeWithInvalidShapeShouldFail
+/home/devel/xx/xxx/pico-tflmicro/src/tensorflow/lite/micro/kernels/reshape.cpp:70 num_input_elements != num_output_elements (4 != 2)
+/home/devel/xx/xxx/pico-tflmicro/src/tensorflow/lite/micro/kernels/reshape.cpp:70 num_input_elements != num_output_elements (4 != 2)
+/home/devel/xx/xxx/pico-tflmicro/src/tensorflow/lite/micro/kernels/reshape.cpp:77 ReshapeOutput(context, node) != kTfLiteOk (1 != 0)
+Testing ReshapeWithRegularShapesShouldSucceed
+Testing ReshapeWithStretchDimensionShouldSucceed
+Testing ReshapeWithScalarOutputShouldSucceed
+Testing ReshapeWithLegacyScalarOutputShouldSucceed
+/home/devel/xx/xxx/pico-tflmicro/src/tensorflow/lite/micro/kernels/reshape.cpp:70 num_input_elements != num_output_elements (1 != 0)
+/home/devel/xx/xxx/pico-tflmicro/src/tensorflow/lite/micro/kernels/reshape.cpp:70 num_input_elements != num_output_elements (1 != 0)
+/home/devel/xx/xxx/pico-tflmicro/src/tensorflow/lite/micro/kernels/reshape.cpp:77 ReshapeOutput(context, node) != kTfLiteOk (1 != 0)
+8/8 tests passed
+~~~ALL TESTS PASSED~~~
+
+Testing HorizontalResize
+Testing HorizontalResizeUInt8
+Testing HorizontalResizeInt8
+Testing VerticalResize
+Testing VerticalResizeUInt8
+Testing VerticalResizeInt8
+Testing TwoDimensionalResize
+Testing TwoDimensionalResizeUInt8
+Testing TwoDimensionalResizeInt8
+Testing TwoDimensionalResizeWithTwoBatches
+Testing TwoDimensionalResizeWithTwoBatchesUInt8
+Testing TwoDimensionalResizeWithTwoBatchesInt8
+Testing ThreeDimensionalResize
+Testing ThreeDimensionalResizeUInt8
+Testing ThreeDimensionalResizeInt8
+15/15 tests passed
+~~~ALL TESTS PASSED~~~
+
+Testing SingleDim
+Testing MultiDims
+2/2 tests passed
+~~~ALL TESTS PASSED~~~
+
+Testing TestShape0
+Testing TestShape1
+Testing TestShape2
+Testing TestShape3
+Testing TestShape4
+Testing TestShape5
+6/6 tests passed
+~~~ALL TESTS PASSED~~~
+
+Testing Softmax1DFloatShouldMatchGolden
+Testing Softmax1DQuantizedUInt8ShouldMatchGolden
+Testing Softmax1DQuantizedInt8ShouldMatchGolden
+Testing Softmax1DQuantizedInt16ShouldMatchGolden
+Testing Softmax2DFloatShouldMatchGolden
+Testing Softmax2DQuantizedUInt8ShouldMatchGolden
+Testing Softmax2DQuantizedInt8ShouldMatchGolden
+Testing Softmax2DQuantizedInt16ShouldMatchGolden
+Testing Softmax3DFloatShouldMatchGolden
+Testing Softmax3DQuantizedUInt8ShouldMatchGolden
+Testing Softmax3DQuantizedInt8ShouldMatchGolden
+Testing Softmax3DQuantizedInt16ShouldMatchGolden
+Testing Softmax4DFloatShouldMatchGolden
+Testing Softmax4DQuantizedUInt8ShouldMatchGolden
+Testing Softmax4DQuantizedInt8ShouldMatchGolden
+Testing Softmax4DQuantizedInt16ShouldMatchGolden
+16/16 tests passed
+~~~ALL TESTS PASSED~~~
+
 Testing TwoSplitFourDimensionalAxisZero
 Testing TwoSplitFourDimensionalAxisOne
 Testing TwoSplitFourDimensionalAxisTwo
@@ -352,5 +553,296 @@ Testing TwoSplitOneDimensional
 Testing TwoSplitFourDimensionalQuantized
 Testing TwoSplitFourDimensionalQuantized32
 9/9 tests passed
+~~~ALL TESTS PASSED~~~
+
+Testing SPLIT_V_ThreeOutputs
+Testing SPLIT_V_FourDimensionalFloatAxis0
+Testing SPLIT_V_FourDimensionalFloatAxis1
+Testing SPLIT_VFourDimensionalFloatAxis2
+Testing SPLIT_V_FourDimensionalFloatAxis3
+Testing SPLIT_V_FourDimensionalFloatNegativeAxis
+Testing SPLIT_V_OneDimensionalFloatAxis0
+Testing SPLIT_V_OneDimensionalFloatTest2
+8/8 tests passed
+~~~ALL TESTS PASSED~~~
+
+Testing UnsupportedInputSize
+/home/devel/xx/xxx/pico-tflmicro/src/tensorflow/lite/micro/kernels/strided_slice.cpp input dim should not exceed 4
+Testing In1D
+Testing In1D_EmptyOutput
+Testing In1D_NegativeBegin
+Testing In1D_OutOfRangeBegin
+Testing In1D_NegativeEnd
+Testing In1D_OutOfRangeEnd
+Testing In1D_BeginMask
+Testing In1D_NegativeBeginNegativeStride
+Testing In1D_OutOfRangeBeginNegativeStride
+Testing In1D_NegativeEndNegativeStride
+Testing In1D_OutOfRangeEndNegativeStride
+Testing In1D_EndMask
+Testing In1D_NegStride
+Testing In1D_EvenLenStride2
+Testing In1D_OddLenStride2
+Testing In2D_Identity
+Testing In2D
+Testing In2D_Stride2
+Testing In2D_NegStride
+Testing In2D_BeginMask
+Testing In2D_EndMask
+Testing In2D_NegStrideBeginMask
+Testing In2D_NegStrideEndMask
+Testing In3D_Identity
+Testing In3D_NegStride
+Testing In3D_Strided2
+Testing In1D_ShrinkAxisMask1
+Testing In1D_ShrinkAxisMask1_NegativeSlice
+Testing In2D_ShrinkAxis3_NegativeSlice
+Testing In2D_ShrinkAxis2_BeginEndAxis1_NegativeSlice
+Testing In1D_BeginMaskShrinkAxisMask1
+Testing In2D_ShrinkAxisMask1
+Testing In2D_ShrinkAxisMask2
+Testing In2D_ShrinkAxisMask3
+Testing In3D_IdentityShrinkAxis1
+Testing In3D_IdentityShrinkAxis2
+Testing In3D_IdentityShrinkAxis3
+Testing In3D_IdentityShrinkAxis4
+Testing In3D_IdentityShrinkAxis5
+Testing In3D_IdentityShrinkAxis6
+Testing In3D_IdentityShrinkAxis7
+Testing RunTwice
+Testing In3D_IdentityShrinkAxis1Uint8
+Testing In3D_IdentityShrinkAxis1int8
+45/45 tests passed
+~~~ALL TESTS PASSED~~~
+
+Testing FloatSubNoActivation
+Testing FloatSubActivationRelu1
+Testing FloatSubVariousInputShapes
+Testing FloatSubWithScalarBroadcast
+Testing QuantizedSubNoActivationUint8
+Testing QuantizedSubNoActivationInt8
+Testing QuantizedSubActivationRelu1Uint8
+Testing QuantizedSubActivationRelu1Int8
+Testing QuantizedSubVariousInputShapesUint8
+Testing QuantizedSubVariousInputShapesInt8
+Testing QuantizedSubWithScalarBroadcastUint8
+Testing QuantizedSubWithScalarBroadcastFloat
+Testing QuantizedSubWithScalarBroadcastInt8
+Testing QuantizedSubWithMixedBroadcastUint8
+Testing QuantizedSubWithMixedBroadcastInt8
+15/15 tests passed
+~~~ALL TESTS PASSED~~~
+
+Testing SvdfFloat2x2Input2x4OutputShouldMatchGolden
+Testing SvdfQuantized2x2Input2x4OutputShouldMatchGolden
+Testing SvdfFloat1x16Input64x1OutputShouldMatchGolden
+Testing SvdfFloat1x16Input64x1OutputReluShouldMatchGolden
+Testing SvdfQuantized1x16Input64x1OutputShouldMatchGolden
+Testing SvdfQuantized1x16Input64x1OutputReluShouldMatchGolden
+6/6 tests passed
+~~~ALL TESTS PASSED~~~
+
+Testing SimpleTestTanhFloat
+Testing SimpleTestTanhUInt8
+Testing SimpleTestTanhUInt8
+3/3 tests passed
+~~~ALL TESTS PASSED~~~
+
+Testing UnpackFloatThreeOutputs
+Testing UnpackFloatThreeOutputsNegativeAxisTwo
+Testing UnpackFloatOneOutput
+Testing UnpackQuantizedThreeOutputs
+Testing UnpackQuantized32ThreeOutputs
+5/5 tests passed
+~~~ALL TESTS PASSED~~~
+
+Testing TestBasics
+Testing TestErrorHandling
+buffer index 1 is outside range 0 to 1
+Testing TestPersonDetectionModel
+3/3 tests passed
+~~~ALL TESTS PASSED~~~
+
+Testing TestKeywordModelMemoryThreshold
+[RecordingMicroAllocator] Arena allocation total 12896 bytes
+[RecordingMicroAllocator] Arena allocation head 684 bytes
+[RecordingMicroAllocator] Arena allocation tail 12212 bytes
+[RecordingMicroAllocator] 'TfLiteEvalTensor data' used 648 bytes with alignment overhead (requested 648 bytes for 54 allocations)
+[RecordingMicroAllocator] 'Persistent buffer data' used 604 bytes with alignment overhead (requested 524 bytes for 15 allocations)
+[RecordingMicroAllocator] 'TfLiteTensor variable buffer data' used 10248 bytes with alignment overhead (requested 10240 bytes for 7 allocations)
+[RecordingMicroAllocator] 'NodeAndRegistration struct' used 420 bytes with alignment overhead (requested 420 bytes for 15 NodeAndRegistration structs)
+[RecordingMicroAllocator] 'Operator runtime data' used 80 bytes with alignment overhead (requested 80 bytes for 13 OpData structs)
+actual <= expected + expected * kAllocationThreshold failed at /home/devel/xx/xxx/pico-tflmicro/tests/memory_arena_threshold_test/memory_arena_threshold_test.c:108
+Testing TestConvModelMemoryThreshold
+[RecordingMicroAllocator] Arena allocation total 9072 bytes
+[RecordingMicroAllocator] Arena allocation head 7756 bytes
+[RecordingMicroAllocator] Arena allocation tail 1316 bytes
+[RecordingMicroAllocator] 'TfLiteEvalTensor data' used 180 bytes with alignment overhead (requested 180 bytes for 15 allocations)
+[RecordingMicroAllocator] 'Persistent buffer data' used 656 bytes with alignment overhead (requested 624 bytes for 10 allocations)
+[RecordingMicroAllocator] 'NodeAndRegistration struct' used 196 bytes with alignment overhead (requested 196 bytes for 7 NodeAndRegistration structs)
+[RecordingMicroAllocator] 'Operator runtime data' used 128 bytes with alignment overhead (requested 128 bytes for 5 OpData structs)
+1/2 tests passed
+~~~SOME TESTS FAILED~~~
+
+Testing TestAlignPointerUp
+Testing TestAlignPointerDown
+Testing TestAlignSizeUp
+Testing TestTypeSizeOf
+Testing TestBytesRequiredForTensor
+Testing TestAllocateOutputDimensionsFromInput
+6/6 tests passed
+~~~ALL TESTS PASSED~~~
+
+Testing TestInitializeRuntimeTensor
+Testing TestInitializeTempRuntimeTensor
+Testing TestInitializeQuantizedTensor
+Testing TestMissingQuantization
+Testing TestFailsWhenModelStartsTwice
+MicroAllocator: Model allocation started before finishing previously allocated model
+Testing TestFailsWithWrongSequence
+MicroAllocator: Model allocation finished before starting allocating model
+MicroAllocator: Model allocation started before finishing previously allocated model
+Testing TestMockModelAllocation
+Testing TestMultiTenantAllocation
+Testing TestAllocationForModelsWithBranches
+Testing TestAllocationForComplexModelAllocation
+Testing OfflinePlannerBranchesAllOnline
+Testing OfflinePlannerBasic
+Testing OfflinePlannerOverlappingAllocation
+Testing OfflinePlannerOfflineOnline
+Testing TestAllocatePersistentTfLiteTensor
+Testing TestAllocateSingleTempTfLiteTensor
+Testing TestAllocateChainOfTfLiteTensor
+Testing TestAllocateTfLiteTensorWithReset
+Testing TestOperatorInputsNotInSubgraphInputs
+Testing TestTypicalFirstOpAndSecondOpWithScratchTensors
+20/20 tests passed
+~~~ALL TESTS PASSED~~~
+
+Number: 42
+Badly-formed format string 
+Another  badly-formed % format string
+~~~ALL TESTS PASSED~~~
+Testing TestInterpreter
+Output tensors not at index 0 are allocated from the persistent memory arena. Repeat calls will cause excess allocation!
+Testing TestMultiTenantInterpreter
+Testing TestKernelMemoryPlanning
+Output tensors not at index 0 are allocated from the persistent memory arena. Repeat calls will cause excess allocation!
+Output tensors not at index 0 are allocated from the persistent memory arena. Repeat calls will cause excess allocation!
+Output tensors not at index 0 are allocated from the persistent memory arena. Repeat calls will cause excess allocation!
+Output tensors not at index 0 are allocated from the persistent memory arena. Repeat calls will cause excess allocation!
+Output tensors not at index 0 are allocated from the persistent memory arena. Repeat calls will cause excess allocation!
+Output tensors not at index 0 are allocated from the persistent memory arena. Repeat calls will cause excess allocation!
+Testing TestVariableTensorReset
+Testing TestIncompleteInitialization
+Testing InterpreterWithProfilerShouldProfileOps
+Testing TestIncompleteInitializationAllocationsWithSmallArena
+Failed to allocate temp memory. Requested: 240, available 56, missing: 184
+Failed to allocate memory for allocation_info, 240 bytes required
+static_cast<size_t>(192) == allocator->GetSimpleMemoryAllocator()->GetHeadUsedBytes() failed at /home/devel/xx/xxx/pico-tflmicro/tests/micro_interpreter_test/micro_interpreter_:405 (192 vs 96)
+static_cast<size_t>(0) == allocator ->GetRecordedAllocation( tflite::RecordedAllocationType::kTfLiteEvalTensorData) .used_bytes failed at /home/devel/xx/xxx/pico-tflmicro/tests/micro_interpreter_te:414 (0 vs 120)
+Testing TestInterpreterDoesNotAllocateUntilInvoke
+[RecordingMicroAllocator] Arena allocation total 448 bytes
+[RecordingMicroAllocator] Arena allocation head 40 bytes
+[RecordingMicroAllocator] Arena allocation tail 408 bytes
+[RecordingMicroAllocator] 'TfLiteEvalTensor data' used 120 bytes with alignment overhead (requested 120 bytes for 10 allocations)
+[RecordingMicroAllocator] 'TfLiteTensor variable buffer data' used 48 bytes with alignment overhead (requested 12 bytes for 3 allocations)
+[RecordingMicroAllocator] 'NodeAndRegistration struct' used 84 bytes with alignment overhead (requested 84 bytes for 3 NodeAndRegistration structs)
+Testing TestInterpreterMultipleInputs
+Input tensors not at index 0 are allocated from the persistent memory arena. Repeat calls will cause excess allocation!
+Input tensors not at index 0 are allocated from the persistent memory arena. Repeat calls will cause excess allocation!
+8/9 tests passed
+~~~SOME TESTS FAILED~~~
+
+Testing TestOperations
+Testing TestErrorReporting
+2/2 tests passed
+~~~ALL TESTS PASSED~~~
+
+Testing FormatPositiveIntShouldMatchExpected
+Testing FormatNegativeIntShouldMatchExpected
+Testing FormatUnsignedIntShouldMatchExpected
+Testing FormatHexShouldMatchExpected
+Testing FormatFloatShouldMatchExpected
+Testing BadlyFormattedStringShouldProduceReasonableString
+Testing IntFormatOverrunShouldTruncate
+Testing UnsignedIntFormatOverrunShouldTruncate
+Testing HexFormatOverrunShouldTruncate
+Testing FloatFormatOverrunShouldTruncate
+Testing FloatFormatShouldPrintFractionCorrectly
+Testing FloatFormatShouldPrintFractionCorrectlyNoLeadingZeros
+Testing StringFormatOverrunShouldTruncate
+Testing StringFormatWithExactOutputSizeOverrunShouldTruncate
+14/14 tests passed
+~~~ALL TESTS PASSED~~~
+
+Testing TestBasicTimerFunctionality
+1/1 tests passed
+~~~ALL TESTS PASSED~~~
+
+Testing FloatToAsymmetricQuantizedUInt8Test
+Testing FloatToAsymmetricQuantizedInt8Test
+Testing FloatToSymmetricQuantizedInt8Test
+Testing FloatToAsymmetricQuantizedInt32Test
+Testing AsymmetricQuantizeInt8
+Testing AsymmetricQuantizeUInt8
+Testing SymmetricQuantizeInt32
+7/7 tests passed
+~~~ALL TESTS PASSED~~~
+
+Testing TestRecordsTfLiteEvalTensorArrayData
+[RecordingMicroAllocator] Arena allocation total 8412 bytes
+[RecordingMicroAllocator] Arena allocation head 7752 bytes
+[RecordingMicroAllocator] Arena allocation tail 660 bytes
+[RecordingMicroAllocator] 'TfLiteEvalTensor data' used 180 bytes with alignment overhead (requested 180 bytes for 15 allocations)
+[RecordingMicroAllocator] 'NodeAndRegistration struct' used 196 bytes with alignment overhead (requested 196 bytes for 7 NodeAndRegistration structs)
+[RecordingMicroAllocator] 'Operator runtime data' used 128 bytes with alignment overhead (requested 128 bytes for 5 OpData structs)
+[RecordingMicroAllocator] Arena allocation total 8412 bytes
+[RecordingMicroAllocator] Arena allocation head 7752 bytes
+[RecordingMicroAllocator] Arena allocation tail 660 bytes
+[RecordingMicroAllocator] 'TfLiteEvalTensor data' used 180 bytes with alignment overhead (requested 180 bytes for 15 allocations)
+[RecordingMicroAllocator] 'NodeAndRegistration struct' used 196 bytes with alignment overhead (requested 196 bytes for 7 NodeAndRegistration structs)
+[RecordingMicroAllocator] 'Operator runtime data' used 128 bytes with alignment overhead (requested 128 bytes for 5 OpData structs)
+Testing TestRecordsNodeAndRegistrationArrayData
+Testing TestRecordsMultiTenantAllocations
+Testing TestRecordsPersistentTfLiteTensorData
+Testing TestRecordsPersistentTfLiteTensorQuantizationData
+Testing TestRecordsPersistentBufferData
+6/6 tests passed
+~~~ALL TESTS PASSED~~~
+
+Testing TestRecordsTailAllocations
+Testing TestRecordsMisalignedTailAllocations
+Testing TestDoesNotRecordFailedTailAllocations
+Failed to allocate tail memory. Requested: 2048, available 1024, missing: 1024
+Testing TestRecordsHeadSizeAdjustment
+Testing TestRecordsMisalignedHeadSizeAdjustments
+Testing TestDoesNotRecordFailedTailAllocations
+Failed to set head size. Requested: 2048, available 1024, missing: 1024
+6/6 tests passed
+~~~ALL TESTS PASSED~~~
+
+Testing TestEnsureHeadSizeSimpleAlignment
+Testing TestAdjustHeadSizeMisalignment
+Testing TestAdjustHeadSizeMisalignedHandlesCorrectBytesAvailable
+Testing TestGetAvailableMemory
+Testing TestGetAvailableMemoryWithTempAllocations
+Testing TestGetUsedBytes
+Testing TestGetUsedBytesTempAllocations
+Testing TestJustFits
+Testing TestAligned
+Testing TestMultipleTooLarge
+Failed to allocate tail memory. Requested: 768, available 256, missing: 512
+Testing TestTempAllocations
+Testing TestResetTempAllocations
+Testing TestEnsureHeadSizeWithoutResettingTemp
+Internal error: SetHeadBufferSize() needs to be called after ResetTempAllocations().
+13/13 tests passed
+~~~ALL TESTS PASSED~~~
+
+Testing CreateQuantizedBiasTensor
+Testing CreatePerChannelQuantizedBiasTensor
+Testing CreateSymmetricPerChannelQuantizedTensor
+3/3 tests passed
 ~~~ALL TESTS PASSED~~~
 

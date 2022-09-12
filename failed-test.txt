@@ -1,0 +1,21 @@
+Testing TestKeywordModelMemoryThreshold
+[RecordingMicroAllocator] Arena allocation total 12896 bytes
+[RecordingMicroAllocator] Arena allocation head 684 bytes
+[RecordingMicroAllocator] Arena allocation tail 12212 bytes
+[RecordingMicroAllocator] 'TfLiteEvalTensor data' used 648 bytes with alignment overhead (requested 648 bytes for 54 allocations)
+[RecordingMicroAllocator] 'Persistent buffer data' used 604 bytes with alignment overhead (requested 524 bytes for 15 allocations)
+[RecordingMicroAllocator] 'TfLiteTensor variable buffer data' used 10248 bytes with alignment overhead (requested 10240 bytes for 7 allocations)
+[RecordingMicroAllocator] 'NodeAndRegistration struct' used 420 bytes with alignment overhead (requested 420 bytes for 15 NodeAndRegistration structs)
+[RecordingMicroAllocator] 'Operator runtime data' used 80 bytes with alignment overhead (requested 80 bytes for 13 OpData structs)
+actual <= expected + expected * kAllocationThreshold failed at /home/devel/xx/xxx/pico-tflmicro/tests/memory_arena_threshold_test/memory_arena_threshold_test.c:108
+Testing TestConvModelMemoryThreshold
+[RecordingMicroAllocator] Arena allocation total 9072 bytes
+[RecordingMicroAllocator] Arena allocation head 7756 bytes
+[RecordingMicroAllocator] Arena allocation tail 1316 bytes
+[RecordingMicroAllocator] 'TfLiteEvalTensor data' used 180 bytes with alignment overhead (requested 180 bytes for 15 allocations)
+[RecordingMicroAllocator] 'Persistent buffer data' used 656 bytes with alignment overhead (requested 624 bytes for 10 allocations)
+[RecordingMicroAllocator] 'NodeAndRegistration struct' used 196 bytes with alignment overhead (requested 196 bytes for 7 NodeAndRegistration structs)
+[RecordingMicroAllocator] 'Operator runtime data' used 128 bytes with alignment overhead (requested 128 bytes for 5 OpData structs)
+1/2 tests passed
+~~~SOME TESTS FAILED~~~
+
