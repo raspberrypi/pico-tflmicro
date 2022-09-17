@@ -24,8 +24,8 @@ set_target_properties(
 
 target_sources(gesture_predictor_test
   PRIVATE
-  ${CMAKE_CURRENT_LIST_DIR}/gesture_predictor.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/gesture_predictor_test.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/gesture_predictor.cc
+  ${CMAKE_CURRENT_LIST_DIR}/gesture_predictor_test.cc
   ${CMAKE_CURRENT_LIST_DIR}/constants.h
   ${CMAKE_CURRENT_LIST_DIR}/gesture_predictor.h
 )
@@ -58,8 +58,9 @@ set_target_properties(
 
 target_sources(gesture_output_handler_test
   PRIVATE
-  ${CMAKE_CURRENT_LIST_DIR}/output_handler.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/output_handler_test.cpp
+ 
+  ${CMAKE_CURRENT_LIST_DIR}/output_handler.cc
+  ${CMAKE_CURRENT_LIST_DIR}/output_handler_test.cc
   ${CMAKE_CURRENT_LIST_DIR}/output_handler.h
 )
 
@@ -71,6 +72,12 @@ target_link_libraries(
 )
 
 pico_add_extra_outputs(gesture_output_handler_test)
+ 
+
+ 
+ 
+
+ 
 
 
 add_executable(magic_wand "")
@@ -91,12 +98,12 @@ set_target_properties(
 
 target_sources(magic_wand
   PRIVATE
-  ${CMAKE_CURRENT_LIST_DIR}/accelerometer_handler.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/gesture_predictor.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/magic_wand_model_data.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/main.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/main_functions.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/output_handler.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/accelerometer_handler.cc
+  ${CMAKE_CURRENT_LIST_DIR}/gesture_predictor.cc
+  ${CMAKE_CURRENT_LIST_DIR}/magic_wand_model_data.cc
+  ${CMAKE_CURRENT_LIST_DIR}/main.cc
+  ${CMAKE_CURRENT_LIST_DIR}/main_functions.cc
+  ${CMAKE_CURRENT_LIST_DIR}/output_handler.cc
   ${CMAKE_CURRENT_LIST_DIR}/accelerometer_handler.h
   ${CMAKE_CURRENT_LIST_DIR}/constants.h
   ${CMAKE_CURRENT_LIST_DIR}/gesture_predictor.h
@@ -132,10 +139,11 @@ set_target_properties(
 
 target_sources(magic_wand_test
   PRIVATE
-  ${CMAKE_CURRENT_LIST_DIR}/magic_wand_model_data.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/magic_wand_test.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/ring_micro_features_data.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/slope_micro_features_data.cpp
+   
+  ${CMAKE_CURRENT_LIST_DIR}/magic_wand_model_data.cc
+  ${CMAKE_CURRENT_LIST_DIR}/magic_wand_test.cc
+  ${CMAKE_CURRENT_LIST_DIR}/ring_micro_features_data.cc
+  ${CMAKE_CURRENT_LIST_DIR}/slope_micro_features_data.cc
   ${CMAKE_CURRENT_LIST_DIR}/magic_wand_model_data.h
   ${CMAKE_CURRENT_LIST_DIR}/ring_micro_features_data.h
   ${CMAKE_CURRENT_LIST_DIR}/slope_micro_features_data.h
@@ -148,38 +156,5 @@ target_link_libraries(
   pico-tflmicro_test
 )
 
-pico_add_extra_outputs(magic_wand_test)
-
-
-add_executable(gesture_accelerometer_handler_test "")
-
-target_include_directories(gesture_accelerometer_handler_test
-  PRIVATE
-  ${CMAKE_CURRENT_LIST_DIR}/.
-)
-
-set_target_properties(
-  gesture_accelerometer_handler_test
-  PROPERTIES
-  COMPILE_FLAGS -fno-rtti
-  COMPILE_FLAGS -fno-exceptions
-  COMPILE_FLAGS -fno-threadsafe-statics
-  COMPILE_FLAGS -nostdlib
-)
-
-target_sources(gesture_accelerometer_handler_test
-  PRIVATE
-  ${CMAKE_CURRENT_LIST_DIR}/accelerometer_handler.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/accelerometer_handler_test.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/accelerometer_handler.h
-)
-
-target_link_libraries(
-  gesture_accelerometer_handler_test
-  pico-tflmicro
-  hardware_pwm
-  pico-tflmicro_test
-)
-
-pico_add_extra_outputs(gesture_accelerometer_handler_test)
-
+ 
+ 

@@ -3,7 +3,7 @@
 
 #include "kiss_fft.h"
 #ifdef __cplusplus
-extern "C" {
+extern "C++" {
 #endif
 
     

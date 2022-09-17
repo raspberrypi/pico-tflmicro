@@ -1,3 +1,6 @@
+#ifndef _KISS_FFT_GUTS_H
+#define _KISS_FFT_GUTS_H
+
 /*
 Copyright (c) 2003-2010, Mark Borgerding
 
@@ -135,7 +138,7 @@ struct kiss_fft_state{
 #else
 #  define KISS_FFT_COS(phase) (kiss_fft_scalar) cos(phase)
 #  define KISS_FFT_SIN(phase) (kiss_fft_scalar) sin(phase)
-#  define HALF_OF(x) ((x)*.5)
+#  define HALF_OF(x) ((x)*(kiss_fft_scalar).5)
 #endif
 
 #define  kf_cexp(x,phase) \
@@ -162,3 +165,4 @@ struct kiss_fft_state{
 #define  KISS_FFT_TMP_ALLOC(nbytes) KISS_FFT_MALLOC(nbytes)
 #define  KISS_FFT_TMP_FREE(ptr) KISS_FFT_FREE(ptr)
 #endif
+#endif // _KISS_FFT_GUTS_H
