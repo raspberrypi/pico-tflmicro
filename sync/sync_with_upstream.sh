@@ -14,6 +14,12 @@ cp -r ${ARDUINO_REPO_DIR}/src/third_party src/third_party
 cp sync/micro_time.cpp src/tensorflow/lite/micro/micro_time.cpp
 cp sync/system_setup.cpp src/tensorflow/lite/micro/system_setup.cpp
 
+mkdir -p src/tensorflow/lite/micro/benchmarks
+cp sync/micro_benchmark.h src/tensorflow/lite/micro/benchmarks
+
+mkdir -p src/tensorflow/lite/micro/testing
+cp sync/micro_test.h src/tensorflow/lite/micro/testing
+
 rm -rf CMakeLists.txt
 SOURCE_LIST_FILE="$(mktemp /tmp/source_file_list.XXXXXXXXX)" || exit 1
 find src \( -iname "*.cpp" -o -iname "*.c" -o -iname "*.h" \) | \

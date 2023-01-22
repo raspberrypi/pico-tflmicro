@@ -91,3 +91,4 @@ target_link_libraries(
 )
 
 add_subdirectory("examples/hello_world")
+add_subdirectory("examples/person_detection")

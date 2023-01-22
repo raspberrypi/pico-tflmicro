@@ -202,6 +202,7 @@ target_sources(pico-tflmicro
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/arena_allocator/recording_single_arena_buffer_allocator.h
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/arena_allocator/single_arena_buffer_allocator.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/arena_allocator/single_arena_buffer_allocator.h
+  ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/benchmarks/micro_benchmark.h
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/compatibility.h
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/debug_log.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/debug_log.h
@@ -388,6 +389,7 @@ target_sources(pico-tflmicro
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/test_helper_custom_ops.h
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/test_helpers.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/test_helpers.h
+  ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/testing/micro_test.h
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/tflite_bridge/flatbuffer_conversions_bridge.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/tflite_bridge/flatbuffer_conversions_bridge.h
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/tflite_bridge/micro_error_reporter.cpp
@@ -555,3 +557,4 @@ target_link_libraries(
 )
 
 add_subdirectory("examples/hello_world")
+add_subdirectory("examples/person_detection")
