@@ -1,4 +1,5 @@
-/* Copyright 2019 The TensorFlow Authors. All Rights Reserved.
+/* Copyright 2021 The TensorFlow Authors. All Rights Reserved.
+
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -12,10 +13,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+#include <algorithm>
 #include <numeric>
+#include <tuple>
 
-#define FLATBUFFERS_LOCALE_INDEPENDENT 0
-#include "flatbuffers/flexbuffers.h"
+#include "third_party/flatbuffers/include/flatbuffers/flexbuffers.h"
 #include "tensorflow/lite/c/builtin_op_data.h"
 #include "tensorflow/lite/c/common.h"
 #include "tensorflow/lite/kernels/internal/common.h"
@@ -80,7 +82,7 @@ struct CenterSizeEncoding {
   float h;
   float w;
 };
-// We make sure that the memory allocations are contiguous with static assert.
+// We make sure that the memory allocations are contiguous with static_assert.
 static_assert(sizeof(BoxCornerEncoding) == sizeof(float) * kNumCoordBox,
               "Size of BoxCornerEncoding is 4 float values");
 static_assert(sizeof(CenterSizeEncoding) == sizeof(float) * kNumCoordBox,
@@ -116,12 +118,11 @@ struct OpData {
 };
 
 void* Init(TfLiteContext* context, const char* buffer, size_t length) {
+  TFLITE_DCHECK(context->AllocatePersistentBuffer != nullptr);
   OpData* op_data = nullptr;
 
   const uint8_t* buffer_t = reinterpret_cast<const uint8_t*>(buffer);
   const flexbuffers::Map& m = flexbuffers::GetRoot(buffer_t, length).AsMap();
-
-  TFLITE_DCHECK(context->AllocatePersistentBuffer != nullptr);
   op_data = reinterpret_cast<OpData*>(
       context->AllocatePersistentBuffer(context, sizeof(OpData)));
 
@@ -148,19 +149,20 @@ void* Init(TfLiteContext* context, const char* buffer, size_t length) {
   return op_data;
 }
 
-void Free(TfLiteContext* context, void* buffer) {}
-
 TfLiteStatus Prepare(TfLiteContext* context, TfLiteNode* node) {
   auto* op_data = static_cast<OpData*>(node->user_data);
 
+  MicroContext* micro_context = GetMicroContext(context);
+
   // Inputs: box_encodings, scores, anchors
   TF_LITE_ENSURE_EQ(context, NumInputs(node), 3);
-  const TfLiteTensor* input_box_encodings =
-      GetInput(context, node, kInputTensorBoxEncodings);
-  const TfLiteTensor* input_class_predictions =
-      GetInput(context, node, kInputTensorClassPredictions);
-  const TfLiteTensor* input_anchors =
-      GetInput(context, node, kInputTensorAnchors);
+  TfLiteTensor* input_box_encodings =
+      micro_context->AllocateTempInputTensor(node, kInputTensorBoxEncodings);
+  TfLiteTensor* input_class_predictions =
+      micro_context->AllocateTempInputTensor(node,
+                                             kInputTensorClassPredictions);
+  TfLiteTensor* input_anchors =
+      micro_context->AllocateTempInputTensor(node, kInputTensorAnchors);
   TF_LITE_ENSURE_EQ(context, NumDimensions(input_box_encodings), 3);
   TF_LITE_ENSURE_EQ(context, NumDimensions(input_class_predictions), 3);
   TF_LITE_ENSURE_EQ(context, NumDimensions(input_anchors), 2);
@@ -218,6 +220,10 @@ TfLiteStatus Prepare(TfLiteContext* context, TfLiteNode* node) {
   // num_detections
   TF_LITE_ENSURE_EQ(context, NumOutputs(node), 4);
 
+  micro_context->DeallocateTempTfLiteTensor(input_box_encodings);
+  micro_context->DeallocateTempTfLiteTensor(input_class_predictions);
+  micro_context->DeallocateTempTfLiteTensor(input_anchors);
+
   return kTfLiteOk;
 }
 
@@ -233,25 +239,6 @@ class Dequantizer {
   int zero_point_;
   float scale_;
 };
-
-void DequantizeBoxEncodings(const TfLiteEvalTensor* input_box_encodings,
-                            int idx, float quant_zero_point, float quant_scale,
-                            int length_box_encoding,
-                            CenterSizeEncoding* box_centersize) {
-  const uint8_t* boxes =
-      tflite::micro::GetTensorData<uint8_t>(input_box_encodings) +
-      length_box_encoding * idx;
-  Dequantizer dequantize(quant_zero_point, quant_scale);
-  // See definition of the KeyPointBoxCoder at
-  // https://github.com/tensorflow/models/blob/master/research/object_detection/box_coders/keypoint_box_coder.py
-  // The first four elements are the box coordinates, which is the same as the
-  // FastRnnBoxCoder at
-  // https://github.com/tensorflow/models/blob/master/research/object_detection/box_coders/faster_rcnn_box_coder.py
-  box_centersize->y = dequantize(boxes[0]);
-  box_centersize->x = dequantize(boxes[1]);
-  box_centersize->h = dequantize(boxes[2]);
-  box_centersize->w = dequantize(boxes[3]);
-}
 
 template <class T>
 T ReInterpretTensor(const TfLiteEvalTensor* tensor) {
@@ -282,19 +269,6 @@ TfLiteStatus DecodeCenterSizeBoxes(TfLiteContext* context, TfLiteNode* node,
   CenterSizeEncoding anchor;
   for (int idx = 0; idx < num_boxes; ++idx) {
     switch (input_box_encodings->type) {
-        // Quantized
-      case kTfLiteUInt8:
-        DequantizeBoxEncodings(
-            input_box_encodings, idx,
-            static_cast<float>(op_data->input_box_encodings.zero_point),
-            static_cast<float>(op_data->input_box_encodings.scale),
-            input_box_encodings->dims->data[2], &box_centersize);
-        DequantizeBoxEncodings(
-            input_anchors, idx,
-            static_cast<float>(op_data->input_anchors.zero_point),
-            static_cast<float>(op_data->input_anchors.scale), kNumCoordBox,
-            &anchor);
-        break;
         // Float
       case kTfLiteFloat32: {
         // Please see DequantizeBoxEncodings function for the support detail.
@@ -311,14 +285,26 @@ TfLiteStatus DecodeCenterSizeBoxes(TfLiteContext* context, TfLiteNode* node,
         return kTfLiteError;
     }
 
-    float ycenter = box_centersize.y / scale_values.y * anchor.h + anchor.y;
-    float xcenter = box_centersize.x / scale_values.x * anchor.w + anchor.x;
+    float ycenter = static_cast<float>(static_cast<double>(box_centersize.y) /
+                                           static_cast<double>(scale_values.y) *
+                                           static_cast<double>(anchor.h) +
+                                       static_cast<double>(anchor.y));
+
+    float xcenter = static_cast<float>(static_cast<double>(box_centersize.x) /
+                                           static_cast<double>(scale_values.x) *
+                                           static_cast<double>(anchor.w) +
+                                       static_cast<double>(anchor.x));
+
     float half_h =
-        0.5f * static_cast<float>(std::exp(box_centersize.h / scale_values.h)) *
-        anchor.h;
+        static_cast<float>(0.5 *
+                           (std::exp(static_cast<double>(box_centersize.h) /
+                                     static_cast<double>(scale_values.h))) *
+                           static_cast<double>(anchor.h));
     float half_w =
-        0.5f * static_cast<float>(std::exp(box_centersize.w / scale_values.w)) *
-        anchor.w;
+        static_cast<float>(0.5 *
+                           (std::exp(static_cast<double>(box_centersize.w) /
+                                     static_cast<double>(scale_values.w))) *
+                           static_cast<double>(anchor.w));
 
     float* decoded_boxes = reinterpret_cast<float*>(
         context->GetScratchBuffer(context, op_data->decoded_boxes_idx));
@@ -334,9 +320,61 @@ TfLiteStatus DecodeCenterSizeBoxes(TfLiteContext* context, TfLiteNode* node,
 void DecreasingPartialArgSort(const float* values, int num_values,
                               int num_to_sort, int* indices) {
   std::iota(indices, indices + num_values, 0);
-  std::partial_sort(
-      indices, indices + num_to_sort, indices + num_values,
-      [&values](const int i, const int j) { return values[i] > values[j]; });
+  std::partial_sort(indices, indices + num_to_sort, indices + num_values,
+                    [&values](const int i, const int j) {
+                      return std::tie(values[i], j) > std::tie(values[j], i);
+                    });
+}
+
+template <typename Compare>
+void InsertionSort(int* start, int* end, Compare compare) {
+  for (int* i = start; i != end; ++i) {
+    std::rotate(std::upper_bound(start, i, *i, compare), i, i + 1);
+  }
+}
+
+template <typename Compare>
+void TopDownMerge(int* values, int* scratch, const int half_num_values,
+                  int num_values, Compare compare) {
+  int left = 0;
+  int right = half_num_values;
+
+  for (int i = 0; i < num_values; i++) {
+    if (left >= half_num_values ||
+        (right < num_values && compare(values[right], values[left]))) {
+      scratch[i] = values[right++];
+    } else {
+      scratch[i] = values[left++];
+    }
+  }
+  memcpy(values, scratch, num_values * sizeof(int));
+}
+
+template <typename Compare>
+void MergeSort(int* values, int* scratch, const int num_values,
+               Compare compare) {
+  constexpr int threshold = 20;
+
+  if (num_values < threshold) {
+    InsertionSort(values, values + num_values, compare);
+    return;
+  }
+
+  const int half_num_values = num_values / 2;
+
+  MergeSort(values, scratch, half_num_values, compare);
+  MergeSort(values + half_num_values, scratch, num_values - half_num_values,
+            compare);
+  TopDownMerge(values, scratch, half_num_values, num_values, compare);
+}
+
+void DecreasingArgSort(const float* values, int num_values, int* indices,
+                       int* scratch) {
+  std::iota(indices, indices + num_values, 0);
+
+  MergeSort(indices, scratch, num_values, [&values](const int i, const int j) {
+    return values[i] > values[j];
+  });
 }
 
 int SelectDetectionsAboveScoreThreshold(const float* values, int size,
@@ -345,8 +383,9 @@ int SelectDetectionsAboveScoreThreshold(const float* values, int size,
   int counter = 0;
   for (int i = 0; i < size; i++) {
     if (values[i] >= threshold) {
-      keep_values[counter++] = values[i];
-      keep_indices[i] = i;
+      keep_values[counter] = values[i];
+      keep_indices[counter] = i;
+      counter++;
     }
   }
   return counter;
@@ -420,8 +459,16 @@ TfLiteStatus NonMaxSuppressionSingleClassHelper(
   int* sorted_indices = reinterpret_cast<int*>(
       context->GetScratchBuffer(context, op_data->sorted_indices_idx));
 
-  DecreasingPartialArgSort(keep_scores, num_scores_kept, num_scores_kept,
-                           sorted_indices);
+  // Reusing keep_indices for scratch buffer and write back its values
+  // after the sorting is done.
+  DecreasingArgSort(keep_scores, num_scores_kept, sorted_indices, keep_indices);
+  int counter = 0;
+  for (int i = 0; i < num_boxes; i++) {
+    if (scores[i] >= non_max_suppression_score_threshold) {
+      keep_indices[counter] = i;
+      counter++;
+    }
+  }
 
   const int num_boxes_kept = num_scores_kept;
   const int output_size = std::min(num_boxes_kept, max_detections);
@@ -687,22 +734,6 @@ TfLiteStatus NonMaxSuppressionMultiClassFastHelper(TfLiteContext* context,
   return kTfLiteOk;
 }
 
-void DequantizeClassPredictions(const TfLiteEvalTensor* input_class_predictions,
-                                const int num_boxes,
-                                const int num_classes_with_background,
-                                float* scores, OpData* op_data) {
-  float quant_zero_point =
-      static_cast<float>(op_data->input_class_predictions.zero_point);
-  float quant_scale =
-      static_cast<float>(op_data->input_class_predictions.scale);
-  Dequantizer dequantize(quant_zero_point, quant_scale);
-  const uint8_t* scores_quant =
-      tflite::micro::GetTensorData<uint8_t>(input_class_predictions);
-  for (int idx = 0; idx < num_boxes * num_classes_with_background; ++idx) {
-    scores[idx] = dequantize(scores_quant[idx]);
-  }
-}
-
 TfLiteStatus NonMaxSuppressionMultiClass(TfLiteContext* context,
                                          TfLiteNode* node, OpData* op_data) {
   // Get the input tensors
@@ -724,14 +755,6 @@ TfLiteStatus NonMaxSuppressionMultiClass(TfLiteContext* context,
 
   const float* scores;
   switch (input_class_predictions->type) {
-    case kTfLiteUInt8: {
-      float* temporary_scores = reinterpret_cast<float*>(
-          context->GetScratchBuffer(context, op_data->scores_idx));
-      DequantizeClassPredictions(input_class_predictions, num_boxes,
-                                 num_classes_with_background, temporary_scores,
-                                 op_data);
-      scores = temporary_scores;
-    } break;
     case kTfLiteFloat32:
       scores = tflite::micro::GetTensorData<float>(input_class_predictions);
       break;
@@ -777,14 +800,7 @@ TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
 }  // namespace
 
 TfLiteRegistration* Register_DETECTION_POSTPROCESS() {
-  static TfLiteRegistration r = {/*init=*/Init,
-                                 /*free=*/Free,
-                                 /*prepare=*/Prepare,
-                                 /*invoke=*/Eval,
-                                 /*profiling_string=*/nullptr,
-                                 /*builtin_code=*/0,
-                                 /*custom_name=*/nullptr,
-                                 /*version=*/0};
+  static TfLiteRegistration r = tflite::micro::RegisterOp(Init, Prepare, Eval);
   return &r;
 }
 

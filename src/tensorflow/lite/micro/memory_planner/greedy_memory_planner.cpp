@@ -15,7 +15,27 @@ limitations under the License.
 
 #include "tensorflow/lite/micro/memory_planner/greedy_memory_planner.h"
 
+#include "tensorflow/lite/micro/micro_log.h"
+#include "tensorflow/lite/micro/micro_string.h"
+
 namespace tflite {
+
+namespace {
+
+// Returns a character representing a numbered buffer
+// for GreedyMemoryPlanner::PrintMemoryPlan()
+char GetOrdinalCharacter(int i) {
+  if (i < 10) {
+    return '0' + i;
+  } else if (i < 36) {
+    return 'a' + (i - 10);
+  } else if (i < 62) {
+    return 'A' + (i - 36);
+  }
+  return '*';
+}
+
+}  // namespace
 
 // Simple stable in-place sort function. Not time-efficient for large arrays.
 // Would normally be in an anonymous namespace to keep it private, but we want
@@ -38,9 +58,14 @@ void ReverseSortInPlace(int* values, int* ids, int size) {
   } while (any_swapped);
 }
 
-GreedyMemoryPlanner::GreedyMemoryPlanner(unsigned char* scratch_buffer,
-                                         int scratch_buffer_size)
-    : buffer_count_(0), need_to_calculate_offsets_(true) {
+GreedyMemoryPlanner::GreedyMemoryPlanner() {}
+
+TfLiteStatus GreedyMemoryPlanner::Init(unsigned char* scratch_buffer,
+                                       int scratch_buffer_size) {
+  // Reset internal states
+  buffer_count_ = 0;
+  need_to_calculate_offsets_ = true;
+
   // Allocate the arrays we need within the scratch buffer arena.
   max_buffer_count_ = scratch_buffer_size / per_buffer_size();
 
@@ -58,18 +83,17 @@ GreedyMemoryPlanner::GreedyMemoryPlanner(unsigned char* scratch_buffer,
   next_free += sizeof(ListEntry) * max_buffer_count_;
 
   buffer_offsets_ = reinterpret_cast<int*>(next_free);
+  return kTfLiteOk;
 }
 
 GreedyMemoryPlanner::~GreedyMemoryPlanner() {
   // We don't own the scratch buffer, so don't deallocate anything.
 }
 
-TfLiteStatus GreedyMemoryPlanner::AddBuffer(
-    tflite::ErrorReporter* error_reporter, int size, int first_time_used,
-    int last_time_used) {
+TfLiteStatus GreedyMemoryPlanner::AddBuffer(int size, int first_time_used,
+                                            int last_time_used) {
   if (buffer_count_ >= max_buffer_count_) {
-    TF_LITE_REPORT_ERROR(error_reporter, "Too many buffers (max is %d)",
-                         max_buffer_count_);
+    MicroPrintf("Too many buffers (max is %d)", max_buffer_count_);
     return kTfLiteError;
   }
   BufferRequirements* current = &requirements_[buffer_count_];
@@ -82,12 +106,11 @@ TfLiteStatus GreedyMemoryPlanner::AddBuffer(
   return kTfLiteOk;
 }
 
-TfLiteStatus GreedyMemoryPlanner::AddBuffer(
-    tflite::ErrorReporter* error_reporter, int size, int first_time_used,
-    int last_time_used, int offline_offset) {
+TfLiteStatus GreedyMemoryPlanner::AddBuffer(int size, int first_time_used,
+                                            int last_time_used,
+                                            int offline_offset) {
   BufferRequirements* current = &requirements_[buffer_count_];
-  if (AddBuffer(error_reporter, size, first_time_used, last_time_used) !=
-      kTfLiteOk) {
+  if (AddBuffer(size, first_time_used, last_time_used) != kTfLiteOk) {
     return kTfLiteError;
   }
   current->offline_offset = offline_offset;
@@ -297,8 +320,6 @@ size_t GreedyMemoryPlanner::GetMaximumMemorySize() {
   while (entry) {
     BufferRequirements* requirements =
         &requirements_[entry->requirements_index];
-    // TODO(b/148246793): Update all size and offset variables types from
-    //                    int to size_t
     const size_t current_size = entry->offset + requirements->size;
     if (current_size > max_size) {
       max_size = current_size;
@@ -311,17 +332,14 @@ size_t GreedyMemoryPlanner::GetMaximumMemorySize() {
   return max_size;
 }
 
-void GreedyMemoryPlanner::PrintMemoryPlan(ErrorReporter* error_reporter) {
+void GreedyMemoryPlanner::PrintMemoryPlan() {
   CalculateOffsetsIfNeeded();
 
   for (int i = 0; i < buffer_count_; ++i) {
-    TF_LITE_REPORT_ERROR(
-        error_reporter,
-        "Planner buffer ID: %d, calculated offset: %d, size required: %d, "
-        "first_time_created: %d, "
-        "last_time_used: %d",
-        i, buffer_offsets_[i], requirements_[i].size,
-        requirements_[i].first_time_used, requirements_[i].last_time_used);
+    MicroPrintf("%c (id=%d): size=%d, offset=%d, first_used=%d last_used=%d",
+                GetOrdinalCharacter(i), i, requirements_[i].size,
+                buffer_offsets_[i], requirements_[i].first_time_used,
+                requirements_[i].last_time_used);
   }
 
   constexpr int kLineWidth = 80;
@@ -345,6 +363,7 @@ void GreedyMemoryPlanner::PrintMemoryPlan(ErrorReporter* error_reporter) {
     for (int c = 0; c < kLineWidth; ++c) {
       line[c] = '.';
     }
+    int memory_use = 0;
     for (int i = 0; i < buffer_count_; ++i) {
       BufferRequirements* requirements = &requirements_[i];
       if ((t < requirements->first_time_used) ||
@@ -356,47 +375,39 @@ void GreedyMemoryPlanner::PrintMemoryPlan(ErrorReporter* error_reporter) {
         continue;
       }
       const int size = requirements->size;
+      memory_use += size;
       const int line_start = (offset * kLineWidth) / max_size;
       const int line_end = ((offset + size) * kLineWidth) / max_size;
       for (int n = line_start; n < line_end; ++n) {
         if (line[n] == '.') {
-          char display;
-          if (i < 10) {
-            display = '0' + i;
-          } else if (i < 36) {
-            display = 'a' + (i - 10);
-          } else if (i < 62) {
-            display = 'A' + (i - 36);
-          } else {
-            display = '*';
-          }
-          line[n] = display;
+          line[n] = GetOrdinalCharacter(i);
         } else {
           line[n] = '!';
         }
       }
     }
     line[kLineWidth] = 0;
-    TF_LITE_REPORT_ERROR(error_reporter, "%s", (const char*)line);
+
+    MicroPrintf("%s%d: %s (%dk)", t < 10 ? " " : "", t, (const char*)line,
+                (memory_use + 1023) / 1024);
   }
 }
 
 int GreedyMemoryPlanner::GetBufferCount() { return buffer_count_; }
 
-TfLiteStatus GreedyMemoryPlanner::GetOffsetForBuffer(
-    tflite::ErrorReporter* error_reporter, int buffer_index, int* offset) {
+TfLiteStatus GreedyMemoryPlanner::GetOffsetForBuffer(int buffer_index,
+                                                     int* offset) {
   CalculateOffsetsIfNeeded();
   if ((buffer_index < 0) || (buffer_index >= buffer_count_)) {
-    TF_LITE_REPORT_ERROR(error_reporter,
-                         "buffer index %d is outside range 0 to %d",
-                         buffer_index, buffer_count_);
+    MicroPrintf("buffer index %d is outside range 0 to %d", buffer_index,
+                buffer_count_);
     return kTfLiteError;
   }
   *offset = buffer_offsets_[buffer_index];
   return kTfLiteOk;
 }
 
-bool GreedyMemoryPlanner::DoAnyBuffersOverlap(ErrorReporter* error_reporter) {
+bool GreedyMemoryPlanner::DoAnyBuffersOverlap() {
   CalculateOffsetsIfNeeded();
   bool were_overlaps_found = false;
   for (int i = 0; i < buffer_count_; ++i) {
@@ -425,10 +436,10 @@ bool GreedyMemoryPlanner::DoAnyBuffersOverlap(ErrorReporter* error_reporter) {
         continue;
       }
       were_overlaps_found = true;
-      TF_LITE_REPORT_ERROR(
-          error_reporter, "Overlap: %d (%d=>%d, %d->%d) vs %d (%d=>%d, %d->%d)",
-          i, a_first_time_used, a_last_time_used, a_start_offset, a_end_offset,
-          j, b_first_time_used, b_last_time_used, b_start_offset, b_end_offset);
+      MicroPrintf("Overlap: %d (%d=>%d, %d->%d) vs %d (%d=>%d, %d->%d)", i,
+                  a_first_time_used, a_last_time_used, a_start_offset,
+                  a_end_offset, j, b_first_time_used, b_last_time_used,
+                  b_start_offset, b_end_offset);
     }
   }
   return were_overlaps_found;

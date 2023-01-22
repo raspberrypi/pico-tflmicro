@@ -17,24 +17,23 @@ limitations under the License.
 #define TENSORFLOW_LITE_MICRO_MEMORY_PLANNER_LINEAR_MEMORY_PLANNER_H_
 
 #include "tensorflow/lite/micro/compatibility.h"
-#include "tensorflow/lite/micro/memory_planner/memory_planner.h"
+#include "tensorflow/lite/micro/memory_planner/micro_memory_planner.h"
 
 namespace tflite {
 
 // The simplest possible memory planner that just lays out all buffers at
 // increasing offsets without trying to reuse memory.
-class LinearMemoryPlanner : public MemoryPlanner {
+class LinearMemoryPlanner : public MicroMemoryPlanner {
  public:
   LinearMemoryPlanner();
   ~LinearMemoryPlanner() override;
 
-  TfLiteStatus AddBuffer(tflite::ErrorReporter* error_reporter, int size,
-                         int first_time_used, int last_time_used) override;
+  TfLiteStatus AddBuffer(int size, int first_time_used,
+                         int last_time_used) override;
 
   size_t GetMaximumMemorySize() override;
   int GetBufferCount() override;
-  TfLiteStatus GetOffsetForBuffer(tflite::ErrorReporter* error_reporter,
-                                  int buffer_index, int* offset) override;
+  TfLiteStatus GetOffsetForBuffer(int buffer_index, int* offset) override;
 
  private:
   static constexpr int kMaxBufferCount = 1024;

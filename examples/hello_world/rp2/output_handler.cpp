@@ -61,8 +61,7 @@ void init_pwm_fade() {
 
 }  // namespace
 
-void HandleOutput(tflite::ErrorReporter* error_reporter, float x_value,
-                  float y_value) {
+void HandleOutput(float x_value, float y_value) {
   // Do this only once
   static bool is_initialized = false;
   if (!is_initialized) {
@@ -75,7 +74,7 @@ void HandleOutput(tflite::ErrorReporter* error_reporter, float x_value,
   g_led_brightness = (int)(127.5f * (y_value + 1));
 
   // Log the current brightness value for display in the console.
-  TF_LITE_REPORT_ERROR(error_reporter, "%d\n", g_led_brightness);
+  MicroPrintf("%d\n", g_led_brightness);
    
   // By default the sine wave is too fast to see in the LED, so slow
   // down the whole program deliberately so it's more visible.

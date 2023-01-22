@@ -19,6 +19,7 @@ limitations under the License.
 #include "tensorflow/lite/kernels/internal/reference/l2normalization.h"
 #include "tensorflow/lite/kernels/kernel_util.h"
 #include "tensorflow/lite/micro/kernels/kernel_util.h"
+#include "tensorflow/lite/micro/micro_log.h"
 
 namespace tflite {
 namespace ops {
@@ -49,28 +50,31 @@ TfLiteStatus Prepare(TfLiteContext* context, TfLiteNode* node) {
   TF_LITE_ENSURE_EQ(context, NumInputs(node), 1);
   TF_LITE_ENSURE_EQ(context, NumOutputs(node), 1);
 
-  const TfLiteTensor* input = GetInput(context, node, kInputTensor);
-  TF_LITE_ENSURE(context, input != nullptr);
-  TfLiteTensor* output = GetOutput(context, node, kOutputTensor);
-  TF_LITE_ENSURE(context, output != nullptr);
+  MicroContext* micro_context = GetMicroContext(context);
 
+  TfLiteTensor* input =
+      micro_context->AllocateTempInputTensor(node, kInputTensor);
+  TF_LITE_ENSURE(context, input != nullptr);
+  TfLiteTensor* output =
+      micro_context->AllocateTempOutputTensor(node, kOutputTensor);
+  TF_LITE_ENSURE(context, output != nullptr);
   TF_LITE_ENSURE(context, NumDimensions(input) <= 4);
 
-  TF_LITE_ENSURE(context, output->type == kTfLiteFloat32 ||
-                              output->type == kTfLiteUInt8 ||
-                              output->type == kTfLiteInt8);
+  TF_LITE_ENSURE(context,
+                 output->type == kTfLiteFloat32 || output->type == kTfLiteInt8);
   TF_LITE_ENSURE_TYPES_EQ(context, input->type, output->type);
 
-  if (output->type == kTfLiteUInt8 || output->type == kTfLiteInt8) {
+  if (output->type == kTfLiteInt8) {
     data->input_zero_point = input->params.zero_point;
   } else if (output->type == kTfLiteFloat32) {
     data->input_zero_point = 0;
   }
 
-  // TODO(ahentz): For some reason our implementations don't support
-  // activations.
+  // Our implementations don't currently support activations.
   TF_LITE_ENSURE_EQ(context, params->activation, kTfLiteActNone);
 
+  micro_context->DeallocateTempTfLiteTensor(input);
+  micro_context->DeallocateTempTfLiteTensor(output);
   return kTfLiteOk;
 }
 
@@ -110,12 +114,6 @@ TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
                                    tflite::micro::GetTensorShape(output),
                                    tflite::micro::GetTensorData<float>(output),
                                    epsilon);
-  } else if (output->type == kTfLiteUInt8) {
-    reference_ops::L2Normalization(
-        data, tflite::micro::GetTensorShape(input),
-        tflite::micro::GetTensorData<uint8_t>(input),
-        tflite::micro::GetTensorShape(output),
-        tflite::micro::GetTensorData<uint8_t>(output));
   } else if (output->type == kTfLiteInt8) {
     const auto input_shape = tflite::micro::GetTensorShape(input);
     const auto output_shape = tflite::micro::GetTensorShape(output);
@@ -129,8 +127,8 @@ TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
         tflite::micro::GetTensorData<int8_t>(input),
         tflite::micro::GetTensorData<int8_t>(output));
   } else {
-    TF_LITE_KERNEL_LOG(context, "Output type is %s, requires float.",
-                       TfLiteTypeGetName(output->type));
+    MicroPrintf("Output type is %s, requires float.",
+                TfLiteTypeGetName(output->type));
     return kTfLiteError;
   }
 
@@ -140,14 +138,7 @@ TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
 }  // namespace l2norm
 
 TfLiteRegistration Register_L2NORM_REF() {
-  return {/*init=*/l2norm::Init,
-          /*free=*/nullptr,
-          /*prepare=*/l2norm::Prepare,
-          /*invoke=*/l2norm::Eval,
-          /*profiling_string=*/nullptr,
-          /*builtin_code=*/0,
-          /*custom_name=*/nullptr,
-          /*version=*/0};
+  return tflite::micro::RegisterOp(l2norm::Init, l2norm::Prepare, l2norm::Eval);
 }
 
 TfLiteRegistration Register_L2_NORMALIZATION() { return Register_L2NORM_REF(); }

@@ -17,7 +17,7 @@ limitations under the License.
 
 #include <cmath>
 
-#include "fixedpoint/fixedpoint.h"
+#include "third_party/gemmlowp/fixedpoint/fixedpoint.h"
 #include "tensorflow/lite/kernels/internal/common.h"
 #include "tensorflow/lite/kernels/internal/cppmath.h"
 #include "tensorflow/lite/kernels/internal/quantization_util.h"

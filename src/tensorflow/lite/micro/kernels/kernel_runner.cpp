@@ -15,152 +15,107 @@ limitations under the License.
 
 #include "tensorflow/lite/micro/kernels/kernel_runner.h"
 
+#include "tensorflow/lite/micro/arena_allocator/single_arena_buffer_allocator.h"
+#include "tensorflow/lite/micro/micro_arena_constants.h"
+#include "tensorflow/lite/micro/micro_log.h"
+#include "tensorflow/lite/micro/test_helpers.h"
+
 namespace tflite {
 namespace micro {
 
-namespace {
-constexpr size_t kBufferAlignment = 16;
-}  // namespace
-
 // TODO(b/161841696): Consider moving away from global arena buffers:
-constexpr int KernelRunner::kNumScratchBuffers_;
 constexpr int KernelRunner::kKernelRunnerBufferSize_;
 uint8_t KernelRunner::kKernelRunnerBuffer_[];
+
+void ClearBufferApi(TfLiteContext* context_) {
+  context_->GetScratchBuffer = nullptr;
+  context_->GetExternalContext = nullptr;
+  context_->AllocatePersistentBuffer = nullptr;
+  context_->RequestScratchBufferInArena = nullptr;
+}
 
 KernelRunner::KernelRunner(const TfLiteRegistration& registration,
                            TfLiteTensor* tensors, int tensors_size,
                            TfLiteIntArray* inputs, TfLiteIntArray* outputs,
-                           void* builtin_data, ErrorReporter* error_reporter)
-    : allocator_(SimpleMemoryAllocator::Create(
-          error_reporter, kKernelRunnerBuffer_, kKernelRunnerBufferSize_)),
-      registration_(registration),
-      tensors_(tensors),
-      error_reporter_(error_reporter) {
+                           void* builtin_data, TfLiteIntArray* intermediates)
+    : registration_(registration),
+      allocator_(SingleArenaBufferAllocator::Create(kKernelRunnerBuffer_,
+                                                    kKernelRunnerBufferSize_)),
+      mock_micro_graph_(allocator_),
+      fake_micro_context_(tensors, allocator_, &mock_micro_graph_) {
   // Prepare TfLiteContext:
-  context_.impl_ = static_cast<void*>(this);
-  context_.ReportError = ReportOpError;
+  context_.impl_ = static_cast<void*>(&fake_micro_context_);
+  context_.ReportError = MicroContextReportOpError;
   context_.recommended_num_threads = 1;
-  context_.GetTensor = GetTensor;
-  context_.GetEvalTensor = GetEvalTensor;
-  context_.AllocatePersistentBuffer = AllocatePersistentBuffer;
-  context_.RequestScratchBufferInArena = RequestScratchBufferInArena;
-  context_.GetScratchBuffer = GetScratchBuffer;
+  context_.GetTensor = MicroContextGetTensor;
+  context_.GetEvalTensor = MicroContextGetEvalTensor;
+  tflite::micro::ClearBufferApi(&context_);
+  context_.AllocatePersistentBuffer = MicroContextAllocatePersistentBuffer;
+
+  context_.recommended_num_threads = 0;
 
   // Prepare TfLiteNode:
   node_.inputs = inputs;
   node_.outputs = outputs;
   node_.builtin_data = builtin_data;
+  node_.intermediates = intermediates;
+}
+
+bool KernelRunner::ValidateTempBufferDeallocated() {
+  return fake_micro_context_.IsAllTempTfLiteTensorDeallocated();
 }
 
 TfLiteStatus KernelRunner::InitAndPrepare(const char* init_data,
                                           size_t length) {
   if (registration_.init) {
+    tflite::micro::ClearBufferApi(&context_);
+    context_.AllocatePersistentBuffer = MicroContextAllocatePersistentBuffer;
     node_.user_data = registration_.init(&context_, init_data, length);
   }
+
+  TF_LITE_ENSURE(&context_, ValidateTempBufferDeallocated());
+
   if (registration_.prepare) {
+    tflite ::micro::ClearBufferApi(&context_);
+    context_.AllocatePersistentBuffer = MicroContextAllocatePersistentBuffer;
+    context_.RequestScratchBufferInArena =
+        MicroContextRequestScratchBufferInArena;
+    context_.GetExternalContext = MicroContextGetExternalContext;
     TF_LITE_ENSURE_STATUS(registration_.prepare(&context_, &node_));
   }
+
+  TF_LITE_ENSURE(&context_, ValidateTempBufferDeallocated());
+
   return kTfLiteOk;
 }
 
 TfLiteStatus KernelRunner::Invoke() {
+  tflite::micro::ClearBufferApi(&context_);
+  context_.GetScratchBuffer = MicroContextGetScratchBuffer;
+
   if (registration_.invoke == nullptr) {
-    TF_LITE_REPORT_ERROR(error_reporter_,
-                         "TfLiteRegistration missing invoke function pointer!");
-    return kTfLiteError;
-  }
-  return registration_.invoke(&context_, &node_);
-}
-
-TfLiteTensor* KernelRunner::GetTensor(const struct TfLiteContext* context,
-                                      int tensor_index) {
-  TFLITE_DCHECK(context != nullptr);
-  KernelRunner* runner = reinterpret_cast<KernelRunner*>(context->impl_);
-  TFLITE_DCHECK(runner != nullptr);
-
-  return &runner->tensors_[tensor_index];
-}
-
-TfLiteEvalTensor* KernelRunner::GetEvalTensor(
-    const struct TfLiteContext* context, int tensor_index) {
-  TFLITE_DCHECK(context != nullptr);
-  KernelRunner* runner = reinterpret_cast<KernelRunner*>(context->impl_);
-  TFLITE_DCHECK(runner != nullptr);
-
-  TfLiteEvalTensor* eval_tensor =
-      reinterpret_cast<TfLiteEvalTensor*>(runner->allocator_->AllocateTemp(
-          sizeof(TfLiteEvalTensor), alignof(TfLiteEvalTensor)));
-  TFLITE_DCHECK(eval_tensor != nullptr);
-
-  // In unit tests, the TfLiteTensor pointer contains the source of truth for
-  // buffers and values:
-  eval_tensor->data = runner->tensors_[tensor_index].data;
-  eval_tensor->dims = runner->tensors_[tensor_index].dims;
-  eval_tensor->type = runner->tensors_[tensor_index].type;
-  return eval_tensor;
-}
-
-void* KernelRunner::AllocatePersistentBuffer(TfLiteContext* context,
-                                             size_t bytes) {
-  TFLITE_DCHECK(context != nullptr);
-  KernelRunner* runner = reinterpret_cast<KernelRunner*>(context->impl_);
-  TFLITE_DCHECK(runner != nullptr);
-
-  return runner->allocator_->AllocateFromTail(bytes, kBufferAlignment);
-}
-
-TfLiteStatus KernelRunner::RequestScratchBufferInArena(TfLiteContext* context,
-                                                       size_t bytes,
-                                                       int* buffer_index) {
-  TFLITE_DCHECK(context != nullptr);
-  TFLITE_DCHECK(buffer_index != nullptr);
-
-  KernelRunner* runner = reinterpret_cast<KernelRunner*>(context->impl_);
-  TFLITE_DCHECK(runner != nullptr);
-
-  if (runner->scratch_buffer_count_ == kNumScratchBuffers_) {
-    TF_LITE_REPORT_ERROR(
-        runner->error_reporter_,
-        "Exceeded the maximum number of scratch tensors allowed (%d).",
-        kNumScratchBuffers_);
+    MicroPrintf("TfLiteRegistration missing invoke function pointer!");
     return kTfLiteError;
   }
 
-  // For tests, we allocate scratch buffers from the tail and keep them around
-  // for the lifetime of model. This means that the arena size in the tests will
-  // be more than what we would have if the scratch buffers could share memory.
-  runner->scratch_buffers_[runner->scratch_buffer_count_] =
-      runner->allocator_->AllocateFromTail(bytes, kBufferAlignment);
-  TFLITE_DCHECK(runner->scratch_buffers_[runner->scratch_buffer_count_] !=
-                nullptr);
+  TF_LITE_ENSURE_STATUS(registration_.invoke(&context_, &node_));
 
-  *buffer_index = runner->scratch_buffer_count_++;
+  TF_LITE_ENSURE(&context_, ValidateTempBufferDeallocated());
+
   return kTfLiteOk;
 }
 
-void* KernelRunner::GetScratchBuffer(TfLiteContext* context, int buffer_index) {
-  TFLITE_DCHECK(context != nullptr);
-  KernelRunner* runner = reinterpret_cast<KernelRunner*>(context->impl_);
-  TFLITE_DCHECK(runner != nullptr);
+TfLiteStatus KernelRunner::Free() {
+  tflite::micro::ClearBufferApi(&context_);
+  context_.GetScratchBuffer = MicroContextGetScratchBuffer;
 
-  TFLITE_DCHECK(runner->scratch_buffer_count_ <= kNumScratchBuffers_);
-  if (buffer_index >= runner->scratch_buffer_count_) {
-    return nullptr;
+  if (registration_.free == nullptr) {
+    MicroPrintf("TfLiteRegistration missing free function pointer!");
+    return kTfLiteError;
   }
-  return runner->scratch_buffers_[buffer_index];
+
+  registration_.free(&context_, node_.user_data);
+  return kTfLiteOk;
 }
-
-void KernelRunner::ReportOpError(struct TfLiteContext* context,
-                                 const char* format, ...) {
-  TFLITE_DCHECK(context != nullptr);
-  KernelRunner* runner = reinterpret_cast<KernelRunner*>(context->impl_);
-  TFLITE_DCHECK(runner != nullptr);
-
-  va_list args;
-  va_start(args, format);
-  TF_LITE_REPORT_ERROR(runner->error_reporter_, format, args);
-  va_end(args);
-}
-
 }  // namespace micro
 }  // namespace tflite

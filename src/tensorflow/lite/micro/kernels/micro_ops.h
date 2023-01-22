@@ -1,4 +1,4 @@
-/* Copyright 2019 The TensorFlow Authors. All Rights Reserved.
+/* Copyright 2022 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -31,53 +31,89 @@ namespace tflite {
 // (https://abseil.io/tips/130). Any new ops (or cleanup of existing ops should
 // have their Register function declarations in the tflite namespace.
 
-TfLiteRegistration Register_CONV_2D();
+TfLiteRegistration Register_ADD();
+TfLiteRegistration Register_ADD_N();
+TfLiteRegistration Register_ARG_MAX();
+TfLiteRegistration Register_ARG_MIN();
+TfLiteRegistration Register_ASSIGN_VARIABLE();
+TfLiteRegistration Register_AVERAGE_POOL_2D();
+TfLiteRegistration Register_BATCH_TO_SPACE_ND();
+TfLiteRegistration Register_BROADCAST_ARGS();
+TfLiteRegistration Register_BROADCAST_TO();
+TfLiteRegistration Register_CALL_ONCE();
+TfLiteRegistration Register_CAST();
+// TODO(b/160234179): Change custom OPs to also return by value.
+TfLiteRegistration* Register_CIRCULAR_BUFFER();
+TfLiteRegistration Register_CUMSUM();
+TfLiteRegistration Register_DEPTH_TO_SPACE();
 TfLiteRegistration Register_DEPTHWISE_CONV_2D();
+TfLiteRegistration Register_DEQUANTIZE();
+TfLiteRegistration Register_DIV();
+TfLiteRegistration Register_ELU();
+TfLiteRegistration Register_EXP();
+TfLiteRegistration Register_EXPAND_DIMS();
+TfLiteRegistration Register_FILL();
+TfLiteRegistration Register_FLOOR_DIV();
+TfLiteRegistration Register_FLOOR_MOD();
+TfLiteRegistration Register_GATHER();
+TfLiteRegistration Register_GATHER_ND();
+TfLiteRegistration Register_HARD_SWISH();
+TfLiteRegistration Register_IF();
+TfLiteRegistration Register_L2_POOL_2D();
+TfLiteRegistration Register_LEAKY_RELU();
+TfLiteRegistration Register_LOG_SOFTMAX();
+TfLiteRegistration Register_LOGICAL_AND();
+TfLiteRegistration Register_LOGICAL_OR();
+TfLiteRegistration Register_LOGISTIC();
+TfLiteRegistration Register_MAX_POOL_2D();
+TfLiteRegistration Register_MIRROR_PAD();
+TfLiteRegistration Register_NEG();
+TfLiteRegistration Register_PRELU();
+TfLiteRegistration Register_MUL();
+TfLiteRegistration Register_PACK();
+TfLiteRegistration Register_PAD();
+TfLiteRegistration Register_PADV2();
 TfLiteRegistration Register_QUANTIZE();
+TfLiteRegistration Register_READ_VARIABLE();
+TfLiteRegistration Register_RELU();
+TfLiteRegistration Register_RELU6();
+TfLiteRegistration Register_RESIZE_BILINEAR();
+TfLiteRegistration Register_SELECT_V2();
 TfLiteRegistration Register_SHAPE();
-TfLiteRegistration Register_SOFTMAX();
+TfLiteRegistration Register_SLICE();
+TfLiteRegistration Register_SPACE_TO_BATCH_ND();
+TfLiteRegistration Register_SPACE_TO_DEPTH();
+TfLiteRegistration Register_SQUARED_DIFFERENCE();
+TfLiteRegistration Register_SQUEEZE();
+TfLiteRegistration Register_SUB();
+TfLiteRegistration Register_SUM();
 TfLiteRegistration Register_SVDF();
+TfLiteRegistration Register_TRANSPOSE();
+TfLiteRegistration Register_TRANSPOSE_CONV();
+// TODO(b/230666079): resolve conflict with xtensa implementation
+TfLiteRegistration Register_UNIDIRECTIONAL_SEQUENCE_LSTM();
+TfLiteRegistration Register_VAR_HANDLE();
+TfLiteRegistration Register_WHILE();
+TfLiteRegistration Register_ZEROS_LIKE();
 
 namespace ops {
 namespace micro {
 
 TfLiteRegistration Register_ABS();
-TfLiteRegistration Register_ADD();
-TfLiteRegistration Register_ARG_MAX();
-TfLiteRegistration Register_ARG_MIN();
-TfLiteRegistration Register_AVERAGE_POOL_2D();
 TfLiteRegistration Register_CEIL();
-// TODO(b/160234179): Change custom OPs to also return by value.
-TfLiteRegistration* Register_CIRCULAR_BUFFER();
 TfLiteRegistration Register_CONCATENATION();
 TfLiteRegistration Register_COS();
-TfLiteRegistration Register_DEQUANTIZE();
 TfLiteRegistration Register_EQUAL();
 TfLiteRegistration Register_FLOOR();
 TfLiteRegistration Register_GREATER();
 TfLiteRegistration Register_GREATER_EQUAL();
-TfLiteRegistration Register_HARD_SWISH();
 TfLiteRegistration Register_LESS();
 TfLiteRegistration Register_LESS_EQUAL();
 TfLiteRegistration Register_LOG();
-TfLiteRegistration Register_LOGICAL_AND();
 TfLiteRegistration Register_LOGICAL_NOT();
-TfLiteRegistration Register_LOGICAL_OR();
-TfLiteRegistration Register_LOGISTIC();
 TfLiteRegistration Register_MAXIMUM();
-TfLiteRegistration Register_MAX_POOL_2D();
-TfLiteRegistration Register_MEAN();
 TfLiteRegistration Register_MINIMUM();
-TfLiteRegistration Register_MUL();
-TfLiteRegistration Register_NEG();
 TfLiteRegistration Register_NOT_EQUAL();
-TfLiteRegistration Register_PACK();
-TfLiteRegistration Register_PAD();
-TfLiteRegistration Register_PADV2();
-TfLiteRegistration Register_PRELU();
-TfLiteRegistration Register_REDUCE_MAX();
-TfLiteRegistration Register_RELU();
-TfLiteRegistration Register_RELU6();
 TfLiteRegistration Register_RESHAPE();
 TfLiteRegistration Register_RESIZE_NEAREST_NEIGHBOR();
 TfLiteRegistration Register_ROUND();
@@ -88,7 +124,6 @@ TfLiteRegistration Register_SPLIT_V();
 TfLiteRegistration Register_SQRT();
 TfLiteRegistration Register_SQUARE();
 TfLiteRegistration Register_STRIDED_SLICE();
-TfLiteRegistration Register_SUB();
 TfLiteRegistration Register_UNPACK();
 TfLiteRegistration Register_L2_NORMALIZATION();
 TfLiteRegistration Register_TANH();

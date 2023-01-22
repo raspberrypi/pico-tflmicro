@@ -19,6 +19,7 @@ limitations under the License.
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
+#include <limits>
 
 #include "tensorflow/lite/c/common.h"
 
@@ -27,6 +28,12 @@ namespace tflite {
 // Returns number of elements in the shape array.
 
 int ElementCount(const TfLiteIntArray& dims);
+
+size_t EvalTensorBytes(const TfLiteEvalTensor* tensor);
+
+// C++11 does not support constexpr max; hence, use ternary conditional to
+// create our own constexpr Max function.
+constexpr int Max(int a, int b) { return a >= b ? a : b; }
 
 // Converts a float value into a quantized value.  Note that large values (close
 // to max int and min int) may see significant error due to a lack of floating
@@ -43,11 +50,13 @@ T FloatToQuantizedType(const float value, const float scale, int zero_point) {
 
 template <typename T>
 T FloatToSymmetricQuantizedType(const float value, const float scale) {
-  int32_t result = round(value / scale);
-  result =
-      std::max(static_cast<int32_t>(std::numeric_limits<T>::min() + 1), result);
-  result =
-      std::min(static_cast<int32_t>(std::numeric_limits<T>::max()), result);
+  // 64-bit values are required since 8x16 conv accumulates to int64, meaning
+  // an int64 bias is required.
+  std::int64_t result = round(value / scale);
+  result = std::max(
+      static_cast<std::int64_t>(std::numeric_limits<T>::min() + 1), result);
+  result = std::min(static_cast<std::int64_t>(std::numeric_limits<T>::max()),
+                    result);
   return result;
 }
 
@@ -95,7 +104,8 @@ void SignedSymmetricPerChannelQuantize(const float* values,
                                        TfLiteIntArray* dims,
                                        int quantized_dimension,
                                        int8_t* quantized_values,
-                                       float* scaling_factor);
+                                       float* scaling_factor,
+                                       TfLiteType type = kTfLiteNoType);
 
 // Quantizes inputs based on the values provided, choosing the smallest range
 // which includes all input values.
@@ -126,6 +136,24 @@ void Dequantize(const T* values, const int size, const float scale,
                 int zero_point, float* dequantized_values) {
   for (int i = 0; i < size; ++i) {
     dequantized_values[i] = (values[i] - zero_point) * scale;
+  }
+}
+
+// based on TfLiteType passed in to these functions the corresponding max / min
+// int for that type are returned
+inline int QMinFromTfLiteType(TfLiteType type) {
+  if (type == kTfLiteInt4) {
+    return -8;
+  } else {
+    return std::numeric_limits<int8_t>::min();
+  }
+}
+
+inline int QMaxFromTfLiteType(TfLiteType type) {
+  if (type == kTfLiteInt4) {
+    return 7;
+  } else {
+    return std::numeric_limits<int8_t>::max();
   }
 }
 

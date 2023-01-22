@@ -1,8 +1,11 @@
-/* Copyright 2018 The TensorFlow Authors. All Rights Reserved.
+/* Copyright 2022 The TensorFlow Authors. All Rights Reserved.
+
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
+
     http://www.apache.org/licenses/LICENSE-2.0
+
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,24 +23,46 @@ AllOpsResolver::AllOpsResolver() {
   // Please keep this list of Builtin Operators in alphabetical order.
   AddAbs();
   AddAdd();
+  AddAddN();
   AddArgMax();
   AddArgMin();
+  AddAssignVariable();
   AddAveragePool2D();
+  AddBatchToSpaceNd();
+  AddBroadcastArgs();
+  AddBroadcastTo();
+  AddCallOnce();
+  AddCast();
   AddCeil();
+  AddCircularBuffer();
   AddConcatenation();
   AddConv2D();
   AddCos();
+  AddCumSum();
+  AddDepthToSpace();
   AddDepthwiseConv2D();
   AddDequantize();
   AddDetectionPostprocess();
+  AddDiv();
+  AddElu();
   AddEqual();
   AddEthosU();
+  AddExp();
+  AddExpandDims();
+  AddFill();
   AddFloor();
+  AddFloorDiv();
+  AddFloorMod();
   AddFullyConnected();
+  AddGather();
+  AddGatherNd();
   AddGreater();
   AddGreaterEqual();
   AddHardSwish();
+  AddIf();
   AddL2Normalization();
+  AddL2Pool2D();
+  AddLeakyRelu();
   AddLess();
   AddLessEqual();
   AddLog();
@@ -45,10 +70,12 @@ AllOpsResolver::AllOpsResolver() {
   AddLogicalNot();
   AddLogicalOr();
   AddLogistic();
-  AddMaximum();
+  AddLogSoftmax();
   AddMaxPool2D();
+  AddMaximum();
   AddMean();
   AddMinimum();
+  AddMirrorPad();
   AddMul();
   AddNeg();
   AddNotEqual();
@@ -57,25 +84,40 @@ AllOpsResolver::AllOpsResolver() {
   AddPadV2();
   AddPrelu();
   AddQuantize();
+  AddReadVariable();
   AddReduceMax();
   AddRelu();
   AddRelu6();
   AddReshape();
+  AddResizeBilinear();
   AddResizeNearestNeighbor();
   AddRound();
   AddRsqrt();
+  AddSelectV2();
   AddShape();
   AddSin();
+  AddSlice();
   AddSoftmax();
+  AddSpaceToBatchNd();
+  AddSpaceToDepth();
   AddSplit();
   AddSplitV();
   AddSqrt();
   AddSquare();
+  AddSquaredDifference();
+  AddSqueeze();
   AddStridedSlice();
   AddSub();
+  AddSum();
   AddSvdf();
   AddTanh();
+  AddTranspose();
+  AddTransposeConv();
+  AddUnidirectionalSequenceLSTM();
   AddUnpack();
+  AddVarHandle();
+  AddWhile();
+  AddZerosLike();
 }
 
 }  // namespace tflite

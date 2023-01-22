@@ -18,11 +18,10 @@ limitations under the License.
 #include <cstddef>
 #include <cstdint>
 
-#include "flatbuffers/flatbuffers.h"  // from @flatbuffers
+#include "third_party/flatbuffers/include/flatbuffers/flatbuffers.h"
 #include "tensorflow/lite/c/common.h"
-#include "tensorflow/lite/core/api/error_reporter.h"
-#include "tensorflow/lite/core/api/flatbuffer_conversions.h"
 #include "tensorflow/lite/kernels/internal/tensor_ctypes.h"
+#include "tensorflow/lite/micro/tflite_bridge/flatbuffer_conversions_bridge.h"
 #include "tensorflow/lite/schema/schema_generated.h"
 
 namespace tflite {
@@ -48,14 +47,23 @@ size_t AlignSizeUp(size_t size, size_t alignment) {
 
 TfLiteStatus TfLiteTypeSizeOf(TfLiteType type, size_t* size) {
   switch (type) {
+    case kTfLiteFloat16:
+      *size = sizeof(int16_t);
+      break;
     case kTfLiteFloat32:
       *size = sizeof(float);
+      break;
+    case kTfLiteFloat64:
+      *size = sizeof(double);
       break;
     case kTfLiteInt16:
       *size = sizeof(int16_t);
       break;
     case kTfLiteInt32:
       *size = sizeof(int32_t);
+      break;
+    case kTfLiteUInt32:
+      *size = sizeof(uint32_t);
       break;
     case kTfLiteUInt8:
       *size = sizeof(uint8_t);
@@ -72,11 +80,17 @@ TfLiteStatus TfLiteTypeSizeOf(TfLiteType type, size_t* size) {
     case kTfLiteBool:
       *size = sizeof(bool);
       break;
+    case kTfLiteResource:
+      *size = sizeof(int32_t);
+      break;
     case kTfLiteComplex64:
       *size = sizeof(float) * 2;
       break;
     case kTfLiteComplex128:
       *size = sizeof(double) * 2;
+      break;
+    case kTfLiteInt4:
+      *size = sizeof(int8_t);
       break;
     default:
       return kTfLiteError;
@@ -85,8 +99,7 @@ TfLiteStatus TfLiteTypeSizeOf(TfLiteType type, size_t* size) {
 }
 
 TfLiteStatus BytesRequiredForTensor(const tflite::Tensor& flatbuffer_tensor,
-                                    size_t* bytes, size_t* type_size,
-                                    ErrorReporter* error_reporter) {
+                                    size_t* bytes, size_t* type_size) {
   int element_count = 1;
   // If flatbuffer_tensor.shape == nullptr, then flatbuffer_tensor is a scalar
   // so has 1 element.
@@ -97,8 +110,8 @@ TfLiteStatus BytesRequiredForTensor(const tflite::Tensor& flatbuffer_tensor,
   }
 
   TfLiteType tf_lite_type;
-  TF_LITE_ENSURE_STATUS(ConvertTensorType(flatbuffer_tensor.type(),
-                                          &tf_lite_type, error_reporter));
+  TF_LITE_ENSURE_STATUS(
+      ConvertTensorType(flatbuffer_tensor.type(), &tf_lite_type));
   TF_LITE_ENSURE_STATUS(TfLiteTypeSizeOf(tf_lite_type, type_size));
   *bytes = element_count * (*type_size);
   return kTfLiteOk;

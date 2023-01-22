@@ -16,15 +16,13 @@ limitations under the License.
 #ifndef TENSORFLOW_LITE_MICRO_TEST_HELPERS_H_
 #define TENSORFLOW_LITE_MICRO_TEST_HELPERS_H_
 
-// Useful functions for writing tests.
-
 #include <cstdint>
 #include <limits>
 
-#include "flatbuffers/flatbuffers.h"  // from @flatbuffers
-#include "tensorflow/lite//kernels/internal/tensor_ctypes.h"
+#include "third_party/flatbuffers/include/flatbuffers/flatbuffers.h"
 #include "tensorflow/lite/c/common.h"
 #include "tensorflow/lite/kernels/internal/compatibility.h"
+#include "tensorflow/lite/kernels/internal/tensor_ctypes.h"
 #include "tensorflow/lite/micro/all_ops_resolver.h"
 #include "tensorflow/lite/micro/micro_utils.h"
 #include "tensorflow/lite/portable_type_to_tflitetype.h"
@@ -90,6 +88,19 @@ class MultipleInputs {
   static bool freed_;
 };
 
+// A simple no-op operator.
+class NoOp {
+ public:
+  static const TfLiteRegistration* getRegistration();
+  static TfLiteRegistration* GetMutableRegistration();
+  static void* Init(TfLiteContext* context, const char* buffer, size_t length);
+  static void Free(TfLiteContext* context, void* buffer);
+  static TfLiteStatus Prepare(TfLiteContext* context, TfLiteNode* node);
+  static TfLiteStatus Invoke(TfLiteContext* context, TfLiteNode* node);
+
+  static bool freed_;
+};
+
 // Returns an Op Resolver that can be used in the testing code.
 AllOpsResolver GetOpResolver();
 
@@ -100,6 +111,12 @@ const Model* GetSimpleMockModel();
 // Returns a flatbuffer TensorFlow Lite model with more inputs, variable
 // tensors, and operators.
 const Model* GetComplexMockModel();
+
+// Returns a simple example flatbuffer TensorFlow Lite model. Contains 1 input,
+// 1 layer of weights, 1 output Tensor, and 1 operator.
+// The size of all three tensors is 256 x 256, which is larger than what other
+// models provide from this test helper.
+const Model* GetModelWith256x256Tensor();
 
 // Returns a simple flatbuffer model with two branches.
 const Model* GetSimpleModelWithBranch();
@@ -126,8 +143,32 @@ const Model* GetModelWithOfflinePlanning(int num_tensors,
                                          int num_conns,
                                          int num_subgraph_inputs = 0);
 
+// Returns a flatbuffer with a single operator, two inputs (one unused) and one
+// output.
+const Model* GetModelWithUnusedInputs();
+
+// Returns a flatbuffer with a single operator, zero inputs and two outputs
+// (one unused).
+const Model* GetModelWithUnusedOperatorOutputs();
+
 // Returns a flatbuffer model with `simple_stateful_op`
 const Model* GetSimpleStatefulModel();
+
+// Returns a flatbuffer model with "if" and two subgraphs.
+const Model* GetSimpleModelWithSubgraphsAndIf();
+
+// Returns a flatbuffer model with "if" and two subgraphs one of which is empty.
+const Model* GetSimpleModelWithIfAndEmptySubgraph();
+
+// Returns a flatbuffer model with "while" and three subgraphs.
+const Model* GetSimpleModelWithSubgraphsAndWhile();
+
+// Returns a flatbuffer model with "if" and two subgraphs and the input tensor 1
+// of "if" subgraph overlaps with the input tensor 2 of subgraph 1.
+const Model* GetModelWithIfAndSubgraphInputTensorOverlap();
+
+// Returns a flatbuffer model with null subgraph/operator inputs and outputs.
+const Model* GetSimpleModelWithNullInputsAndOutputs();
 
 // Builds a one-dimensional flatbuffer tensor of the given size.
 const Tensor* Create1dFlatbufferTensor(int size, bool is_variable = false);
@@ -146,45 +187,60 @@ CreateFlatbufferBuffers();
 // Performs a simple string comparison without requiring standard C library.
 int TestStrcmp(const char* a, const char* b);
 
-// Wrapper to forward kernel errors to the interpreter's error reporter.
-void ReportOpError(struct TfLiteContext* context, const char* format, ...);
-
 void PopulateContext(TfLiteTensor* tensors, int tensors_size,
                      TfLiteContext* context);
 
 // Create a TfLiteIntArray from an array of ints.  The first element in the
 // supplied array must be the size of the array expressed as an int.
-TfLiteIntArray* IntArrayFromInts(const int* int_array);
+TfLiteIntArray* IntArrayFromInts(int* int_array);
 
 // Create a TfLiteFloatArray from an array of floats.  The first element in the
 // supplied array must be the size of the array expressed as a float.
 TfLiteFloatArray* FloatArrayFromFloats(const float* floats);
 
+// Assumes that `src_tensor` is a buffer where each element is a 4-bit value
+// stored in 8-bit.
+// Returns a new buffer that is packed densely with 2 4-bit values in a byte.
+// The packing format is low-bits-first, i.e. the lower nibble of a byte is
+// filled first, followed by the upper nibble.
+void PackInt4ValuesDenselyInPlace(uint8_t* src_buffer, int buffer_size);
+
 template <typename T>
 TfLiteTensor CreateTensor(const T* data, TfLiteIntArray* dims,
-                          const bool is_variable = false) {
+                          const bool is_variable = false,
+                          TfLiteType type = kTfLiteNoType) {
   TfLiteTensor result;
   result.dims = dims;
   result.params = {};
   result.quantization = {kTfLiteNoQuantization, nullptr};
   result.is_variable = is_variable;
   result.allocation_type = kTfLiteMemNone;
-  result.type = typeToTfLiteType<T>();
-  // Const cast is used to allow passing in const and non-const arrays within a
-  // single CreateTensor method. A Const array should be used for immutable
-  // input tensors and non-const array should be used for mutable and output
-  // tensors.
   result.data.data = const_cast<T*>(data);
   result.quantization = {kTfLiteAffineQuantization, nullptr};
   result.bytes = ElementCount(*dims) * sizeof(T);
+  result.data.data = const_cast<T*>(data);
+
+  if (type == kTfLiteInt4) {
+    result.type = kTfLiteInt4;
+    PackInt4ValuesDenselyInPlace(tflite::GetTensorData<uint8_t>(&result),
+                                 ElementCount(*dims));
+    result.bytes = ((ElementCount(*dims) + 1) / 2);
+  } else {
+    // Const cast is used to allow passing in const and non-const arrays within
+    // a single CreateTensor method. A Const array should be used for immutable
+    // input tensors and non-const array should be used for mutable and output
+    // tensors.
+    result.type = typeToTfLiteType<T>();
+  }
   return result;
 }
 
 template <typename T>
 TfLiteTensor CreateQuantizedTensor(const T* data, TfLiteIntArray* dims,
                                    const float scale, const int zero_point = 0,
-                                   const bool is_variable = false) {
-  TfLiteTensor result = CreateTensor(data, dims, is_variable);
+                                   const bool is_variable = false,
+                                   TfLiteType type = kTfLiteNoType) {
+  TfLiteTensor result = CreateTensor(data, dims, is_variable, type);
   result.params = {scale, zero_point};
   result.quantization = {kTfLiteAffineQuantization, nullptr};
   return result;
@@ -193,13 +249,26 @@ TfLiteTensor CreateQuantizedTensor(const T* data, TfLiteIntArray* dims,
 template <typename T>
 TfLiteTensor CreateQuantizedTensor(const float* input, T* quantized,
                                    TfLiteIntArray* dims, float scale,
-                                   int zero_point, bool is_variable = false) {
+                                   int zero_point, bool is_variable = false,
+                                   TfLiteType type = kTfLiteNoType) {
   int input_size = ElementCount(*dims);
   tflite::Quantize(input, quantized, input_size, scale, zero_point);
-  return CreateQuantizedTensor(quantized, dims, scale, zero_point, is_variable);
+  return CreateQuantizedTensor(quantized, dims, scale, zero_point, is_variable,
+                               type);
 }
 
+TfLiteTensor CreateQuantizedBiasTensor(const float* data, int16_t* quantized,
+                                       TfLiteIntArray* dims, float input_scale,
+                                       float weights_scale,
+                                       bool is_variable = false);
+
 TfLiteTensor CreateQuantizedBiasTensor(const float* data, int32_t* quantized,
+                                       TfLiteIntArray* dims, float input_scale,
+                                       float weights_scale,
+                                       bool is_variable = false);
+
+TfLiteTensor CreateQuantizedBiasTensor(const float* data,
+                                       std::int64_t* quantized,
                                        TfLiteIntArray* dims, float input_scale,
                                        float weights_scale,
                                        bool is_variable = false);
@@ -212,10 +281,19 @@ TfLiteTensor CreatePerChannelQuantizedBiasTensor(
     TfLiteAffineQuantization* affine_quant, int quantized_dimension,
     bool is_variable = false);
 
+// Quantizes int64_t bias tensor with per-channel weights determined by input
+// scale multiplied by weight scale for each channel.
+TfLiteTensor CreatePerChannelQuantizedBiasTensor(
+    const float* input, std::int64_t* quantized, TfLiteIntArray* dims,
+    float input_scale, float* weight_scales, float* scales, int* zero_points,
+    TfLiteAffineQuantization* affine_quant, int quantized_dimension,
+    bool is_variable = false);
+
 TfLiteTensor CreateSymmetricPerChannelQuantizedTensor(
     const float* input, int8_t* quantized, TfLiteIntArray* dims, float* scales,
     int* zero_points, TfLiteAffineQuantization* affine_quant,
-    int quantized_dimension, bool is_variable = false);
+    int quantized_dimension, bool is_variable = false,
+    TfLiteType tensor_weight_type = kTfLiteNoType);
 
 // Returns the number of tensors in the default subgraph for a tflite::Model.
 size_t GetModelTensorCount(const Model* model);

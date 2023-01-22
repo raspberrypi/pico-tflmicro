@@ -1,4 +1,4 @@
-/* Copyright 2019 The TensorFlow Authors. All Rights Reserved.
+/* Copyright 2022 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,11 +17,10 @@ limitations under the License.
 #include "tensorflow/lite/c/common.h"
 #include "tensorflow/lite/kernels/internal/tensor_ctypes.h"
 #include "tensorflow/lite/micro/kernels/kernel_util.h"
+#include "tensorflow/lite/micro/micro_log.h"
 
 namespace tflite {
-namespace ops {
-namespace micro {
-namespace pack {
+
 namespace {
 
 constexpr int kOutputTensor = 0;
@@ -82,10 +81,6 @@ TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
       return PackImpl<float>(context, node, output, data->values_count,
                              data->axis);
     }
-    case kTfLiteUInt8: {
-      return PackImpl<uint8_t>(context, node, output, data->values_count,
-                               data->axis);
-    }
     case kTfLiteInt8: {
       return PackImpl<int8_t>(context, node, output, data->values_count,
                               data->axis);
@@ -99,8 +94,8 @@ TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
                                data->axis);
     }
     default: {
-      TF_LITE_KERNEL_LOG(context, "Type '%s' is not supported by pack.",
-                         TfLiteTypeGetName(output->type));
+      MicroPrintf("Type '%s' is not supported by pack.",
+                  TfLiteTypeGetName(output->type));
       return kTfLiteError;
     }
   }
@@ -109,19 +104,9 @@ TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
 }
 
 }  // namespace
-}  // namespace pack
 
 TfLiteRegistration Register_PACK() {
-  return {/*init=*/nullptr,
-          /*free=*/nullptr,
-          /*prepare=*/nullptr,
-          /*invoke=*/pack::Eval,
-          /*profiling_string=*/nullptr,
-          /*builtin_code=*/0,
-          /*custom_name=*/nullptr,
-          /*version=*/0};
+  return tflite::micro::RegisterOp(nullptr, nullptr, Eval);
 }
 
-}  // namespace micro
-}  // namespace ops
 }  // namespace tflite

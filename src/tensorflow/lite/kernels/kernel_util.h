@@ -18,9 +18,12 @@ limitations under the License.
 #include <stdint.h>
 
 #include <limits>
+#ifndef ARDUINO
+#include <string>
+#endif  // ARDUINO
 
-#include "tensorflow/lite/c/builtin_op_data.h"
-#include "tensorflow/lite/c/common.h"
+#include "tensorflow/lite/core/c/builtin_op_data.h"
+#include "tensorflow/lite/core/c/common.h"
 
 namespace tflite {
 
@@ -94,7 +97,7 @@ TfLiteStatus GetOutputSafe(const TfLiteContext* context, const TfLiteNode* node,
 const TfLiteTensor* GetOptionalInputTensor(const TfLiteContext* context,
                                            const TfLiteNode* node, int index);
 
-#ifndef TF_LITE_STATIC_MEMORY
+#ifndef ARDUINO
 // Note: You must check if result is not null:
 //
 //   TfLiteTensor* my_tensor = GetTemporary(context, node, kMyTensorIdx);
@@ -142,21 +145,25 @@ const TfLiteTensor* GetIntermediates(TfLiteContext* context,
 TfLiteStatus GetIntermediatesSafe(const TfLiteContext* context,
                                   const TfLiteNode* node, int index,
                                   TfLiteTensor** tensor);
-#endif  // TF_LITE_STATIC_MEMORY
+#endif  // ARDUINO
 
 inline int NumDimensions(const TfLiteTensor* t) { return t->dims->size; }
 inline int SizeOfDimension(const TfLiteTensor* t, int dim) {
   return t->dims->data[dim];
 }
 
-inline int NumInputs(const TfLiteNode* node) { return node->inputs->size; }
-inline int NumOutputs(const TfLiteNode* node) { return node->outputs->size; }
+inline int NumInputs(const TfLiteNode* node) {
+  return node->inputs == nullptr ? 0 : node->inputs->size;
+}
+inline int NumOutputs(const TfLiteNode* node) {
+  return node->outputs == nullptr ? 0 : node->outputs->size;
+}
 
-#ifndef TF_LITE_STATIC_MEMORY
+#ifndef ARDUINO
 inline int NumIntermediates(const TfLiteNode* node) {
   return node->intermediates->size;
 }
-#endif  // TF_LITE_STATIC_MEMORY
+#endif  // ARDUINO
 
 inline int64_t NumElements(const TfLiteIntArray* dims) {
   int64_t count = 1;
@@ -170,6 +177,14 @@ inline int64_t NumElements(const TfLiteTensor* t) {
   return NumElements(t->dims);
 }
 
+inline int64_t NumElements(const int* dims, int num_dims) {
+  int64_t count = 1;
+  for (int i = 0; i < num_dims; ++i) {
+    count *= dims[i];
+  }
+  return count;
+}
+
 // Determines whether tensor is constant.
 // TODO(b/138199592): Introduce new query which checks for constant OR
 // persistent-read-only, which would be useful for most tensor kernels that
@@ -177,6 +192,11 @@ inline int64_t NumElements(const TfLiteTensor* t) {
 // time of prepare.
 inline bool IsConstantTensor(const TfLiteTensor* tensor) {
   return tensor->allocation_type == kTfLiteMmapRo;
+}
+
+inline bool IsConstantOrPersistentTensor(const TfLiteTensor* tensor) {
+  return IsConstantTensor(tensor) ||
+         (tensor->allocation_type == kTfLitePersistentRo);
 }
 
 // Determines whether tensor is dynamic. Note that a tensor can be non-const and
@@ -214,14 +234,15 @@ TfLiteStatus PopulateConvolutionQuantizationParams(
     const TfLiteTensor* filter, const TfLiteTensor* bias, TfLiteTensor* output,
     const TfLiteFusedActivation& activation, int32_t* multiplier, int* shift,
     int32_t* output_activation_min, int32_t* output_activation_max,
-    int32_t* per_channel_multiplier, int* per_channel_shift);
+    int32_t* per_channel_multiplier, int32_t* per_channel_shift);
 
 TfLiteStatus PopulateConvolutionQuantizationParams(
     TfLiteContext* context, const TfLiteTensor* input,
     const TfLiteTensor* filter, const TfLiteTensor* bias, TfLiteTensor* output,
     const TfLiteFusedActivation& activation, int32_t* multiplier, int* shift,
     int32_t* output_activation_min, int32_t* output_activation_max,
-    int32_t* per_channel_multiplier, int* per_channel_shift, int num_channels);
+    int32_t* per_channel_multiplier, int32_t* per_channel_shift,
+    int num_channels);
 
 // Calculates the multiplication factor for a quantized convolution (or
 // quantized depthwise convolution) involving the given tensors. Returns an
@@ -270,6 +291,16 @@ void CalculateActivationRange(TfLiteFusedActivation activation,
 // Return true if the given tensors have the same shape.
 bool HaveSameShapes(const TfLiteTensor* input1, const TfLiteTensor* input2);
 
+#if !defined(ARDUINO)
+// Gets the output shape from the input tensor.
+TfLiteStatus GetOutputShapeFromInput(TfLiteContext* context,
+                                     const TfLiteTensor* input,
+                                     TfLiteIntArray** output_shape);
+
+const std::string GetShapeDebugString(const TfLiteIntArray* shape);
+
+#endif  // !defined(ARDUINO)
+
 // Calculates the output_shape that is necessary for element-wise operations
 // with broadcasting involving the two input tensors.
 TfLiteStatus CalculateShapeForBroadcast(TfLiteContext* context,
@@ -285,8 +316,14 @@ TfLiteStatus CalculateShapeForBroadcast(TfLiteContext* context,
                                         const TfLiteTensor* input3,
                                         TfLiteIntArray** output_shape);
 
-// Return the size of given type in bytes. Return 0 in in case of string.
+// Return the size of given type in bytes. Return 0 in case of string.
 int TfLiteTypeGetSize(TfLiteType type);
+
+// Whether the current platform is mobile (Android or iOS).
+bool IsMobilePlatform();
+
+// Returns whether there is unspecified dimension in the tensor's dim signature.
+bool HasUnspecifiedDimension(const TfLiteTensor* tensor);
 
 }  // namespace tflite
 
