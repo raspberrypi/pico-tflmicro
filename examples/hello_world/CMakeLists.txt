@@ -36,6 +36,9 @@ target_link_libraries(
   pico-tflmicro_test
 )
 
+pico_enable_stdio_usb(hello_world_test 1)
+pico_enable_stdio_uart(hello_world_test 0)
+
 pico_add_extra_outputs(hello_world_test)
 
 
@@ -73,6 +76,9 @@ target_link_libraries(
   pico-tflmicro
   hardware_pwm
 )
+
+pico_enable_stdio_usb(hello_world 1)
+pico_enable_stdio_uart(hello_world 0)
 
 pico_add_extra_outputs(hello_world)
 

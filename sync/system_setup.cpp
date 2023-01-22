@@ -37,26 +37,23 @@ limitations under the License.
 #include <stdio.h>
 
 #include "pico/stdlib.h"
-#endif
+#endif  // TF_LITE_STRIP_ERROR_STRINGS
 
 namespace tflite {
 
 void InitializeTarget() {
-    // Do nothing.
+#ifndef TF_LITE_STRIP_ERROR_STRINGS
+  stdio_init_all();
+#endif  // TF_LITE_STRIP_ERROR_STRINGS
 }
 
 }  // namespace tflite
 
 extern "C" void DebugLog(const char* s) {
 #ifndef TF_LITE_STRIP_ERROR_STRINGS
-  static bool has_uart_been_set_up = false;
-  if (!has_uart_been_set_up) {
-    setup_default_uart();
-    has_uart_been_set_up = true;
-  }
   // Reusing TF_LITE_STRIP_ERROR_STRINGS to disable DebugLog completely to get
   // maximum reduction in binary size. This is because we have DebugLog calls
   // via TF_LITE_CHECK that are not stubbed out by TF_LITE_REPORT_ERROR.
   printf("%s", s);
-#endif
+#endif  // TF_LITE_STRIP_ERROR_STRINGS
 }
