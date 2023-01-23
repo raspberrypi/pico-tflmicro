@@ -47,6 +47,7 @@ set_target_properties(
 target_link_libraries(
   pico-tflmicro
   pico_stdlib
+  pico_multicore
 )
 
 target_sources(pico-tflmicro
@@ -88,6 +89,7 @@ set_target_properties(
 target_link_libraries(
   pico-tflmicro_test
   pico_stdlib
+  pico_multicore
 )
 
 add_subdirectory("examples/hello_world")

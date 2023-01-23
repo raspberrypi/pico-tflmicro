@@ -39,12 +39,10 @@ This repository (https://github.com/raspberrypi/pico-tflmicro) is read-only, bec
 it has been automatically generated from the master TensorFlow repository at
 https://github.com/tensorflow/tensorflow. This means that all issues and pull requests
 need to be filed there. You can generate a version of this generated project by
-running the commands:
+running the command:
 
 ```
-git clone https://github.com/tensorflow/tensorflow
-cd tensorflow
-tensorflow/lite/micro/tools/project/generate.py rp2 pico-tflmicro
+sync/sync_with_upstream.sh
 ```
 
 This should create a Pico-compatible project from the latest version of the TensorFlow
@@ -66,4 +64,3 @@ has more details on the design and implementation of the framework.
 The TensorFlow source code is covered by the license described in src/tensorflow/LICENSE,
 components from other libraries have the appropriate licenses included in their
 third_party folders.
-
