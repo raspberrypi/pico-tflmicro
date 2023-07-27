@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -xe
 
 UPSTREAM_REPO_URL=https://github.com/tensorflow/tflite-micro-arduino-examples
 
@@ -24,7 +24,7 @@ rm -rf CMakeLists.txt
 SOURCE_LIST_FILE="$(mktemp /tmp/source_file_list.XXXXXXXXX)" || exit 1
 find src \( -iname "*.cpp" -o -iname "*.c" -o -iname "*.h" \) | \
   sort | \
-  sed -E 's#.*#\  ${CMAKE_CURRENT_LIST_DIR}/\0#g' \
+  sed -E 's#(.*)#\  ${CMAKE_CURRENT_LIST_DIR}/\1#g' \
   > ${SOURCE_LIST_FILE}
 
 sync/replace_string_with_file_contents.py \
