@@ -5,10 +5,13 @@ An Open Source Machine Learning Framework for Everyone.
 
 ## Introduction
 
-This is a version of the [TensorFlow Lite Micro library](https://www.tensorflow.org/lite/microcontrollers)
+This is an experimental version of the [TensorFlow Lite Micro library](https://www.tensorflow.org/lite/microcontrollers)
 for the Raspberry Pi Pico microcontroller. It allows you to run machine learning models to
 do things like voice recognition, detect people in images, recognize gestures from an accelerometer,
 and other sensor analysis tasks.
+The official repository is at [https://github.com/raspberrypi/pico-tflmicro](https://github.com/raspberrypi/pico-tflmicro)
+but this version has upstreamed changes from the Google codebase. It also takes
+advantage of the RP2040's dual cores for increased speed on some operations.
 
 ## Getting Started
 
@@ -35,11 +38,11 @@ are not included with the base microcontroller.
 
 ## Contributing
 
-This repository (https://github.com/raspberrypi/pico-tflmicro) is read-only, because
+This repository (https://github.com/usefulsensors/pico-tflmicro) is read-only, because
 it has been automatically generated from the master TensorFlow repository at
-https://github.com/tensorflow/tensorflow. This means that all issues and pull requests
-need to be filed there. You can generate a version of this generated project by
-running the command:
+https://github.com/tensorflow/tensorflow. It's maintained by @petewarden on a
+best effort basis, so bugs and PRs may not get addressed. You can generate an 
+updated version of this generated project by running the command:
 
 ```
 sync/sync_with_upstream.sh
