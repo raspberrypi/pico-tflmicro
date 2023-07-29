@@ -31,7 +31,7 @@
 #include "third_party/cmsis_nn/Include/arm_nnsupportfunctions.h"
 
 // Uncomment this to try the experimental dual core support on the RP2040.
-//#define TF_LITE_PICO_MULTICORE
+#define TF_LITE_PICO_MULTICORE
 
 #ifdef TF_LITE_PICO_MULTICORE
 
@@ -249,11 +249,6 @@ arm_cmsis_nn_status arm_nn_mat_mult_nt_t_s8(const q7_t *lhs,
                                             const int32_t activation_min,
                                             const int32_t activation_max)
 {    
-    const MatMulArgs core0_mat_mul_args = {0, lhs, rhs, bias, dst,
-        dst_multipliers, dst_shifts, lhs_rows, rhs_rows, rhs_cols, lhs_offset,
-        dst_offset, activation_min, activation_max};
-    mat_mul_task(&core0_mat_mul_args);
-
     // Start a parallel task on the second core of the RP2040.
     const MatMulArgs core1_mat_mul_args = {1, lhs, rhs, bias, dst,
         dst_multipliers, dst_shifts, lhs_rows, rhs_rows, rhs_cols, lhs_offset,
@@ -261,6 +256,11 @@ arm_cmsis_nn_status arm_nn_mat_mult_nt_t_s8(const q7_t *lhs,
     g_core1_mat_mul_args = core1_mat_mul_args;
     multicore_reset_core1();
     multicore_launch_core1(core1_mat_mul_worker);
+
+    const MatMulArgs core0_mat_mul_args = {0, lhs, rhs, bias, dst,
+        dst_multipliers, dst_shifts, lhs_rows, rhs_rows, rhs_cols, lhs_offset,
+        dst_offset, activation_min, activation_max};
+    mat_mul_task(&core0_mat_mul_args);
 
     // A result of ARM_CMSIS_NN_SUCCESS means success. Blocks until core 1 is
     // done.

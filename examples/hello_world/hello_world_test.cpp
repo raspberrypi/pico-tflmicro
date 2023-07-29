@@ -17,11 +17,10 @@ limitations under the License.
 
 #include "tensorflow/lite/micro/all_ops_resolver.h"
 #include "model.h"
-#include "tensorflow/lite/micro/micro_error_reporter.h"
+#include "tensorflow/lite/micro/tflite_bridge/micro_error_reporter.h"
 #include "tensorflow/lite/micro/micro_interpreter.h"
 #include "tensorflow/lite/micro/testing/micro_test.h"
 #include "tensorflow/lite/schema/schema_generated.h"
-#include "tensorflow/lite/version.h"
 
 TF_LITE_MICRO_TESTS_BEGIN
 
@@ -51,7 +50,7 @@ TF_LITE_MICRO_TEST(LoadModelAndPerformInference) {
 
   // Build an interpreter to run the model with
   tflite::MicroInterpreter interpreter(model, resolver, tensor_arena,
-                                       kTensorArenaSize, &micro_error_reporter);
+                                       kTensorArenaSize);
   // Allocate memory from the tensor_arena for the model's tensors
   TF_LITE_MICRO_EXPECT_EQ(interpreter.AllocateTensors(), kTfLiteOk);
 
@@ -59,7 +58,7 @@ TF_LITE_MICRO_TEST(LoadModelAndPerformInference) {
   TfLiteTensor* input = interpreter.input(0);
 
   // Make sure the input has the properties we expect
-  TF_LITE_MICRO_EXPECT_NE(nullptr, input);
+  TF_LITE_MICRO_EXPECT(input != nullptr);
   // The property "dims" tells us the tensor's shape. It has one element for
   // each dimension. Our input is a 2D tensor containing 1 element, so "dims"
   // should have size 2.

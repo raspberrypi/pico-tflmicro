@@ -1,68 +1,76 @@
-Original (over ten runs):
-DEPTHWISE_CONV_2D took lu ticks (34561 ms).
-DEPTHWISE_CONV_2D took lu ticks (60270 ms).
-CONV_2D took lu ticks (46264 ms).
-DEPTHWISE_CONV_2D took lu ticks (29554 ms).
-CONV_2D took lu ticks (31129 ms).
-DEPTHWISE_CONV_2D took lu ticks (57453 ms).
-CONV_2D took lu ticks (47209 ms).
-DEPTHWISE_CONV_2D took lu ticks (14471 ms).
-CONV_2D took lu ticks (23856 ms).
-DEPTHWISE_CONV_2D took lu ticks (27611 ms).
-CONV_2D took lu ticks (40094 ms).
-DEPTHWISE_CONV_2D took lu ticks (7013 ms).
-CONV_2D took lu ticks (21395 ms).
-DEPTHWISE_CONV_2D took lu ticks (15268 ms).
-CONV_2D took lu ticks (38805 ms).
-DEPTHWISE_CONV_2D took lu ticks (12980 ms).
-CONV_2D took lu ticks (38766 ms).
-DEPTHWISE_CONV_2D took lu ticks (13015 ms).
-CONV_2D took lu ticks (38739 ms).
-DEPTHWISE_CONV_2D took lu ticks (12987 ms).
-CONV_2D took lu ticks (38784 ms).
-DEPTHWISE_CONV_2D took lu ticks (12986 ms).
-CONV_2D took lu ticks (38744 ms).
-DEPTHWISE_CONV_2D took lu ticks (3519 ms).
-CONV_2D took lu ticks (23982 ms).
-DEPTHWISE_CONV_2D took lu ticks (5959 ms).
-CONV_2D took lu ticks (45617 ms).
-AVERAGE_POOL_2D took lu ticks (870 ms).
-CONV_2D took lu ticks (217 ms).
-RESHAPE took lu ticks (22 ms).
-SOFTMAX took lu ticks (338 ms).
-Total 782 ms
+Results of running person_detection_benchmark with and without multicore optimizations.
 
-Multi-core conv (over ten runs):
+To reproduce these, run `make person_detection_benchmark`, with and without the
+TF_LITE_PICO_MULTICORE macro defined at the top of src/third_party/cmsis_nn/Source/NNSup
+portFunctions/arm_nn_mat_mult_nt_t_s8.c
 
-DEPTHWISE_CONV_2D took lu ticks (34563 ms).
-DEPTHWISE_CONV_2D took lu ticks (60270 ms).
-CONV_2D took lu ticks (45210 ms).
-DEPTHWISE_CONV_2D took lu ticks (29574 ms).
-CONV_2D took lu ticks (30005 ms).
-DEPTHWISE_CONV_2D took lu ticks (57435 ms).
-CONV_2D took lu ticks (44857 ms).
-DEPTHWISE_CONV_2D took lu ticks (14463 ms).
-CONV_2D took lu ticks (22734 ms).
-DEPTHWISE_CONV_2D took lu ticks (27580 ms).
-CONV_2D took lu ticks (38809 ms).
-DEPTHWISE_CONV_2D took lu ticks (7017 ms).
-CONV_2D took lu ticks (20271 ms).
-DEPTHWISE_CONV_2D took lu ticks (15955 ms).
-CONV_2D took lu ticks (36588 ms).
-DEPTHWISE_CONV_2D took lu ticks (12997 ms).
-CONV_2D took lu ticks (36536 ms).
-DEPTHWISE_CONV_2D took lu ticks (13042 ms).
-CONV_2D took lu ticks (36537 ms).
-DEPTHWISE_CONV_2D took lu ticks (12986 ms).
-CONV_2D took lu ticks (36548 ms).
-DEPTHWISE_CONV_2D took lu ticks (12984 ms).
-CONV_2D took lu ticks (36547 ms).
-DEPTHWISE_CONV_2D took lu ticks (3522 ms).
-CONV_2D took lu ticks (23033 ms).
-DEPTHWISE_CONV_2D took lu ticks (5934 ms).
-CONV_2D took lu ticks (43677 ms).
-AVERAGE_POOL_2D took lu ticks (871 ms).
-CONV_2D took lu ticks (288 ms).
-RESHAPE took lu ticks (22 ms).
-SOFTMAX took lu ticks (340 ms).
-Total 761ms
+Without multicore CONV2D optimizations:
+
+NoPersonDataIterations(1) took 782572 ticks (782 ms)
+DEPTHWISE_CONV_2D took 34565 ticks (34 ms).
+DEPTHWISE_CONV_2D took 60267 ticks (60 ms).
+CONV_2D took 46251 ticks (46 ms).
+DEPTHWISE_CONV_2D took 29559 ticks (29 ms).
+CONV_2D took 31128 ticks (31 ms).
+DEPTHWISE_CONV_2D took 57462 ticks (57 ms).
+CONV_2D took 47209 ticks (47 ms).
+
+DEPTHWISE_CONV_2D took 14466 ticks (14 ms).
+CONV_2D took 23858 ticks (23 ms).
+DEPTHWISE_CONV_2D took 27623 ticks (27 ms).
+CONV_2D took 40101 ticks (40 ms).
+DEPTHWISE_CONV_2D took 7009 ticks (7 ms).
+CONV_2D took 21417 ticks (21 ms).
+DEPTHWISE_CONV_2D took 15295 ticks (15 ms).
+CONV_2D took 38763 ticks (38 ms).
+DEPTHWISE_CONV_2D took 12988 ticks (12 ms).
+CONV_2D took 38759 ticks (38 ms).
+DEPTHWISE_CONV_2D took 13028 ticks (13 ms).
+CONV_2D took 38781 ticks (38 ms).
+DEPTHWISE_CONV_2D took 12994 ticks (12 ms).
+CONV_2D took 38758 ticks (38 ms).
+DEPTHWISE_CONV_2D took 12977 ticks (12 ms).
+CONV_2D took 38719 ticks (38 ms).
+DEPTHWISE_CONV_2D took 3520 ticks (3 ms).
+CONV_2D took 23998 ticks (23 ms).
+DEPTHWISE_CONV_2D took 5973 ticks (5 ms).
+CONV_2D took 45654 ticks (45 ms).
+AVERAGE_POOL_2D took 871 ticks (0 ms).
+CONV_2D took 221 ticks (0 ms).
+RESHAPE took 21 ticks (0 ms).
+SOFTMAX took 337 ticks (0 ms).
+
+Multi-core CONV2D:
+
+NoPersonDataIterations(1) took 599071 ticks (599 ms)
+DEPTHWISE_CONV_2D took 34581 ticks (34 ms).
+DEPTHWISE_CONV_2D took 60268 ticks (60 ms).
+CONV_2D took 24616 ticks (24 ms).
+DEPTHWISE_CONV_2D took 29580 ticks (29 ms).
+CONV_2D took 16478 ticks (16 ms).
+DEPTHWISE_CONV_2D took 57435 ticks (57 ms).
+CONV_2D took 24962 ticks (24 ms).
+DEPTHWISE_CONV_2D took 14447 ticks (14 ms).
+CONV_2D took 12709 ticks (12 ms).
+DEPTHWISE_CONV_2D took 27583 ticks (27 ms).
+CONV_2D took 22407 ticks (22 ms).
+DEPTHWISE_CONV_2D took 7026 ticks (7 ms).
+CONV_2D took 11890 ticks (11 ms).
+DEPTHWISE_CONV_2D took 15912 ticks (15 ms).
+CONV_2D took 25101 ticks (25 ms).
+DEPTHWISE_CONV_2D took 13029 ticks (13 ms).
+CONV_2D took 25065 ticks (25 ms).
+DEPTHWISE_CONV_2D took 13110 ticks (13 ms).
+CONV_2D took 25129 ticks (25 ms).
+DEPTHWISE_CONV_2D took 13033 ticks (13 ms).
+CONV_2D took 25153 ticks (25 ms).
+DEPTHWISE_CONV_2D took 13030 ticks (13 ms).
+CONV_2D took 25156 ticks (25 ms).
+DEPTHWISE_CONV_2D took 3562 ticks (3 ms).
+CONV_2D took 17287 ticks (17 ms).
+DEPTHWISE_CONV_2D took 5939 ticks (5 ms).
+CONV_2D took 33065 ticks (33 ms).
+AVERAGE_POOL_2D took 870 ticks (0 ms).
+CONV_2D took 290 ticks (0 ms).
+RESHAPE took 21 ticks (0 ms).
+SOFTMAX took 337 ticks (0 ms).
