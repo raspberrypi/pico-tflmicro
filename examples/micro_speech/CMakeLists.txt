@@ -63,21 +63,6 @@ set_target_properties(
 
 target_sources(feature_provider_mock_test
   PRIVATE
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/fft.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/fft_util.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/filterbank.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/filterbank_util.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/frontend.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/frontend_util.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/log_lut.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/log_scale.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/log_scale_util.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/noise_reduction.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/noise_reduction_util.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/pcan_gain_control.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/pcan_gain_control_util.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/window.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/window_util.c
   ${CMAKE_CURRENT_LIST_DIR}/audio_provider_mock.cpp
   ${CMAKE_CURRENT_LIST_DIR}/feature_provider.cpp
   ${CMAKE_CURRENT_LIST_DIR}/feature_provider_test.cpp
@@ -87,8 +72,6 @@ target_sources(feature_provider_mock_test
   ${CMAKE_CURRENT_LIST_DIR}/micro_features/yes_micro_features_data.cpp
   ${CMAKE_CURRENT_LIST_DIR}/no_1000ms_sample_data.cpp
   ${CMAKE_CURRENT_LIST_DIR}/yes_1000ms_sample_data.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/micro/tools/make/downloads/kissfft/kiss_fft.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/micro/tools/make/downloads/kissfft/tools/kiss_fftr.c
   ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/bits.h
   ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/fft.h
   ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/fft_util.h
@@ -113,10 +96,6 @@ target_sources(feature_provider_mock_test
   ${CMAKE_CURRENT_LIST_DIR}/micro_features/yes_micro_features_data.h
   ${CMAKE_CURRENT_LIST_DIR}/no_1000ms_sample_data.h
   ${CMAKE_CURRENT_LIST_DIR}/yes_1000ms_sample_data.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/micro/tools/make/downloads/kissfft/COPYING
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/micro/tools/make/downloads/kissfft/_kiss_fft_guts.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/micro/tools/make/downloads/kissfft/kiss_fft.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/micro/tools/make/downloads/kissfft/tools/kiss_fftr.h
 )
 
 target_link_libraries(
@@ -147,21 +126,6 @@ set_target_properties(
 
 target_sources(micro_speech
   PRIVATE
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/fft.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/fft_util.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/filterbank.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/filterbank_util.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/frontend.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/frontend_util.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/log_lut.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/log_scale.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/log_scale_util.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/noise_reduction.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/noise_reduction_util.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/pcan_gain_control.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/pcan_gain_control_util.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/window.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/window_util.c
   ${CMAKE_CURRENT_LIST_DIR}/audio_provider.cpp
   ${CMAKE_CURRENT_LIST_DIR}/command_responder.cpp
   ${CMAKE_CURRENT_LIST_DIR}/feature_provider.cpp
@@ -173,8 +137,6 @@ target_sources(micro_speech
   ${CMAKE_CURRENT_LIST_DIR}/micro_features/no_micro_features_data.cpp
   ${CMAKE_CURRENT_LIST_DIR}/micro_features/yes_micro_features_data.cpp
   ${CMAKE_CURRENT_LIST_DIR}/recognize_commands.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/micro/tools/make/downloads/kissfft/kiss_fft.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/micro/tools/make/downloads/kissfft/tools/kiss_fftr.c
   ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/bits.h
   ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/fft.h
   ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/fft_util.h
@@ -201,10 +163,6 @@ target_sources(micro_speech
   ${CMAKE_CURRENT_LIST_DIR}/micro_features/no_micro_features_data.h
   ${CMAKE_CURRENT_LIST_DIR}/micro_features/yes_micro_features_data.h
   ${CMAKE_CURRENT_LIST_DIR}/recognize_commands.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/micro/tools/make/downloads/kissfft/COPYING
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/micro/tools/make/downloads/kissfft/_kiss_fft_guts.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/micro/tools/make/downloads/kissfft/kiss_fft.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/micro/tools/make/downloads/kissfft/tools/kiss_fftr.h
 )
 
 target_link_libraries(
@@ -309,21 +267,6 @@ set_target_properties(
 
 target_sources(micro_speech_mock
   PRIVATE
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/fft.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/fft_util.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/filterbank.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/filterbank_util.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/frontend.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/frontend_util.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/log_lut.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/log_scale.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/log_scale_util.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/noise_reduction.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/noise_reduction_util.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/pcan_gain_control.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/pcan_gain_control_util.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/window.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/window_util.c
   ${CMAKE_CURRENT_LIST_DIR}/audio_provider_mock.cpp
   ${CMAKE_CURRENT_LIST_DIR}/command_responder.cpp
   ${CMAKE_CURRENT_LIST_DIR}/feature_provider.cpp
@@ -337,24 +280,6 @@ target_sources(micro_speech_mock
   ${CMAKE_CURRENT_LIST_DIR}/no_1000ms_sample_data.cpp
   ${CMAKE_CURRENT_LIST_DIR}/recognize_commands.cpp
   ${CMAKE_CURRENT_LIST_DIR}/yes_1000ms_sample_data.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/micro/tools/make/downloads/kissfft/kiss_fft.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/micro/tools/make/downloads/kissfft/tools/kiss_fftr.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/bits.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/fft.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/fft_util.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/filterbank.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/filterbank_util.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/frontend.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/frontend_util.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/log_lut.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/log_scale.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/log_scale_util.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/noise_reduction.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/noise_reduction_util.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/pcan_gain_control.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/pcan_gain_control_util.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/window.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/window_util.h
   ${CMAKE_CURRENT_LIST_DIR}/audio_provider.h
   ${CMAKE_CURRENT_LIST_DIR}/command_responder.h
   ${CMAKE_CURRENT_LIST_DIR}/feature_provider.h
@@ -368,10 +293,6 @@ target_sources(micro_speech_mock
   ${CMAKE_CURRENT_LIST_DIR}/no_1000ms_sample_data.h
   ${CMAKE_CURRENT_LIST_DIR}/recognize_commands.h
   ${CMAKE_CURRENT_LIST_DIR}/yes_1000ms_sample_data.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/micro/tools/make/downloads/kissfft/COPYING
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/micro/tools/make/downloads/kissfft/_kiss_fft_guts.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/micro/tools/make/downloads/kissfft/kiss_fft.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/micro/tools/make/downloads/kissfft/tools/kiss_fftr.h
 )
 
 target_link_libraries(
@@ -401,21 +322,6 @@ set_target_properties(
 
 target_sources(micro_features_generator_test
   PRIVATE
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/fft.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/fft_util.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/filterbank.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/filterbank_util.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/frontend.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/frontend_util.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/log_lut.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/log_scale.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/log_scale_util.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/noise_reduction.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/noise_reduction_util.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/pcan_gain_control.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/pcan_gain_control_util.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/window.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/window_util.c
   ${CMAKE_CURRENT_LIST_DIR}/micro_features/micro_features_generator.cpp
   ${CMAKE_CURRENT_LIST_DIR}/micro_features/micro_features_generator_test.cpp
   ${CMAKE_CURRENT_LIST_DIR}/micro_features/micro_model_settings.cpp
@@ -423,34 +329,12 @@ target_sources(micro_features_generator_test
   ${CMAKE_CURRENT_LIST_DIR}/micro_features/yes_feature_data_slice.cpp
   ${CMAKE_CURRENT_LIST_DIR}/no_30ms_sample_data.cpp
   ${CMAKE_CURRENT_LIST_DIR}/yes_30ms_sample_data.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/micro/tools/make/downloads/kissfft/kiss_fft.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/micro/tools/make/downloads/kissfft/tools/kiss_fftr.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/bits.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/fft.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/fft_util.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/filterbank.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/filterbank_util.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/frontend.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/frontend_util.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/log_lut.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/log_scale.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/log_scale_util.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/noise_reduction.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/noise_reduction_util.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/pcan_gain_control.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/pcan_gain_control_util.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/window.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/window_util.h
   ${CMAKE_CURRENT_LIST_DIR}/micro_features/micro_features_generator.h
   ${CMAKE_CURRENT_LIST_DIR}/micro_features/micro_model_settings.h
   ${CMAKE_CURRENT_LIST_DIR}/micro_features/no_feature_data_slice.h
   ${CMAKE_CURRENT_LIST_DIR}/micro_features/yes_feature_data_slice.h
   ${CMAKE_CURRENT_LIST_DIR}/no_30ms_sample_data.h
   ${CMAKE_CURRENT_LIST_DIR}/yes_30ms_sample_data.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/micro/tools/make/downloads/kissfft/COPYING
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/micro/tools/make/downloads/kissfft/_kiss_fft_guts.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/micro/tools/make/downloads/kissfft/kiss_fft.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/micro/tools/make/downloads/kissfft/tools/kiss_fftr.h
 )
 
 target_link_libraries(
@@ -481,52 +365,15 @@ set_target_properties(
 
 target_sources(feature_provider_test
   PRIVATE
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/fft.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/fft_util.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/filterbank.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/filterbank_util.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/frontend.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/frontend_util.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/log_lut.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/log_scale.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/log_scale_util.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/noise_reduction.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/noise_reduction_util.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/pcan_gain_control.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/pcan_gain_control_util.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/window.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/window_util.c
   ${CMAKE_CURRENT_LIST_DIR}/audio_provider.cpp
   ${CMAKE_CURRENT_LIST_DIR}/feature_provider.cpp
   ${CMAKE_CURRENT_LIST_DIR}/feature_provider_test.cpp
   ${CMAKE_CURRENT_LIST_DIR}/micro_features/micro_features_generator.cpp
   ${CMAKE_CURRENT_LIST_DIR}/micro_features/micro_model_settings.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/micro/tools/make/downloads/kissfft/kiss_fft.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/micro/tools/make/downloads/kissfft/tools/kiss_fftr.c
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/bits.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/fft.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/fft_util.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/filterbank.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/filterbank_util.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/frontend.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/frontend_util.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/log_lut.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/log_scale.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/log_scale_util.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/noise_reduction.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/noise_reduction_util.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/pcan_gain_control.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/pcan_gain_control_util.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/window.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/experimental/microfrontend/lib/window_util.h
   ${CMAKE_CURRENT_LIST_DIR}/audio_provider.h
   ${CMAKE_CURRENT_LIST_DIR}/feature_provider.h
   ${CMAKE_CURRENT_LIST_DIR}/micro_features/micro_features_generator.h
   ${CMAKE_CURRENT_LIST_DIR}/micro_features/micro_model_settings.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/micro/tools/make/downloads/kissfft/COPYING
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/micro/tools/make/downloads/kissfft/_kiss_fft_guts.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/micro/tools/make/downloads/kissfft/kiss_fft.h
-  ${CMAKE_CURRENT_LIST_DIR}/tensorflow/lite/micro/tools/make/downloads/kissfft/tools/kiss_fftr.h
 )
 
 target_link_libraries(
@@ -644,4 +491,3 @@ target_link_libraries(
 )
 
 pico_add_extra_outputs(recognize_commands_test)
-

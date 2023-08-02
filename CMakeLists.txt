@@ -10,7 +10,7 @@ set(CMAKE_CXX_STANDARD 11)
 
 pico_sdk_init()
 
-add_library(pico-tflmicro "")
+add_library(pico-tflmicro STATIC)
 
 target_include_directories(pico-tflmicro
   PUBLIC
@@ -521,7 +521,7 @@ target_sources(pico-tflmicro
 
 )
 
-add_library(pico-tflmicro_test "")
+add_library(pico-tflmicro_test STATIC)
 
 target_include_directories(pico-tflmicro_test
   PUBLIC
@@ -559,4 +559,5 @@ target_link_libraries(
 )
 
 add_subdirectory("examples/hello_world")
+add_subdirectory("examples/micro_speech")
 add_subdirectory("examples/person_detection")
