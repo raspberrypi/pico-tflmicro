@@ -21,8 +21,8 @@
  * Title:        arm_nn_depthwise_conv_nt_t_s8.c
  * Description:  Depthwise convolution on matrices with no padding.
  *
- * $Date:        27. July 2022
- * $Revision:    V.2.0.0
+ * $Date:        26 October 2022
+ * $Revision:    V.2.0.1
  *
  * Target Processor:  Cortex-M processors with MVE extension.
  * -------------------------------------------------------------------- */
@@ -44,8 +44,8 @@
  * Refer header file for details.
  *
  */
-arm_cmsis_nn_status arm_nn_depthwise_conv_nt_t_s8(const q7_t *lhs,
-                                                  const q7_t *rhs,
+arm_cmsis_nn_status arm_nn_depthwise_conv_nt_t_s8(const int8_t *lhs,
+                                                  const int8_t *rhs,
                                                   const int32_t input_offset,
                                                   const int32_t active_ch,
                                                   const int32_t total_ch,
@@ -56,7 +56,7 @@ arm_cmsis_nn_status arm_nn_depthwise_conv_nt_t_s8(const q7_t *lhs,
                                                   const int32_t activation_max,
                                                   const uint16_t row_x_col,
                                                   const int32_t *const output_bias,
-                                                  q7_t *out)
+                                                  int8_t *out)
 {
 #if defined(ARM_MATH_MVEI)
     const int32_t *bias = output_bias;

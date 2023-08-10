@@ -33,7 +33,7 @@ void* Init(TfLiteContext* context, const char* buffer, size_t length) {
 
 }  // namespace
 
-TfLiteRegistration Register_QUANTIZE() {
+TFLMRegistration Register_QUANTIZE() {
   return tflite::micro::RegisterOp(Init, PrepareQuantizeReference,
                                    EvalQuantizeReference);
 }

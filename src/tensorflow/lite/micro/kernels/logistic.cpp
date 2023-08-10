@@ -105,7 +105,7 @@ TfLiteStatus LogisticEval(TfLiteContext* context, TfLiteNode* node) {
 
 }  // namespace
 
-TfLiteRegistration Register_LOGISTIC() {
+TFLMRegistration Register_LOGISTIC() {
   return tflite::micro::RegisterOp(LogisticInit, LogisticPrepare, LogisticEval);
 }
 }  // namespace tflite

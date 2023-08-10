@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2010-2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2010-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -22,20 +22,15 @@
  * Description:  Wrapper API to select appropriate depthwise conv API based
  *               on dimensions.
  *
- * $Date:        6 July 2022
- * $Revision:    V.1.0.1
+ * $Date:        20 January 2023
+ * $Revision:    V.1.1.0
  *
- * Target Processor:  Cortex-M CPUs
+ * Target :  Arm(R) M-Profile Architecture
  *
  * -------------------------------------------------------------------- */
 
 #include "third_party/cmsis_nn/Include/arm_nnfunctions.h"
-
-
-#define USE_FAST_DW_CONV_FUNCTION(dw_conv_params, filter_dims, input_dims)                                             \
-    (dw_conv_params->ch_mult == 1 && dw_conv_params->dilation.w == 1 && dw_conv_params->dilation.h == 1 &&             \
-     filter_dims->w * filter_dims->h * input_dims->c < 512)
-
+#include "third_party/cmsis_nn/Include/arm_nnsupportfunctions.h"
 
 /**
  *  @ingroup Public
@@ -56,17 +51,17 @@ arm_cmsis_nn_status arm_depthwise_conv_wrapper_s16(const cmsis_nn_context *ctx,
                                                    const cmsis_nn_dw_conv_params *dw_conv_params,
                                                    const cmsis_nn_per_channel_quant_params *quant_params,
                                                    const cmsis_nn_dims *input_dims,
-                                                   const q15_t *input,
+                                                   const int16_t *input,
                                                    const cmsis_nn_dims *filter_dims,
-                                                   const q7_t *filter,
+                                                   const int8_t *filter,
                                                    const cmsis_nn_dims *bias_dims,
                                                    const int64_t *bias,
                                                    const cmsis_nn_dims *output_dims,
-                                                   q15_t *output)
+                                                   int16_t *output)
 {
     arm_cmsis_nn_status status = ARM_CMSIS_NN_SUCCESS;
 
-    if (USE_FAST_DW_CONV_FUNCTION(dw_conv_params, filter_dims, input_dims))
+    if (USE_FAST_DW_CONV_S16_FUNCTION(dw_conv_params, filter_dims, input_dims))
     {
         status = arm_depthwise_conv_fast_s16(ctx,
                                              dw_conv_params,
@@ -97,25 +92,6 @@ arm_cmsis_nn_status arm_depthwise_conv_wrapper_s16(const cmsis_nn_context *ctx,
 
     /* Return to application */
     return status;
-}
-
-int32_t arm_depthwise_conv_wrapper_s16_get_buffer_size(const cmsis_nn_dw_conv_params *dw_conv_params,
-                                                       const cmsis_nn_dims *input_dims,
-                                                       const cmsis_nn_dims *filter_dims,
-                                                       const cmsis_nn_dims *output_dims)
-{
-    (void)dw_conv_params;
-    (void)input_dims;
-    (void)filter_dims;
-    (void)output_dims;
-    int32_t size = 0;
-
-    if (USE_FAST_DW_CONV_FUNCTION(dw_conv_params, filter_dims, input_dims))
-    {
-        size = arm_depthwise_conv_fast_s16_get_buffer_size(input_dims, filter_dims);
-    }
-
-    return size;
 }
 
 /**

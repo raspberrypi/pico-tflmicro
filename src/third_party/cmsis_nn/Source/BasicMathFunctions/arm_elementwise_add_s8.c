@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010-2022 Arm Limited or its affiliates.
+ * SPDX-FileCopyrightText: Copyright 2010-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -21,10 +21,10 @@
  * Title:        arm_elementwise_add_s8
  * Description:  Elementwise add
  *
- * $Date:        19 April 2022
- * $Revision:    V.3.0.0
+ * $Date:        5 January 2023
+ * $Revision:    V.3.1.0
  *
- * Target Processor:  Cortex-M CPUs
+ * Target :  Arm(R) M-Profile Architecture
  *
  * -------------------------------------------------------------------- */
 
@@ -109,7 +109,7 @@ arm_cmsis_nn_status arm_elementwise_add_s8(const int8_t *input_1_vect,
     int32_t input_2;
     int32_t sum;
 
-#if defined(ARM_MATH_DSP)
+    #if defined(ARM_MATH_DSP)
     int32_t a_1, b_1, a_2, b_2;
 
     int32_t offset_1_packed, offset_2_packed;
@@ -128,11 +128,11 @@ arm_cmsis_nn_status arm_elementwise_add_s8(const int8_t *input_1_vect,
         input_1_vect = read_and_pad_reordered(input_1_vect, &b_1, &a_1);
         input_2_vect = read_and_pad_reordered(input_2_vect, &b_2, &a_2);
 
-        a_1 = __SADD16(a_1, offset_1_packed);
-        b_1 = __SADD16(b_1, offset_1_packed);
+        a_1 = SADD16(a_1, offset_1_packed);
+        b_1 = SADD16(b_1, offset_1_packed);
 
-        a_2 = __SADD16(a_2, offset_2_packed);
-        b_2 = __SADD16(b_2, offset_2_packed);
+        a_2 = SADD16(a_2, offset_2_packed);
+        b_2 = SADD16(b_2, offset_2_packed);
 
         /* Sum 1 */
         input_1 = (b_1 & 0x0FFFF) << left_shift;
@@ -147,7 +147,7 @@ arm_cmsis_nn_status arm_elementwise_add_s8(const int8_t *input_1_vect,
         sum += out_offset;
         sum = MAX(sum, out_activation_min);
         sum = MIN(sum, out_activation_max);
-        r1 = (q7_t)sum;
+        r1 = (int8_t)sum;
 
         /* Sum 3 */
         input_1 = ((b_1 >> 16) & 0x0FFFF) << left_shift;
@@ -161,7 +161,7 @@ arm_cmsis_nn_status arm_elementwise_add_s8(const int8_t *input_1_vect,
         sum += out_offset;
         sum = MAX(sum, out_activation_min);
         sum = MIN(sum, out_activation_max);
-        r3 = (q7_t)sum;
+        r3 = (int8_t)sum;
 
         /* Sum 2 */
         input_1 = (a_1 & 0x0FFFF) << left_shift;
@@ -175,7 +175,7 @@ arm_cmsis_nn_status arm_elementwise_add_s8(const int8_t *input_1_vect,
         sum += out_offset;
         sum = MAX(sum, out_activation_min);
         sum = MIN(sum, out_activation_max);
-        r2 = (q7_t)sum;
+        r2 = (int8_t)sum;
 
         /* Sum 4 */
         input_1 = ((a_1 >> 16) & 0x0FFFF) << left_shift;
@@ -189,17 +189,17 @@ arm_cmsis_nn_status arm_elementwise_add_s8(const int8_t *input_1_vect,
         sum += out_offset;
         sum = MAX(sum, out_activation_min);
         sum = MIN(sum, out_activation_max);
-        r4 = (q7_t)sum;
+        r4 = (int8_t)sum;
 
-        arm_nn_write_q7x4_ia(&output, PACK_Q7x4_32x1(r1, r2, r3, r4));
+        arm_nn_write_s8x4_ia(&output, PACK_S8x4_32x1(r1, r2, r3, r4));
 
         loop_count--;
     }
 
     loop_count = block_size & 0x3;
-#else
+    #else
     loop_count = block_size;
-#endif
+    #endif
 
     while (loop_count > 0)
     {
@@ -218,7 +218,7 @@ arm_cmsis_nn_status arm_elementwise_add_s8(const int8_t *input_1_vect,
         sum = MAX(sum, out_activation_min);
         sum = MIN(sum, out_activation_max);
 
-        *output++ = (q7_t)sum;
+        *output++ = (int8_t)sum;
 
         /* Decrement loop counter */
         loop_count--;

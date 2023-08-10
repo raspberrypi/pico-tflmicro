@@ -66,7 +66,7 @@ TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
 
 }  // namespace
 
-TfLiteRegistration Register_CEIL() {
+TFLMRegistration Register_CEIL() {
   return tflite::micro::RegisterOp(nullptr, Prepare, Eval);
 }
 

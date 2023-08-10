@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010-2022 Arm Limited or its affiliates.
+ * SPDX-FileCopyrightText: Copyright 2010-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -21,10 +21,10 @@
  * Title:        arm_fully_connected_s16
  * Description:  Fully connected function compatible with TF Lite.
  *
- * $Date:        19 April 2022
- * $Revision:    V.2.0.0
+ * $Date:        13 January 2023
+ * $Revision:    V.2.1.0
  *
- * Target Processor:  Cortex-M and Cortex-A cores
+ * Target :  Arm(R) M-Profile Architecture
  *
  * -------------------------------------------------------------------- */
 
@@ -50,13 +50,13 @@ arm_cmsis_nn_status arm_fully_connected_s16(const cmsis_nn_context *ctx,
                                             const cmsis_nn_fc_params *fc_params,
                                             const cmsis_nn_per_tensor_quant_params *quant_params,
                                             const cmsis_nn_dims *input_dims,
-                                            const q15_t *input,
+                                            const int16_t *input,
                                             const cmsis_nn_dims *filter_dims,
-                                            const q7_t *kernel,
+                                            const int8_t *kernel,
                                             const cmsis_nn_dims *bias_dims,
                                             const int64_t *bias,
                                             const cmsis_nn_dims *output_dims,
-                                            q15_t *output)
+                                            int16_t *output)
 {
     (void)bias_dims;
     (void)ctx;
@@ -64,7 +64,7 @@ arm_cmsis_nn_status arm_fully_connected_s16(const cmsis_nn_context *ctx,
 
     int32_t batch_cnt = input_dims->n;
 
-    const q31_t reduced_multiplier = REDUCE_MULTIPLIER(quant_params->multiplier);
+    const int32_t reduced_multiplier = REDUCE_MULTIPLIER(quant_params->multiplier);
 
     while (batch_cnt)
     {
@@ -84,12 +84,6 @@ arm_cmsis_nn_status arm_fully_connected_s16(const cmsis_nn_context *ctx,
     }
 
     return (ARM_CMSIS_NN_SUCCESS);
-}
-
-int32_t arm_fully_connected_s16_get_buffer_size(const cmsis_nn_dims *filter_dims)
-{
-    (void)filter_dims;
-    return 0;
 }
 
 /**

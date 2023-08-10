@@ -579,27 +579,27 @@ TfLiteStatus Prepare(TfLiteContext* context, TfLiteNode* node) {
 
 }  // namespace
 
-TfLiteRegistration Register_EQUAL() {
+TFLMRegistration Register_EQUAL() {
   return tflite::micro::RegisterOp(Init, Prepare, EqualEval);
 }
 
-TfLiteRegistration Register_NOT_EQUAL() {
+TFLMRegistration Register_NOT_EQUAL() {
   return tflite::micro::RegisterOp(Init, Prepare, NotEqualEval);
 }
 
-TfLiteRegistration Register_GREATER() {
+TFLMRegistration Register_GREATER() {
   return tflite::micro::RegisterOp(Init, Prepare, GreaterEval);
 }
 
-TfLiteRegistration Register_GREATER_EQUAL() {
+TFLMRegistration Register_GREATER_EQUAL() {
   return tflite::micro::RegisterOp(Init, Prepare, GreaterEqualEval);
 }
 
-TfLiteRegistration Register_LESS() {
+TFLMRegistration Register_LESS() {
   return tflite::micro::RegisterOp(Init, Prepare, LessEval);
 }
 
-TfLiteRegistration Register_LESS_EQUAL() {
+TFLMRegistration Register_LESS_EQUAL() {
   return tflite::micro::RegisterOp(Init, Prepare, LessEqualEval);
 }
 

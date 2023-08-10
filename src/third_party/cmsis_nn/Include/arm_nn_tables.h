@@ -21,8 +21,8 @@
  * Title:        arm_nn_tables.h
  * Description:  Extern declaration for NN tables
  *
- * $Date:        30. September 2022
- * $Revision:    V.2.0.0
+ * $Date:        28 October 2022
+ * $Revision:    V.2.1.0
  *
  * Target Processor:  Cortex-M cores
  * -------------------------------------------------------------------- */
@@ -37,5 +37,6 @@
  *
  */
 
+extern const uint16_t sigmoid_table_uint16[256];
 
 #endif /*  ARM_NN_TABLES_H */

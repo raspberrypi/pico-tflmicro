@@ -83,7 +83,7 @@ TfLiteStatus BroadcastArgsEval(TfLiteContext* context, TfLiteNode* node) {
 
 }  // namespace
 
-TfLiteRegistration Register_BROADCAST_ARGS() {
+TFLMRegistration Register_BROADCAST_ARGS() {
   return tflite::micro::RegisterOp(nullptr, BroadcastArgsPrepare,
                                    BroadcastArgsEval);
 }

@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2010-2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2010-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -22,10 +22,10 @@
  * Description:  Optimized s8 depthwise convolution function for channel
  *               multiplier of 1 and 3x3 kernel size.
  *
- * $Date:        19 July 2022
- * $Revision:    V.3.1.0
+ * $Date:        5 January 2023
+ * $Revision:    V.3.2.0
  *
- * Target Processor:  Cortex-M CPUs
+ * Target :  Arm(R) M-Profile Architecture
  *
  * -------------------------------------------------------------------- */
 
@@ -53,13 +53,13 @@ arm_cmsis_nn_status arm_depthwise_conv_3x3_s8(const cmsis_nn_context *ctx,
                                               const cmsis_nn_dw_conv_params *dw_conv_params,
                                               const cmsis_nn_per_channel_quant_params *quant_params,
                                               const cmsis_nn_dims *input_dims,
-                                              const q7_t *input,
+                                              const int8_t *input,
                                               const cmsis_nn_dims *filter_dims,
-                                              const q7_t *kernel,
+                                              const int8_t *kernel,
                                               const cmsis_nn_dims *bias_dims,
                                               const int32_t *bias,
                                               const cmsis_nn_dims *output_dims,
-                                              q7_t *output)
+                                              int8_t *output)
 {
     (void)ctx;
     (void)bias_dims;
@@ -116,6 +116,64 @@ arm_cmsis_nn_status arm_depthwise_conv_3x3_s8(const cmsis_nn_context *ctx,
 
                 const int8_t *input_ptr = input + (in_h + ker_h_start) * (input_ch * input_x) + in_w * input_ch + in_ch;
                 const int8_t *kernel_ptr = kernel + ker_h_start * (input_ch * 3) + in_ch;
+#if defined(ARM_MATH_DSP)
+                const uint32_t lhs_offset_s16x2 = PKHBT(input_offset, input_offset, 16);
+
+                for (int32_t ker_h = ker_h_start; ker_h < MIN(3, input_y - in_h); ++ker_h)
+                {
+                    int32_t in_val = 0;
+                    int32_t ker_val = 0;
+                    int32_t in_val_1 = 0;
+                    int32_t ker_val_1 = 0;
+
+                    if (ker_w_start == 0)
+                    {
+                        in_val = arm_nn_read_s8x4(input_ptr);
+                        ker_val = arm_nn_read_s8x4(kernel_ptr);
+
+                        in_val_1 = SXTAB16_RORn(lhs_offset_s16x2, (uint32_t)in_val, 8);
+                        ker_val_1 = SXTB16_RORn((uint32_t)ker_val, 8);
+
+                        out_buff1 = SMLABB(in_val_1, ker_val_1, out_buff1);
+                        in_val = SXTAB16(lhs_offset_s16x2, (uint32_t)in_val);
+                        out_buff3 = SMLATT(in_val_1, ker_val_1, out_buff3);
+                        ker_val = SXTB16((uint32_t)ker_val);
+                        out_buff0 = SMLABB(in_val, ker_val, out_buff0);
+                        out_buff2 = SMLATT(in_val, ker_val, out_buff2);
+                    }
+
+                    in_val = arm_nn_read_s8x4(input_ptr + input_ch);
+                    ker_val = arm_nn_read_s8x4(kernel_ptr + input_ch);
+                    in_val_1 = SXTAB16_RORn(lhs_offset_s16x2, (uint32_t)in_val, 8);
+                    ker_val_1 = SXTB16_RORn((uint32_t)ker_val, 8);
+
+                    out_buff1 = SMLABB(in_val_1, ker_val_1, out_buff1);
+                    in_val = SXTAB16(lhs_offset_s16x2, (uint32_t)in_val);
+                    out_buff3 = SMLATT(in_val_1, ker_val_1, out_buff3);
+                    ker_val = SXTB16((uint32_t)ker_val);
+                    out_buff0 = SMLABB(in_val, ker_val, out_buff0);
+                    out_buff2 = SMLATT(in_val, ker_val, out_buff2);
+
+                    if ((input_x - in_w) >= 3)
+                    {
+                        in_val = arm_nn_read_s8x4(input_ptr + (input_ch << 1));
+                        ker_val = arm_nn_read_s8x4(kernel_ptr + (input_ch << 1));
+                        in_val_1 = SXTAB16_RORn(lhs_offset_s16x2, (uint32_t)in_val, 8);
+                        ker_val_1 = SXTB16_RORn((uint32_t)ker_val, 8);
+
+                        out_buff1 = SMLABB(in_val_1, ker_val_1, out_buff1);
+                        in_val = SXTAB16(lhs_offset_s16x2, (uint32_t)in_val);
+                        out_buff3 = SMLATT(in_val_1, ker_val_1, out_buff3);
+                        ker_val = SXTB16((uint32_t)ker_val);
+                        out_buff0 = SMLABB(in_val, ker_val, out_buff0);
+                        out_buff2 = SMLATT(in_val, ker_val, out_buff2);
+                    }
+
+                    input_ptr += (input_ch * input_x);
+                    kernel_ptr += (input_ch * 3);
+                }
+
+#else
 
                 for (int32_t ker_h = ker_h_start; ker_h < MIN(3, input_y - in_h); ++ker_h)
                 {
@@ -124,17 +182,16 @@ arm_cmsis_nn_status arm_depthwise_conv_3x3_s8(const cmsis_nn_context *ctx,
 
                     if (ker_w_start == 0)
                     {
-                        in_val = arm_nn_read_q7x4(input_ptr);
-                        ker_val = arm_nn_read_q7x4(kernel_ptr);
-
+                        in_val = arm_nn_read_s8x4(input_ptr);
+                        ker_val = arm_nn_read_s8x4(kernel_ptr);
                         out_buff0 += ((int8_t)in_val + input_offset) * (int8_t)ker_val;
                         out_buff1 += ((int8_t)(in_val >> 8) + input_offset) * (int8_t)(ker_val >> 8);
                         out_buff2 += ((int8_t)(in_val >> 16) + input_offset) * (int8_t)(ker_val >> 16);
                         out_buff3 += ((int8_t)(in_val >> 24) + input_offset) * (int8_t)(ker_val >> 24);
                     }
 
-                    in_val = arm_nn_read_q7x4(input_ptr + input_ch);
-                    ker_val = arm_nn_read_q7x4(kernel_ptr + input_ch);
+                    in_val = arm_nn_read_s8x4(input_ptr + input_ch);
+                    ker_val = arm_nn_read_s8x4(kernel_ptr + input_ch);
 
                     out_buff0 += ((int8_t)in_val + input_offset) * (int8_t)ker_val;
                     out_buff1 += ((int8_t)(in_val >> 8) + input_offset) * (int8_t)(ker_val >> 8);
@@ -143,8 +200,8 @@ arm_cmsis_nn_status arm_depthwise_conv_3x3_s8(const cmsis_nn_context *ctx,
 
                     if ((input_x - in_w) >= 3)
                     {
-                        in_val = arm_nn_read_q7x4(input_ptr + (input_ch << 1));
-                        ker_val = arm_nn_read_q7x4(kernel_ptr + (input_ch << 1));
+                        in_val = arm_nn_read_s8x4(input_ptr + (input_ch << 1));
+                        ker_val = arm_nn_read_s8x4(kernel_ptr + (input_ch << 1));
 
                         out_buff0 += ((int8_t)in_val + input_offset) * (int8_t)ker_val;
                         out_buff1 += ((int8_t)(in_val >> 8) + input_offset) * (int8_t)(ker_val >> 8);
@@ -155,6 +212,7 @@ arm_cmsis_nn_status arm_depthwise_conv_3x3_s8(const cmsis_nn_context *ctx,
                     input_ptr += (input_ch * input_x);
                     kernel_ptr += (input_ch * 3);
                 }
+#endif
 
                 out_buff0 = arm_nn_requantize(out_buff0, output_mult[in_ch + 0], output_shift[in_ch + 0]);
                 out_buff1 = arm_nn_requantize(out_buff1, output_mult[in_ch + 1], output_shift[in_ch + 1]);

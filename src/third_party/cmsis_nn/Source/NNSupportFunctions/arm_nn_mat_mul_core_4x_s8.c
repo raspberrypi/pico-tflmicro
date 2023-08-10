@@ -21,8 +21,8 @@
  * Title:        arm_nn_mat_mul_core_4x_s8.c
  * Description:  General matrix multiplication function for MVE extension
  *
- * $Date:        22. Aug 2022
- * $Revision:    V.3.1.0
+ * $Date:        13 December 2022
+ * $Revision:    V.3.1.1
  *
  * Target Processor:  Cortex-M processors
  * -------------------------------------------------------------------- */
@@ -81,19 +81,20 @@ int8_t *arm_nn_mat_mul_core_4x_s8(const int32_t row_elements,
             acc_n3 += ip_row_3[j] * col;
         }
 #else
-        __ASM volatile("   vldrb.8         q0, [%[col]], #16     \n"
+        __ASM volatile(" .p2align 2                             \n"
+                       "   vldrb.8         q0, [%[col]], #16    \n"
                        "   wlstp.8         lr, %[cnt], 1f       \n"
                        "2:                                      \n"
                        "   vaddva.s8      %[sum], q0            \n"
-                       "   vldrb.8         q1, [%[row0]], #16    \n"
+                       "   vldrb.8         q1, [%[row0]], #16   \n"
                        "   vmladava.s8    %[out0], q0, q1       \n"
-                       "   vldrb.8         q2, [%[row1]], #16    \n"
+                       "   vldrb.8         q2, [%[row1]], #16   \n"
                        "   vmladava.s8     %[out1], q0, q2      \n"
-                       "   vldrb.8         q3, [%[row2]], #16    \n"
+                       "   vldrb.8         q3, [%[row2]], #16   \n"
                        "   vmladava.s8     %[out2], q0, q3      \n"
-                       "   vldrb.8         q4, [%[row3]], #16    \n"
+                       "   vldrb.8         q4, [%[row3]], #16   \n"
                        "   vmladava.s8     %[out3], q0, q4      \n"
-                       "   vldrb.8         q0, [%[col]], #16     \n"
+                       "   vldrb.8         q0, [%[col]], #16    \n"
                        "   letp            lr, 2b               \n"
                        "1:                                      \n"
                        : [col] "+r"(col_base),

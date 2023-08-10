@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Arm Limited or its affiliates.
+ * SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -21,8 +21,8 @@
  * Title:        arm_depthwise_conv_s16.c
  * Description:  s16 version of depthwise convolution.
  *
- * $Date:        19 April 2022
- * $Revision:    V.2.0.0
+ * $Date:        26 October 2022
+ * $Revision:    V.2.0.1
  *
  * Target Processor:  Cortex-M CPUs
  *
@@ -169,7 +169,7 @@ static void depthwise_conv_s16_generic_s16(const int16_t *input,
                     {
                         const int idx_out_ch = i_ch_mult + i_input_ch * ch_mult;
 
-                        const q31_t reduced_multiplier = REDUCE_MULTIPLIER(output_mult[idx_out_ch]);
+                        const int32_t reduced_multiplier = REDUCE_MULTIPLIER(output_mult[idx_out_ch]);
                         int64_t acc_0 = 0;
 
                         int ker_y_start;
@@ -245,13 +245,13 @@ arm_cmsis_nn_status arm_depthwise_conv_s16(const cmsis_nn_context *ctx,
                                            const cmsis_nn_dw_conv_params *dw_conv_params,
                                            const cmsis_nn_per_channel_quant_params *quant_params,
                                            const cmsis_nn_dims *input_dims,
-                                           const q15_t *input,
+                                           const int16_t *input,
                                            const cmsis_nn_dims *filter_dims,
-                                           const q7_t *kernel,
+                                           const int8_t *kernel,
                                            const cmsis_nn_dims *bias_dims,
                                            const int64_t *bias,
                                            const cmsis_nn_dims *output_dims,
-                                           q15_t *output)
+                                           int16_t *output)
 {
     const uint16_t dilation_x = dw_conv_params->dilation.w;
     const uint16_t dilation_y = dw_conv_params->dilation.h;

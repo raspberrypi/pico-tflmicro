@@ -52,6 +52,75 @@ target_link_libraries(
 
 target_sources(pico-tflmicro
   PUBLIC
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/micro/kernels/delay.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/micro/kernels/delay_flexbuffers_generated_data.h
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/micro/kernels/energy.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/micro/kernels/energy_flexbuffers_generated_data.h
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/micro/kernels/fft_auto_scale.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/micro/kernels/fft_flexbuffers_generated_data.h
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/micro/kernels/filter_bank.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/micro/kernels/filter_bank_flexbuffers_generated_data.h
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/micro/kernels/filter_bank_log.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/micro/kernels/filter_bank_log_flexbuffers_generated_data.h
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/micro/kernels/filter_bank_spectral_subtraction.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/micro/kernels/filter_bank_spectral_subtraction_flexbuffers_generated_data.h
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/micro/kernels/filter_bank_square_root.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/micro/kernels/framer.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/micro/kernels/framer_flexbuffers_generated_data.h
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/micro/kernels/irfft.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/micro/kernels/irfft.h
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/micro/kernels/overlap_add.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/micro/kernels/overlap_add_flexbuffers_generated_data.h
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/micro/kernels/rfft.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/micro/kernels/rfft.h
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/micro/kernels/stacker.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/micro/kernels/stacker_flexbuffers_generated_data.h
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/micro/kernels/window.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/micro/kernels/window_flexbuffers_generated_data.h
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/src/circular_buffer.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/src/circular_buffer.h
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/src/complex.h
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/src/energy.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/src/energy.h
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/src/fft_auto_scale.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/src/fft_auto_scale.h
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/src/filter_bank.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/src/filter_bank.h
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/src/filter_bank_log.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/src/filter_bank_log.h
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/src/filter_bank_spectral_subtraction.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/src/filter_bank_spectral_subtraction.h
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/src/filter_bank_square_root.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/src/filter_bank_square_root.h
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/src/irfft.h
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/src/irfft_float.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/src/irfft_int16.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/src/irfft_int32.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/src/kiss_fft_wrappers/kiss_fft_common.h
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/src/kiss_fft_wrappers/kiss_fft_float.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/src/kiss_fft_wrappers/kiss_fft_float.h
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/src/kiss_fft_wrappers/kiss_fft_int16.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/src/kiss_fft_wrappers/kiss_fft_int16.h
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/src/kiss_fft_wrappers/kiss_fft_int32.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/src/kiss_fft_wrappers/kiss_fft_int32.h
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/src/log.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/src/log.h
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/src/max_abs.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/src/max_abs.h
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/src/msb.h
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/src/msb_32.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/src/msb_64.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/src/overlap_add.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/src/overlap_add.h
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/src/rfft.h
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/src/rfft_float.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/src/rfft_int16.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/src/rfft_int32.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/src/square_root.h
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/src/square_root_32.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/src/square_root_64.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/src/window.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/src/signal/src/window.h
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/builtin_op_data.h
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/builtin_ops.h
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/c/builtin_op_data.h
@@ -70,6 +139,7 @@ target_sources(pico-tflmicro
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/core/c/c_api_types.h
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/core/c/common.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/core/c/common.h
+  ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/core/macros.h
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/experimental/microfrontend/lib/bits.h
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/experimental/microfrontend/lib/fft.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/experimental/microfrontend/lib/fft.h
@@ -104,6 +174,7 @@ target_sources(pico-tflmicro
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/experimental/microfrontend/lib/window.h
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/experimental/microfrontend/lib/window_util.c
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/experimental/microfrontend/lib/window_util.h
+  ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/kernels/internal/common.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/kernels/internal/common.h
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/kernels/internal/compatibility.h
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/kernels/internal/cppmath.h
@@ -124,6 +195,7 @@ target_sources(pico-tflmicro
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/kernels/internal/reference/broadcast_args.h
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/kernels/internal/reference/broadcast_to.h
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/kernels/internal/reference/ceil.h
+  ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/kernels/internal/reference/comparisons.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/kernels/internal/reference/comparisons.h
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/kernels/internal/reference/concatenation.h
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/kernels/internal/reference/conv.h
@@ -185,6 +257,7 @@ target_sources(pico-tflmicro
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/kernels/internal/reference/transpose_conv.h
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/kernels/internal/runtime_shape.h
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/kernels/internal/strided_slice_logic.h
+  ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/kernels/internal/tensor_ctypes.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/kernels/internal/tensor_ctypes.h
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/kernels/internal/tensor_utils.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/kernels/internal/types.h
@@ -238,6 +311,7 @@ target_sources(pico-tflmicro
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/cmsis_nn/pooling.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/cmsis_nn/softmax.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/cmsis_nn/svdf.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/cmsis_nn/unidirectional_sequence_lstm.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/comparisons.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/concatenation.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/conv.h
@@ -255,6 +329,7 @@ target_sources(pico-tflmicro
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/div.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/elementwise.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/elu.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/embedding_lookup.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/ethosu.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/ethosu.h
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/exp.cpp
@@ -289,6 +364,7 @@ target_sources(pico-tflmicro
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/logistic_common.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/lstm_eval.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/lstm_eval.h
+  ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/lstm_eval_common.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/lstm_eval_test.h
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/lstm_shared.h
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/maximum_minimum.cpp
@@ -315,6 +391,8 @@ target_sources(pico-tflmicro
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/reduce.h
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/reduce_common.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/reshape.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/reshape.h
+  ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/reshape_common.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/resize_bilinear.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/resize_nearest_neighbor.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/round.cpp
@@ -338,7 +416,6 @@ target_sources(pico-tflmicro
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/tanh.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/transpose.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/transpose_conv.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/unidirectional_sequence_lstm.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/unpack.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/var_handle.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/kernels/while.cpp
@@ -358,6 +435,7 @@ target_sources(pico-tflmicro
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/micro_allocator.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/micro_allocator.h
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/micro_arena_constants.h
+  ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/micro_common.h
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/micro_context.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/micro_context.h
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/micro_graph.cpp
@@ -367,6 +445,7 @@ target_sources(pico-tflmicro
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/micro_log.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/micro_log.h
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/micro_mutable_op_resolver.h
+  ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/micro_op_resolver.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/micro_op_resolver.h
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/micro_profiler.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/micro/micro_profiler.h
@@ -408,6 +487,7 @@ target_sources(pico-tflmicro
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis/CMSIS/Core/Include/cmsis_compiler.h
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis/CMSIS/Core/Include/cmsis_gcc.h
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis/CMSIS/Core/Include/cmsis_iccarm.h
+  ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis/CMSIS/Core/Include/cmsis_tiarmclang.h
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis/CMSIS/Core/Include/cmsis_version.h
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis/CMSIS/Core/Include/core_armv81mml.h
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis/CMSIS/Core/Include/core_armv8mbl.h
@@ -431,31 +511,39 @@ target_sources(pico-tflmicro
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis/CMSIS/Core/Include/pac_armv81.h
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis/CMSIS/Core/Include/pmu_armv8.h
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis/CMSIS/Core/Include/tz_context.h
+  ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Include/Internal/arm_nn_compiler.h
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Include/arm_nn_math_types.h
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Include/arm_nn_tables.h
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Include/arm_nn_types.h
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Include/arm_nnfunctions.h
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Include/arm_nnsupportfunctions.h
+  ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/ActivationFunctions/arm_nn_activation_s16.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/ActivationFunctions/arm_relu6_s8.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/ActivationFunctions/arm_relu_q15.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/ActivationFunctions/arm_relu_q7.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/BasicMathFunctions/arm_elementwise_add_s16.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/BasicMathFunctions/arm_elementwise_add_s8.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/BasicMathFunctions/arm_elementwise_mul_s16.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/BasicMathFunctions/arm_elementwise_mul_s16_s8.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/BasicMathFunctions/arm_elementwise_mul_s8.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/ConcatenationFunctions/arm_concatenation_s8_w.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/ConcatenationFunctions/arm_concatenation_s8_x.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/ConcatenationFunctions/arm_concatenation_s8_y.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/ConcatenationFunctions/arm_concatenation_s8_z.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/ConvolutionFunctions/arm_convolve_1_x_n_s8.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/ConvolutionFunctions/arm_convolve_1x1_s8.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/ConvolutionFunctions/arm_convolve_1x1_s8_fast.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/ConvolutionFunctions/arm_convolve_fast_s16.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/ConvolutionFunctions/arm_convolve_get_buffer_sizes_s16.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/ConvolutionFunctions/arm_convolve_get_buffer_sizes_s8.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/ConvolutionFunctions/arm_convolve_s16.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/ConvolutionFunctions/arm_convolve_s8.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/ConvolutionFunctions/arm_convolve_wrapper_s16.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/ConvolutionFunctions/arm_convolve_wrapper_s8.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/ConvolutionFunctions/arm_depthwise_conv_3x3_s8.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/ConvolutionFunctions/arm_depthwise_conv_fast_s16.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/ConvolutionFunctions/arm_depthwise_conv_get_buffer_sizes_s16.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/ConvolutionFunctions/arm_depthwise_conv_get_buffer_sizes_s8.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/ConvolutionFunctions/arm_depthwise_conv_s16.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/ConvolutionFunctions/arm_depthwise_conv_s8.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/ConvolutionFunctions/arm_depthwise_conv_s8_opt.c
@@ -464,20 +552,31 @@ target_sources(pico-tflmicro
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/ConvolutionFunctions/arm_nn_depthwise_conv_s8_core.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/ConvolutionFunctions/arm_nn_mat_mult_kernel_s8_s16.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/ConvolutionFunctions/arm_nn_mat_mult_s8.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/FullyConnectedFunctions/arm_fully_connected_get_buffer_sizes_s16.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/FullyConnectedFunctions/arm_fully_connected_get_buffer_sizes_s8.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/FullyConnectedFunctions/arm_fully_connected_s16.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/FullyConnectedFunctions/arm_fully_connected_s8.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/LSTMFunctions/arm_lstm_unidirectional_s8_s16.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/NNSupportFunctions/arm_nn_depthwise_conv_nt_t_padded_s8.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/NNSupportFunctions/arm_nn_depthwise_conv_nt_t_s16.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/NNSupportFunctions/arm_nn_depthwise_conv_nt_t_s8.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/NNSupportFunctions/arm_nn_lstm_calculate_gate_s8_s16.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/NNSupportFunctions/arm_nn_lstm_step_s8_s16.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/NNSupportFunctions/arm_nn_lstm_update_cell_state_s16.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/NNSupportFunctions/arm_nn_lstm_update_output_s8_s16.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/NNSupportFunctions/arm_nn_mat_mul_core_1x_s8.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/NNSupportFunctions/arm_nn_mat_mul_core_4x_s8.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/NNSupportFunctions/arm_nn_mat_mul_kernel_s16.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/NNSupportFunctions/arm_nn_mat_mult_nt_t_s8.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/NNSupportFunctions/arm_nn_vec_mat_mul_result_acc_s8.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/NNSupportFunctions/arm_nn_vec_mat_mult_t_s16.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/NNSupportFunctions/arm_nn_vec_mat_mult_t_s8.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/NNSupportFunctions/arm_nn_vec_mat_mult_t_svdf_s8.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/NNSupportFunctions/arm_nntables.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/NNSupportFunctions/arm_q7_to_q15_with_offset.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/NNSupportFunctions/arm_s8_to_s16_unordered_with_offset.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/PoolingFunctions/arm_avgpool_get_buffer_sizes_s16.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/PoolingFunctions/arm_avgpool_get_buffer_sizes_s8.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/PoolingFunctions/arm_avgpool_s16.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/PoolingFunctions/arm_avgpool_s8.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/PoolingFunctions/arm_max_pool_s16.c
@@ -561,5 +660,3 @@ target_link_libraries(
 add_subdirectory("examples/hello_world")
 add_subdirectory("examples/micro_speech")
 add_subdirectory("examples/person_detection")
-
-add_subdirectory("tests/greedy_memory_planner_test")

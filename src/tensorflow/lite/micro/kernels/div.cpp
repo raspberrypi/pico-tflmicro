@@ -201,7 +201,7 @@ TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
 
 }  // namespace
 
-TfLiteRegistration Register_DIV() {
+TFLMRegistration Register_DIV() {
   return tflite::micro::RegisterOp(Init, Prepare, Eval);
 }
 

@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2010-2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2010-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -21,10 +21,10 @@
  * Title:        arm_elementwise_mul_s8
  * Description:  Element wise multiplication
  *
- * $Date:        4 Aug 2022
- * $Revision:    V.2.0.1
+ * $Date:        20 January 2023
+ * $Revision:    V.2.2.0
  *
- * Target Processor:  Cortex-M cores
+ * Target :  Arm(R) M-Profile Architecture
  *
  * -------------------------------------------------------------------- */
 
@@ -97,7 +97,7 @@ arm_cmsis_nn_status arm_elementwise_mul_s8(const int8_t *input_1_vect,
     int32_t input_2;
     int32_t mul_res;
 
-#if defined(ARM_MATH_DSP)
+    #if defined(ARM_MATH_DSP)
     int32_t a_1, b_1, a_2, b_2;
 
     int32_t offset_1_packed, offset_2_packed;
@@ -116,62 +116,50 @@ arm_cmsis_nn_status arm_elementwise_mul_s8(const int8_t *input_1_vect,
         input_1_vect = read_and_pad_reordered(input_1_vect, &b_1, &a_1);
         input_2_vect = read_and_pad_reordered(input_2_vect, &b_2, &a_2);
 
-        a_1 = __SADD16(a_1, offset_1_packed);
-        b_1 = __SADD16(b_1, offset_1_packed);
+        a_1 = SADD16(a_1, offset_1_packed);
+        b_1 = SADD16(b_1, offset_1_packed);
 
-        a_2 = __SADD16(a_2, offset_2_packed);
-        b_2 = __SADD16(b_2, offset_2_packed);
+        a_2 = SADD16(a_2, offset_2_packed);
+        b_2 = SADD16(b_2, offset_2_packed);
 
         /* Mul 1 */
-        input_1 = (int16_t)(b_1 & 0x0FFFFL);
-        input_2 = (int16_t)(b_2 & 0x0FFFFL);
-
-        mul_res = input_1 * input_2;
+        mul_res = SMULBB(b_1, b_2);
         mul_res = arm_nn_requantize(mul_res, out_mult, out_shift) + out_offset;
 
         mul_res = MAX(mul_res, out_activation_min);
         mul_res = MIN(mul_res, out_activation_max);
-        r1 = (q7_t)mul_res;
+        r1 = (int8_t)mul_res;
 
         /* Mul 3 */
-        input_1 = (int16_t)((b_1 >> 16U) & 0x0FFFFL);
-        input_2 = (int16_t)((b_2 >> 16U) & 0x0FFFFL);
-
-        mul_res = input_1 * input_2;
+        mul_res = SMULTT(b_1, b_2);
         mul_res = arm_nn_requantize(mul_res, out_mult, out_shift) + out_offset;
         mul_res = MAX(mul_res, out_activation_min);
         mul_res = MIN(mul_res, out_activation_max);
-        r3 = (q7_t)mul_res;
+        r3 = (int8_t)mul_res;
 
         /* Mul 2 */
-        input_1 = (int16_t)(a_1 & 0x0FFFFL);
-        input_2 = (int16_t)(a_2 & 0x0FFFFL);
-
-        mul_res = input_1 * input_2;
+        mul_res = SMULBB(a_1, a_2);
         mul_res = arm_nn_requantize(mul_res, out_mult, out_shift) + out_offset;
         mul_res = MAX(mul_res, out_activation_min);
         mul_res = MIN(mul_res, out_activation_max);
-        r2 = (q7_t)mul_res;
+        r2 = (int8_t)mul_res;
 
         /* Mul 4 */
-        input_1 = (int16_t)((a_1 >> 16U) & 0x0FFFFL);
-        input_2 = (int16_t)((a_2 >> 16U) & 0x0FFFFL);
-
-        mul_res = input_1 * input_2;
+        mul_res = SMULTT(a_1, a_2);
         mul_res = arm_nn_requantize(mul_res, out_mult, out_shift) + out_offset;
         mul_res = MAX(mul_res, out_activation_min);
         mul_res = MIN(mul_res, out_activation_max);
-        r4 = (q7_t)mul_res;
+        r4 = (int8_t)mul_res;
 
-        arm_nn_write_q7x4_ia(&output, PACK_Q7x4_32x1(r1, r2, r3, r4));
+        arm_nn_write_s8x4_ia(&output, PACK_S8x4_32x1(r1, r2, r3, r4));
 
         loop_count--;
     }
 
     loop_count = block_size & 0x3;
-#else
+    #else
     loop_count = block_size;
-#endif
+    #endif
 
     while (loop_count > 0)
     {
@@ -186,7 +174,7 @@ arm_cmsis_nn_status arm_elementwise_mul_s8(const int8_t *input_1_vect,
         mul_res = MAX(mul_res, out_activation_min);
         mul_res = MIN(mul_res, out_activation_max);
 
-        *output++ = (q7_t)mul_res;
+        *output++ = (int8_t)mul_res;
 
         /* Decrement loop counter */
         loop_count--;

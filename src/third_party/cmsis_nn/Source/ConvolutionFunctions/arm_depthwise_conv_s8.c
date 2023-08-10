@@ -21,8 +21,8 @@
  * Title:        arm_depthwise_conv_s8.c
  * Description:  s8 version of depthwise convolution.
  *
- * $Date:        29 July 2022
- * $Revision:    V.3.0.3
+ * $Date:        26 October 2022
+ * $Revision:    V.3.0.4
  *
  * Target Processor:  Cortex-M CPUs
  *
@@ -151,12 +151,12 @@ depthwise_conv_s8_mult_4(const int8_t *input,
     }
 }
 
-static void depthwise_conv_s8_generic(const q7_t *input,
+static void depthwise_conv_s8_generic(const int8_t *input,
                                       const uint16_t input_batches,
                                       const uint16_t input_x,
                                       const uint16_t input_y,
                                       const uint16_t input_ch,
-                                      const q7_t *kernel,
+                                      const int8_t *kernel,
                                       const uint16_t output_ch,
                                       const uint16_t ch_mult,
                                       const uint16_t kernel_x,
@@ -166,7 +166,7 @@ static void depthwise_conv_s8_generic(const q7_t *input,
                                       const uint16_t stride_x,
                                       const uint16_t stride_y,
                                       const int32_t *bias,
-                                      q7_t *output,
+                                      int8_t *output,
                                       const int32_t *output_shift,
                                       const int32_t *output_mult,
                                       const uint16_t output_x,
@@ -274,13 +274,13 @@ arm_cmsis_nn_status arm_depthwise_conv_s8(const cmsis_nn_context *ctx,
                                           const cmsis_nn_dw_conv_params *dw_conv_params,
                                           const cmsis_nn_per_channel_quant_params *quant_params,
                                           const cmsis_nn_dims *input_dims,
-                                          const q7_t *input,
+                                          const int8_t *input,
                                           const cmsis_nn_dims *filter_dims,
-                                          const q7_t *kernel,
+                                          const int8_t *kernel,
                                           const cmsis_nn_dims *bias_dims,
                                           const int32_t *bias,
                                           const cmsis_nn_dims *output_dims,
-                                          q7_t *output)
+                                          int8_t *output)
 {
     const uint16_t dilation_x = dw_conv_params->dilation.w;
     const uint16_t dilation_y = dw_conv_params->dilation.h;

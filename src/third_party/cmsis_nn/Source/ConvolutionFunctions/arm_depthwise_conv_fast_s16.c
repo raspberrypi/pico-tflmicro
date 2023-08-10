@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2022-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -22,10 +22,10 @@
  * Description:  Optimized s16 depthwise separable convolution function for
  *               channel multiplier of 1.
  *
- * $Date:        6 July 2022
- * $Revision:    V.1.1.0
+ * $Date:        30 January 2023
+ * $Revision:    V.1.3.0
  *
- * Target Processor:  Cortex-M CPUs
+ * Target :  Arm(R) M-Profile Architecture
  *
  * -------------------------------------------------------------------- */
 
@@ -52,13 +52,13 @@ arm_cmsis_nn_status arm_depthwise_conv_fast_s16(const cmsis_nn_context *ctx,
                                                 const cmsis_nn_dw_conv_params *dw_conv_params,
                                                 const cmsis_nn_per_channel_quant_params *quant_params,
                                                 const cmsis_nn_dims *input_dims,
-                                                const q15_t *input,
+                                                const int16_t *input,
                                                 const cmsis_nn_dims *filter_dims,
-                                                const q7_t *kernel,
+                                                const int8_t *kernel,
                                                 const cmsis_nn_dims *bias_dims,
                                                 const int64_t *bias,
                                                 const cmsis_nn_dims *output_dims,
-                                                q15_t *output)
+                                                int16_t *output)
 {
     const int32_t input_ch = input_dims->c;
     const int32_t output_ch = output_dims->c;
@@ -96,9 +96,9 @@ arm_cmsis_nn_status arm_depthwise_conv_fast_s16(const cmsis_nn_context *ctx,
     const int32_t output_y = output_dims->h;
     const int32_t output_activation_min = dw_conv_params->activation.min;
     const int32_t output_activation_max = dw_conv_params->activation.max;
-    q15_t *buffer_a = (q15_t *)ctx->buf;
+    int16_t *buffer_a = (int16_t *)ctx->buf;
 
-#if defined(ARM_MATH_MVEI)
+    #if defined(ARM_MATH_MVEI)
     int16_t *lhs_buffer = buffer_a;
     int16_t *out = output;
     int buffer_count = 0;
@@ -214,11 +214,11 @@ arm_cmsis_nn_status arm_depthwise_conv_fast_s16(const cmsis_nn_context *ctx,
         }
     }
 
-#else // ARM_MATH_DSP
+    #else // ARM_MATH_DSP
 
     /* Run the following code in cores using DSP extension */
-    q15_t *const col_buffer_start = buffer_a;
-    q15_t *col_buffer = col_buffer_start;
+    int16_t *const col_buffer_start = buffer_a;
+    int16_t *col_buffer = col_buffer_start;
     const int64_t *const bias_start_pos = bias;
     const int32_t *const out_mult_start_pos = output_mult;
     const int32_t *const out_shift_start_pos = output_shift;
@@ -244,7 +244,7 @@ arm_cmsis_nn_status arm_depthwise_conv_fast_s16(const cmsis_nn_context *ctx,
                 int32_t index = 0;
                 if (ker_y_start != 0)
                 {
-                    memset(&col_buffer[index], 0, (kernel_x * input_ch) * ker_y_start * sizeof(q15_t));
+                    memset(&col_buffer[index], 0, (kernel_x * input_ch) * ker_y_start * sizeof(int16_t));
                     index += (kernel_x * input_ch) * ker_y_start;
                 }
 
@@ -258,13 +258,13 @@ arm_cmsis_nn_status arm_depthwise_conv_fast_s16(const cmsis_nn_context *ctx,
 
                         if (idx_x < 0 || idx_x >= input_x)
                         {
-                            memset(&col_buffer[index], 0, input_ch * sizeof(q15_t));
+                            memset(&col_buffer[index], 0, input_ch * sizeof(int16_t));
                         }
                         else
                         {
                             arm_memcpy_q15(&col_buffer[index],
                                            input + (idx_y * input_x + idx_x) * input_ch,
-                                           input_ch * sizeof(q15_t));
+                                           input_ch * sizeof(int16_t));
                         }
                         index += input_ch;
                     }
@@ -273,7 +273,7 @@ arm_cmsis_nn_status arm_depthwise_conv_fast_s16(const cmsis_nn_context *ctx,
                 const int diff = kernel_y - ker_y_end;
                 if (diff != 0)
                 {
-                    memset(&col_buffer[index], 0, (kernel_x * input_ch) * diff * sizeof(q15_t));
+                    memset(&col_buffer[index], 0, (kernel_x * input_ch) * diff * sizeof(int16_t));
                 }
 
                 row_count = output_ch / 4;
@@ -284,10 +284,10 @@ arm_cmsis_nn_status arm_depthwise_conv_fast_s16(const cmsis_nn_context *ctx,
 
                 while (row_count)
                 {
-                    q31_t sum_1 = 0;
-                    q31_t sum_2 = 0;
-                    q31_t sum_3 = 0;
-                    q31_t sum_4 = 0;
+                    int32_t sum_1 = 0;
+                    int32_t sum_2 = 0;
+                    int32_t sum_3 = 0;
+                    int32_t sum_4 = 0;
 
                     int32_t output_mult_1 = REDUCE_MULTIPLIER(output_mult[0]);
                     int32_t output_mult_2 = REDUCE_MULTIPLIER(output_mult[1]);
@@ -296,46 +296,46 @@ arm_cmsis_nn_status arm_depthwise_conv_fast_s16(const cmsis_nn_context *ctx,
                     output_mult += 4;
 
                     uint16_t col_count = (kernel_x * kernel_y) / 2;
-                    q15_t *col_pos = col_buffer_start + row_shift;
-                    const q7_t *row_pos = kernel + row_shift;
+                    int16_t *col_pos = col_buffer_start + row_shift;
+                    const int8_t *row_pos = kernel + row_shift;
                     row_shift += 4;
 
                     while (col_count)
                     {
                         /* General idea is to read 4 + 4 (input, kernel) pair and re-arrange them in the right order to
                         use in a SMLAD instruction . One run of this loop produces 4 partial outputs with 8 MACs. */
-                        q31_t row_a1, row_a2, row_b1, row_b2, col_a, row_c, col_b, col_c;
+                        int32_t row_a1, row_a2, row_b1, row_b2, col_a, row_c, col_b, col_c;
 
                         /* Read 4 weights */
-                        row_b1 = arm_nn_read_q7x4(row_pos);
-                        row_a1 = arm_nn_read_q7x4(row_pos + input_ch);
-                        col_a = arm_nn_read_q15x2(col_pos);
-                        col_b = arm_nn_read_q15x2(col_pos + input_ch);
+                        row_b1 = arm_nn_read_s8x4(row_pos);
+                        row_a1 = arm_nn_read_s8x4(row_pos + input_ch);
+                        col_a = arm_nn_read_s16x2(col_pos);
+                        col_b = arm_nn_read_s16x2(col_pos + input_ch);
 
-                        row_a2 = __SXTB16(row_b1);
-                        row_b1 = __SXTB16(__ROR(row_b1, 8));
+                        row_a2 = SXTB16(row_b1);
+                        row_b1 = SXTB16(ROR(row_b1, 8));
 
-                        row_b2 = __SXTB16(row_a1);
-                        row_a1 = __SXTB16(__ROR(row_a1, 8));
+                        row_b2 = SXTB16(row_a1);
+                        row_a1 = SXTB16(ROR(row_a1, 8));
 
-                        col_c = __PKHBT(col_b, col_a, 16);
-                        col_a = __PKHTB(col_b, col_a, 16);
-                        row_c = __PKHBT(row_b2, row_a2, 16);
-                        sum_1 = __SMLAD(col_c, row_c, sum_1);
+                        col_c = PKHBT(col_b, col_a, 16);
+                        col_a = PKHTB(col_b, col_a, 16);
+                        row_c = PKHBT(row_b2, row_a2, 16);
+                        sum_1 = SMLAD(col_c, row_c, sum_1);
 
-                        row_c = __PKHBT(row_b1, row_a1, 16);
-                        sum_2 = __SMLAD(col_a, row_c, sum_2);
+                        row_c = PKHBT(row_b1, row_a1, 16);
+                        sum_2 = SMLAD(col_a, row_c, sum_2);
 
-                        col_a = arm_nn_read_q15x2(col_pos + 2);
-                        col_b = arm_nn_read_q15x2(col_pos + input_ch + 2);
+                        col_a = arm_nn_read_s16x2(col_pos + 2);
+                        col_b = arm_nn_read_s16x2(col_pos + input_ch + 2);
 
-                        col_c = __PKHBT(col_b, col_a, 16);
-                        col_a = __PKHTB(col_b, col_a, 16);
-                        row_c = __PKHTB(row_a2, row_b2, 16);
-                        sum_3 = __SMLAD(col_c, row_c, sum_3);
+                        col_c = PKHBT(col_b, col_a, 16);
+                        col_a = PKHTB(col_b, col_a, 16);
+                        row_c = PKHTB(row_a2, row_b2, 16);
+                        sum_3 = SMLAD(col_c, row_c, sum_3);
 
-                        row_c = __PKHTB(row_a1, row_b1, 16);
-                        sum_4 = __SMLAD(col_a, row_c, sum_4);
+                        row_c = PKHTB(row_a1, row_b1, 16);
+                        sum_4 = SMLAD(col_a, row_c, sum_4);
 
                         row_pos += input_ch << 1;
                         col_pos += input_ch << 1;
@@ -372,22 +372,22 @@ arm_cmsis_nn_status arm_depthwise_conv_fast_s16(const cmsis_nn_context *ctx,
                     result = arm_nn_requantize_s64(acc_1, output_mult_1, *output_shift++);
                     result = MAX(result, output_activation_min);
                     result = MIN(result, output_activation_max);
-                    *output++ = (q15_t)result;
+                    *output++ = (int16_t)result;
 
                     result = arm_nn_requantize_s64(acc_2, output_mult_2, *output_shift++);
                     result = MAX(result, output_activation_min);
                     result = MIN(result, output_activation_max);
-                    *output++ = (q15_t)result;
+                    *output++ = (int16_t)result;
 
                     result = arm_nn_requantize_s64(acc_3, output_mult_3, *output_shift++);
                     result = MAX(result, output_activation_min);
                     result = MIN(result, output_activation_max);
-                    *output++ = (q15_t)result;
+                    *output++ = (int16_t)result;
 
                     result = arm_nn_requantize_s64(acc_4, output_mult_4, *output_shift++);
                     result = MAX(result, output_activation_min);
                     result = MIN(result, output_activation_max);
-                    *output++ = (q15_t)result;
+                    *output++ = (int16_t)result;
 
                     row_count--;
                 }
@@ -395,9 +395,9 @@ arm_cmsis_nn_status arm_depthwise_conv_fast_s16(const cmsis_nn_context *ctx,
                 row_count = output_ch & 0x3;
                 while (row_count)
                 {
-                    q15_t *col_pos = col_buffer_start + row_shift;
-                    const q7_t *row_pos = kernel + row_shift;
-                    q31_t sum = 0;
+                    int16_t *col_pos = col_buffer_start + row_shift;
+                    const int8_t *row_pos = kernel + row_shift;
+                    int32_t sum = 0;
                     const uint16_t col_count = (kernel_x * kernel_y);
                     row_shift += 1;
 
@@ -414,7 +414,7 @@ arm_cmsis_nn_status arm_depthwise_conv_fast_s16(const cmsis_nn_context *ctx,
                     output_mult++;
                     result = MAX(result, output_activation_min);
                     result = MIN(result, output_activation_max);
-                    *output++ = (q15_t)result;
+                    *output++ = (int16_t)result;
 
                     row_count--;
                 }
@@ -426,7 +426,7 @@ arm_cmsis_nn_status arm_depthwise_conv_fast_s16(const cmsis_nn_context *ctx,
         /* Advance to the next batch */
         input += (input_x * input_y * input_ch);
     }
-#endif
+    #endif
 #else
     /* Run the following code as reference implementation for Cortex-M0 and Cortex-M3 */
     return arm_depthwise_conv_s16(ctx,
@@ -444,22 +444,6 @@ arm_cmsis_nn_status arm_depthwise_conv_fast_s16(const cmsis_nn_context *ctx,
 
     /* Return to application */
     return ARM_CMSIS_NN_SUCCESS;
-}
-
-int32_t arm_depthwise_conv_fast_s16_get_buffer_size(const cmsis_nn_dims *input_dims, const cmsis_nn_dims *filter_dims)
-{
-#if defined(ARM_MATH_DSP)
-#if defined(ARM_MATH_MVEI)
-    /* The + 8 accounts for a worst case out of bounds read of the lhs buffers in the *_nt_t_* function.  */
-    return 4 * input_dims->c * filter_dims->w * filter_dims->h * sizeof(int16_t) + 8;
-#else // ARM_MATH_DSP
-    return input_dims->c * filter_dims->w * filter_dims->h * sizeof(int16_t);
-#endif
-#else
-    (void)input_dims;
-    (void)filter_dims;
-    return 0;
-#endif
 }
 
 /**

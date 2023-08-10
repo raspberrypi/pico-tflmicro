@@ -21,8 +21,8 @@
  * Title:        arm_max_pool_s16.c
  * Description:  Pooling function implementations
  *
- * $Date:        16 August 2022
- * $Revision:    V.2.1.1
+ * $Date:        26 October 2022
+ * $Revision:    V.2.1.2
  *
  * Target Processor:  Cortex-M CPUs
  *
@@ -47,15 +47,15 @@ static void compare_and_replace_if_larger(int16_t *base, const int16_t *target, 
         length -= 8;
     }
 #else
-    q15_t *dst = base;
-    const q15_t *src = target;
+    int16_t *dst = base;
+    const int16_t *src = target;
     union arm_nnword ref_max;
     union arm_nnword comp_max;
     int32_t cnt = length >> 1;
 
     while (cnt > 0l)
     {
-        ref_max.word = arm_nn_read_q15x2(dst);
+        ref_max.word = arm_nn_read_s16x2(dst);
         comp_max.word = arm_nn_read_q15x2_ia(&src);
 
         if (comp_max.half_words[0] > ref_max.half_words[0])
@@ -105,7 +105,7 @@ static void clamp_output(int16_t *source, int32_t length, const int16_t act_min,
 
     while (cnt > 0l)
     {
-        in.word = arm_nn_read_q15x2(source);
+        in.word = arm_nn_read_s16x2(source);
 
         in.half_words[0] = MAX(in.half_words[0], act_min);
         in.half_words[0] = MIN(in.half_words[0], act_max);

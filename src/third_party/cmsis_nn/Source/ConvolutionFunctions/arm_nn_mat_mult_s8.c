@@ -21,8 +21,8 @@
  * Title:        arm_nn_mat_mult_s8.c
  * Description:  General Matrix-multiplication function
  *
- * $Date:        16 August 2022
- * $Revision:    V.2.0.7
+ * $Date:        26 October 2022
+ * $Revision:    V.2.0.8
  *
  * Target Processor:  Cortex-M cores
  * -------------------------------------------------------------------- */
@@ -36,20 +36,20 @@
  *
  */
 
-q7_t *arm_nn_mat_mult_s8(const q7_t *input_row,
-                         const q7_t *input_col,
-                         const uint16_t output_ch,
-                         const uint16_t col_batches,
-                         const int32_t *output_shift,
-                         const int32_t *output_mult,
-                         const int32_t out_offset,
-                         const int32_t col_offset,
-                         const int32_t row_offset,
-                         const int16_t activation_min,
-                         const int16_t activation_max,
-                         const uint16_t row_len,
-                         const int32_t *const bias,
-                         q7_t *out)
+int8_t *arm_nn_mat_mult_s8(const int8_t *input_row,
+                           const int8_t *input_col,
+                           const uint16_t output_ch,
+                           const uint16_t col_batches,
+                           const int32_t *output_shift,
+                           const int32_t *output_mult,
+                           const int32_t out_offset,
+                           const int32_t col_offset,
+                           const int32_t row_offset,
+                           const int16_t activation_min,
+                           const int16_t activation_max,
+                           const uint16_t row_len,
+                           const int32_t *const bias,
+                           int8_t *out)
 {
 #if defined(ARM_MATH_MVEI)
     (void)row_offset;
@@ -153,7 +153,7 @@ q7_t *arm_nn_mat_mult_s8(const q7_t *input_row,
                 acc_0 += out_offset;
                 acc_0 = MAX(acc_0, activation_min);
                 acc_0 = MIN(acc_0, activation_max);
-                out[i_out_ch] = (q7_t)acc_0;
+                out[i_out_ch] = (int8_t)acc_0;
             }
             out += output_ch;
         }

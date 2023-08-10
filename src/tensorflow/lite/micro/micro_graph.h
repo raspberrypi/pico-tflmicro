@@ -16,8 +16,8 @@ limitations under the License.
 #ifndef TENSORFLOW_LITE_MICRO_MICRO_GRAPH_H_
 #define TENSORFLOW_LITE_MICRO_MICRO_GRAPH_H_
 
-#include "tensorflow/lite/c/common.h"
 #include "tensorflow/lite/micro/micro_allocator.h"
+#include "tensorflow/lite/micro/micro_common.h"
 #include "tensorflow/lite/micro/micro_resource_variable.h"
 #include "tensorflow/lite/schema/schema_generated.h"
 
@@ -38,20 +38,24 @@ class MicroGraph {
              MicroResourceVariables* resource_variables);
   virtual ~MicroGraph();
 
-  // Sets up builtin data and calls TfLiteRegistration->Init for every operator
-  // in every subgraph in the model.
+  // Sets up builtin data and calls TFLMRegistration->Init for every
+  // operator in every subgraph in the model.
   virtual TfLiteStatus InitSubgraphs();
 
-  // Calls TfLiteRegistration->Prepare for every operator in every subgraph in
-  // the model.
+  // Calls TFLMRegistration->Prepare for every operator in every subgraph
+  // in the model.
   virtual TfLiteStatus PrepareSubgraphs();
 
-  // Calls TfLiteRegistration->Free for every operator in every subgraph in the
-  // model.
+  // Calls TFLMRegistration->Reset for every operator in every subgraph in
+  // the model.
+  virtual TfLiteStatus ResetSubgraphs();
+
+  // Calls TFLMRegistration->Free for every operator in every subgraph in
+  // the model.
   virtual TfLiteStatus FreeSubgraphs();
 
-  // Calls TfLiteRegistration->Invoke for every operator in a single subgraph in
-  // the model.
+  // Calls TFLMRegistration->Invoke for every operator in a single subgraph
+  // in the model.
   virtual TfLiteStatus InvokeSubgraph(int subgraph_idx);
 
   // Zeros out all variable tensors in all subgraphs in the model.

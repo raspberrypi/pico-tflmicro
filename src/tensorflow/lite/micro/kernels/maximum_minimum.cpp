@@ -109,12 +109,12 @@ TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
 
 }  // namespace
 
-TfLiteRegistration Register_MAXIMUM() {
+TFLMRegistration Register_MAXIMUM() {
   return tflite::micro::RegisterOp(nullptr, nullptr,
                                    Eval<kReference, MaximumOp>);
 }
 
-TfLiteRegistration Register_MINIMUM() {
+TFLMRegistration Register_MINIMUM() {
   return tflite::micro::RegisterOp(nullptr, nullptr,
                                    Eval<kReference, MinimumOp>);
 }

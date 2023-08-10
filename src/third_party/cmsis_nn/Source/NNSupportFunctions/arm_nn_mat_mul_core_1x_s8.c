@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2010-2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2010-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -21,10 +21,10 @@
  * Title:        arm_nn_mat_mul_core_1x_s8.c
  * Description:  General Matrix-multiplication function
  *
- * $Date:        22 Aug 2022
- * $Revision:    V.3.1.0
+ * $Date:        20 January 2023
+ * $Revision:    V.3.1.3
  *
- * Target Processor:  Cortex-M cores
+ * Target :  Arm(R) M-Profile Architecture
  * -------------------------------------------------------------------- */
 
 #include "third_party/cmsis_nn/Include/arm_nnsupportfunctions.h"
@@ -70,27 +70,28 @@ arm_cmsis_nn_status arm_nn_mat_mul_core_1x_s8(int32_t row_elements,
 
         int32_t sum_tmp = 0;
 
-#if defined(ARM_MATH_AUTOVECTORIZE)
+    #if defined(ARM_MATH_AUTOVECTORIZE)
         for (int j = 0; j < row_elements; j++)
         {
             int32_t col = col_base[j];
             sum_tmp += col;
             acc_n0 += row_base[j] * col;
         }
-#else
-        __ASM volatile("   vldrb.8         q0, [%[col]], #16     \n"
-                       "   wlstp.8         lr, %[cnt], 1f       \n"
+    #else
+        __ASM volatile(" .p2align 2                             \n"
+                       "  vldrb.8         q0, [%[col]], #16     \n"
+                       "  wlstp.8         lr, %[cnt], 1f       \n"
                        "2:                                      \n"
-                       "   vaddva.s8      %[sum], q0            \n"
-                       "   vldrb.8         q1, [%[row0]], #16    \n"
-                       "   vmladava.s8    %[out0], q0, q1       \n"
-                       "   vldrb.8         q0, [%[col]], #16     \n"
-                       "   letp            lr, 2b               \n"
+                       "  vaddva.s8      %[sum], q0            \n"
+                       "  vldrb.8         q1, [%[row0]], #16   \n"
+                       "  vmladava.s8    %[out0], q0, q1       \n"
+                       "  vldrb.8         q0, [%[col]], #16    \n"
+                       "  letp            lr, 2b               \n"
                        "1:                                      \n"
                        : [col] "+r"(col_base), [sum] "+Te"(sum_tmp), [row0] "+r"(row_base), [out0] "+Te"(acc_n0)
                        : [cnt] "r"(row_elements)
                        : "q0", "q1", "memory", "r14");
-#endif
+    #endif
 
         sum_tmp *= conv_params->input_offset;
         acc_n0 += sum_tmp;
@@ -129,8 +130,9 @@ arm_cmsis_nn_status arm_nn_mat_mul_core_1x_s8(int32_t row_elements,
         acc_n0 += conv_params->output_offset;
         acc_n0 = MAX(acc_n0, conv_params->activation.min);
         acc_n0 = MIN(acc_n0, conv_params->activation.max);
-        *output++ = (q7_t)acc_n0;
+        *output++ = (int8_t)acc_n0;
     }
+    return ARM_CMSIS_NN_SUCCESS;
 
 #else
     (void)row_elements;
@@ -142,8 +144,8 @@ arm_cmsis_nn_status arm_nn_mat_mul_core_1x_s8(int32_t row_elements,
     (void)quant_params;
     (void)bias;
     (void)output;
+    return ARM_CMSIS_NN_NO_IMPL_ERROR;
 #endif
-    return ARM_CMSIS_NN_SUCCESS;
 }
 
 /**

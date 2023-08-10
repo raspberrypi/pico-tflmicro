@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2010-2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2010-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -21,15 +21,16 @@
  * Title:        arm_nnsupportfunctions.h
  * Description:  Public header file of support functions for CMSIS NN Library
  *
- * $Date:        30 September 2022
- * $Revision:    V.11.0.0
+ * $Date:        23 Mars 2023
+ * $Revision:    V.16.0.0
  *
- * Target Processor:  Cortex-M CPUs
+ * Target :  Arm(R) M-Profile Architecture
  * -------------------------------------------------------------------- */
 
 #ifndef _ARM_NNSUPPORTFUNCTIONS_H_
 #define _ARM_NNSUPPORTFUNCTIONS_H_
 
+#include "third_party/cmsis_nn/Include/Internal/arm_nn_compiler.h"
 #include "third_party/cmsis_nn/Include/arm_nn_math_types.h"
 #include "third_party/cmsis_nn/Include/arm_nn_types.h"
 
@@ -38,6 +39,10 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#define USE_FAST_DW_CONV_S16_FUNCTION(dw_conv_params, filter_dims, input_dims)                                         \
+    (dw_conv_params->ch_mult == 1 && dw_conv_params->dilation.w == 1 && dw_conv_params->dilation.h == 1 &&             \
+     filter_dims->w * filter_dims->h < 512)
 
 #define LEFT_SHIFT(_shift) (_shift > 0 ? _shift : 0)
 #define RIGHT_SHIFT(_shift) (_shift > 0 ? 0 : -_shift)
@@ -61,7 +66,7 @@ extern "C" {
 /**
  * @brief definition to pack four 8 bit values.
  */
-#define PACK_Q7x4_32x1(v0, v1, v2, v3)                                                                                 \
+#define PACK_S8x4_32x1(v0, v1, v2, v3)                                                                                 \
     ((((int32_t)(v0) << 0) & (int32_t)0x000000FF) | (((int32_t)(v1) << 8) & (int32_t)0x0000FF00) |                     \
      (((int32_t)(v2) << 16) & (int32_t)0x00FF0000) | (((int32_t)(v3) << 24) & (int32_t)0xFF000000))
 
@@ -71,16 +76,16 @@ extern "C" {
 #define PACK_Q15x2_32x1(v0, v1) (((int32_t)v0 & (int32_t)0xFFFF) | ((int32_t)v1 << 16))
 
 /**
- * @brief Union for SIMD access of q31/q15/q7 types
+ * @brief Union for SIMD access of q31/s16/s8 types
  */
 union arm_nnword
 {
-    q31_t word;
+    int32_t word;
     /**< q31 type */
-    q15_t half_words[2];
-    /**< q15 type */
-    q7_t bytes[4];
-    /**< q7 type */
+    int16_t half_words[2];
+    /**< s16 type */
+    int8_t bytes[4];
+    /**< s8 type */
 };
 
 /**
@@ -105,7 +110,6 @@ union arm_nn_long_long
  *
  */
 
-
 /**
  * @defgroup supportConversion Data Conversion
  *
@@ -114,22 +118,49 @@ union arm_nn_long_long
  */
 
 /**
- * @brief Converts the elements from a q7 vector to a q15 vector with an added offset
- * @param[in]    src        pointer to the q7 input vector
- * @param[out]   dst        pointer to the q15 output vector
+ * @brief Converts the elements from a s8 vector to a s16 vector with an added offset
+ * @param[in]    src        pointer to the s8 input vector
+ * @param[out]   dst        pointer to the s16 output vector
  * @param[in]    block_size length of the input vector
- * @param[in]    offset     q7 offset to be added to each input vector element.
+ * @param[in]    offset     s16 offset to be added to each input vector element.
  *
  * \par Description:
  *
+ * Output elements are ordered.
  * The equation used for the conversion process is:
  *
  * <pre>
- *  dst[n] = (q15_t) src[n] + offset;   0 <= n < block_size.
+ *  dst[n] = (int16_t) src[n] + offset;   0 <= n < block_size.
  * </pre>
  *
  */
-void arm_q7_to_q15_with_offset(const q7_t *src, q15_t *dst, uint32_t block_size, q15_t offset);
+void arm_q7_to_q15_with_offset(const int8_t *src, int16_t *dst, int32_t block_size, int16_t offset);
+
+#if defined(ARM_MATH_DSP)
+/**
+ * @brief Converts the elements from a s8 vector to a s16 vector with an added offset
+ * @param[in]    src        pointer to the s8 input vector
+ * @param[out]   dst        pointer to the s16 output vector
+ * @param[in]    block_size length of the input vector
+ * @param[in]    offset     s16 offset to be added to each input vector element.
+ *
+ * \par Description:
+ *
+ * No additonal ordering is done with the result that output elements are not in order.
+ * Instead of ABCD order will be ACBD.
+ * Note this is for processors with DSP extension only.
+ * The equation used for the conversion process is:
+ *
+ * <pre>
+ *  dst[n - 0] = (int16_t) src[n - 0] + offset;   0 <= n < block_size.
+ *  dst[n - 1] = (int16_t) src[n - 2] + offset;   0 <= n < block_size.
+ *  dst[n - 2] = (int16_t) src[n - 1] + offset;   0 <= n < block_size.
+ *  dst[n - 3] = (int16_t) src[n - 3] + offset;   0 <= n < block_size.
+ * </pre>
+ *
+ */
+void arm_s8_to_s16_unordered_with_offset(const int8_t *src, int16_t *dst, int32_t block_size, int16_t offset);
+#endif
 
 /**
  * @brief Depthwise conv on an im2col buffer where the input channel equals output channel.
@@ -150,17 +181,17 @@ void arm_q7_to_q15_with_offset(const q7_t *src, q15_t *dst, uint32_t block_size,
  *
  * @details     Supported framework: TensorFlow Lite micro.
  */
-q7_t *arm_nn_depthwise_conv_s8_core(const q7_t *row,
-                                    const q15_t *col,
-                                    const uint16_t num_ch,
-                                    const int32_t *out_shift,
-                                    const int32_t *out_mult,
-                                    const int32_t out_offset,
-                                    const int32_t activation_min,
-                                    const int32_t activation_max,
-                                    const uint16_t kernel_size,
-                                    const int32_t *const output_bias,
-                                    q7_t *out);
+int8_t *arm_nn_depthwise_conv_s8_core(const int8_t *row,
+                                      const int16_t *col,
+                                      const uint16_t num_ch,
+                                      const int32_t *out_shift,
+                                      const int32_t *out_mult,
+                                      const int32_t out_offset,
+                                      const int32_t activation_min,
+                                      const int32_t activation_max,
+                                      const uint16_t kernel_size,
+                                      const int32_t *const output_bias,
+                                      int8_t *out);
 
 /**
  * @brief General Matrix-multiplication function with per-channel requantization.
@@ -184,20 +215,20 @@ q7_t *arm_nn_depthwise_conv_s8_core(const q7_t *row,
  *
  * @details   Supported framework: TensorFlow Lite
  */
-q7_t *arm_nn_mat_mult_s8(const q7_t *input_row,
-                         const q7_t *input_col,
-                         const uint16_t output_ch,
-                         const uint16_t col_batches,
-                         const int32_t *output_shift,
-                         const int32_t *output_mult,
-                         const int32_t out_offset,
-                         const int32_t col_offset,
-                         const int32_t row_offset,
-                         const int16_t out_activation_min,
-                         const int16_t out_activation_max,
-                         const uint16_t row_len,
-                         const int32_t *const bias,
-                         q7_t *out);
+int8_t *arm_nn_mat_mult_s8(const int8_t *input_row,
+                           const int8_t *input_col,
+                           const uint16_t output_ch,
+                           const uint16_t col_batches,
+                           const int32_t *output_shift,
+                           const int32_t *output_mult,
+                           const int32_t out_offset,
+                           const int32_t col_offset,
+                           const int32_t row_offset,
+                           const int16_t out_activation_min,
+                           const int16_t out_activation_max,
+                           const uint16_t row_len,
+                           const int32_t *const bias,
+                           int8_t *out);
 /**
  * @brief Matrix-multiplication function for convolution with per-channel requantization for 16 bits convolution.
  * @param[in]       input_a     pointer to operand A
@@ -219,16 +250,16 @@ q7_t *arm_nn_mat_mult_s8(const q7_t *input_row,
  *            clamped in the range provided by activation min and max.
  *            Supported framework: TensorFlow Lite micro.
  */
-q15_t *arm_nn_mat_mult_kernel_s16(const q7_t *input_a,
-                                  const q15_t *input_b,
-                                  const int32_t output_ch,
-                                  const int32_t *out_shift,
-                                  const int32_t *out_mult,
-                                  const int16_t activation_min,
-                                  const int16_t activation_max,
-                                  const int32_t num_col_a,
-                                  const int64_t *const output_bias,
-                                  q15_t *out_0);
+int16_t *arm_nn_mat_mult_kernel_s16(const int8_t *input_a,
+                                    const int16_t *input_b,
+                                    const int32_t output_ch,
+                                    const int32_t *out_shift,
+                                    const int32_t *out_mult,
+                                    const int16_t activation_min,
+                                    const int16_t activation_max,
+                                    const int32_t num_col_a,
+                                    const int64_t *const output_bias,
+                                    int16_t *out_0);
 
 /**
  * @brief General Vector by Matrix multiplication with requantization and storage of result.
@@ -305,13 +336,13 @@ int8_t *arm_nn_mat_mul_core_4x_s8(const int32_t row_elements,
  * @param[in]  lhs                Pointer to the LHS input matrix
  * @param[in]  rhs                Pointer to the RHS input matrix
  * @param[in]  bias               Pointer to the bias vector. The length of this vector is equal to the number of
- * output columns (or RHS input rows)
+ *                                output columns (or RHS input rows)
  * @param[out] dst                Pointer to the output matrix with "m" rows and "n" columns
  * @param[in]  dst_multipliers    Pointer to the multipliers vector needed for the per-channel requantization.
  *                                The length of this vector is equal to the number of output columns (or RHS input
- * rows)
+ *                                rows)
  * @param[in]  dst_shifts         Pointer to the shifts vector needed for the per-channel requantization. The length
- * of this vector is equal to the number of output columns (or RHS input rows)
+ *                                of this vector is equal to the number of output columns (or RHS input rows)
  * @param[in]  lhs_rows           Number of LHS input rows
  * @param[in]  rhs_rows           Number of RHS input rows
  * @param[in]  rhs_cols           Number of LHS/RHS input columns
@@ -319,14 +350,15 @@ int8_t *arm_nn_mat_mul_core_4x_s8(const int32_t row_elements,
  * @param[in]  dst_offset         Offset to be applied the output result
  * @param[in]  activation_min     Minimum value to clamp down the output. Range : int8
  * @param[in]  activation_max     Maximum value to clamp up the output. Range : int8
+ * @param[in]  lhs_cols_offset    Column offset between subsequent lhs_rows
  *
  * @return     The function returns <code>ARM_CMSIS_NN_SUCCESS</code>
  *
  */
-arm_cmsis_nn_status arm_nn_mat_mult_nt_t_s8(const q7_t *lhs,
-                                            const q7_t *rhs,
-                                            const q31_t *bias,
-                                            q7_t *dst,
+arm_cmsis_nn_status arm_nn_mat_mult_nt_t_s8(const int8_t *lhs,
+                                            const int8_t *rhs,
+                                            const int32_t *bias,
+                                            int8_t *dst,
                                             const int32_t *dst_multipliers,
                                             const int32_t *dst_shifts,
                                             const int32_t lhs_rows,
@@ -335,7 +367,8 @@ arm_cmsis_nn_status arm_nn_mat_mult_nt_t_s8(const q7_t *lhs,
                                             const int32_t lhs_offset,
                                             const int32_t dst_offset,
                                             const int32_t activation_min,
-                                            const int32_t activation_max);
+                                            const int32_t activation_max,
+                                            const int32_t lhs_cols_offset);
 
 /**
  * @brief s8 Vector by Matrix (transposed) multiplication
@@ -346,7 +379,6 @@ arm_cmsis_nn_status arm_nn_mat_mult_nt_t_s8(const q7_t *lhs,
  * @param[out]     dst             Output vector
  * @param[in]      lhs_offset      Offset to be added to the input values of the left-hand side vector.
  *                                 Range: -127 to 128
- * @param[in]      rhs_offset      Not used
  * @param[in]      dst_offset      Offset to be added to the output values. Range: -127 to 128
  * @param[in]      dst_multiplier  Output multiplier
  * @param[in]      dst_shift       Output shift
@@ -360,12 +392,11 @@ arm_cmsis_nn_status arm_nn_mat_mult_nt_t_s8(const q7_t *lhs,
  * @return         The function returns <code>ARM_CMSIS_NN_SUCCESS</code>
  *
  */
-arm_cmsis_nn_status arm_nn_vec_mat_mult_t_s8(const q7_t *lhs,
-                                             const q7_t *rhs,
-                                             const q31_t *bias,
-                                             q7_t *dst,
+arm_cmsis_nn_status arm_nn_vec_mat_mult_t_s8(const int8_t *lhs,
+                                             const int8_t *rhs,
+                                             const int32_t *bias,
+                                             int8_t *dst,
                                              const int32_t lhs_offset,
-                                             const int32_t rhs_offset,
                                              const int32_t dst_offset,
                                              const int32_t dst_multiplier,
                                              const int32_t dst_shift,
@@ -392,10 +423,10 @@ arm_cmsis_nn_status arm_nn_vec_mat_mult_t_s8(const q7_t *lhs,
  * @return         The function returns <code>ARM_CMSIS_NN_SUCCESS</code>
  *
  */
-arm_cmsis_nn_status arm_nn_vec_mat_mult_t_s16(const q15_t *lhs,
-                                              const q7_t *rhs,
-                                              const q63_t *bias,
-                                              q15_t *dst,
+arm_cmsis_nn_status arm_nn_vec_mat_mult_t_s16(const int16_t *lhs,
+                                              const int8_t *rhs,
+                                              const int64_t *bias,
+                                              int16_t *dst,
                                               const int32_t dst_multiplier,
                                               const int32_t dst_shift,
                                               const int32_t rhs_cols,
@@ -411,7 +442,6 @@ arm_cmsis_nn_status arm_nn_vec_mat_mult_t_s16(const q15_t *lhs,
  * @param[out]     dst             Output vector
  * @param[in]      lhs_offset      Offset to be added to the input values of the left-hand side
  *                                 vector. Range: -127 to 128
- * @param[in]      rhs_offset      Not used
  * @param[in]      scatter_offset  Address offset for dst. First output is stored at 'dst', the
  *                                 second at 'dst + scatter_offset' and so on.
  * @param[in]      dst_multiplier  Output multiplier
@@ -424,11 +454,10 @@ arm_cmsis_nn_status arm_nn_vec_mat_mult_t_s16(const q15_t *lhs,
  * @return         The function returns <code>ARM_CMSIS_NN_SUCCESS</code>
  *
  */
-arm_cmsis_nn_status arm_nn_vec_mat_mult_t_svdf_s8(const q7_t *lhs,
-                                                  const q7_t *rhs,
-                                                  q15_t *dst,
+arm_cmsis_nn_status arm_nn_vec_mat_mult_t_svdf_s8(const int8_t *lhs,
+                                                  const int8_t *rhs,
+                                                  int16_t *dst,
                                                   const int32_t lhs_offset,
-                                                  const int32_t rhs_offset,
                                                   const int32_t scatter_offset,
                                                   const int32_t dst_multiplier,
                                                   const int32_t dst_shift,
@@ -466,8 +495,8 @@ arm_cmsis_nn_status arm_nn_vec_mat_mult_t_svdf_s8(const q7_t *lhs,
  *                  - Output bias
  *                  - rhs
  */
-arm_cmsis_nn_status arm_nn_depthwise_conv_nt_t_padded_s8(const q7_t *lhs,
-                                                         const q7_t *rhs,
+arm_cmsis_nn_status arm_nn_depthwise_conv_nt_t_padded_s8(const int8_t *lhs,
+                                                         const int8_t *rhs,
                                                          const int32_t lhs_offset,
                                                          const int32_t active_ch,
                                                          const int32_t total_ch,
@@ -478,7 +507,7 @@ arm_cmsis_nn_status arm_nn_depthwise_conv_nt_t_padded_s8(const q7_t *lhs,
                                                          const int32_t activation_max,
                                                          const uint16_t row_x_col,
                                                          const int32_t *const output_bias,
-                                                         q7_t *out);
+                                                         int8_t *out);
 
 /**
  * @brief Depthwise convolution of transposed rhs matrix with 4 lhs matrices. To be used in non-padded cases.
@@ -509,8 +538,8 @@ arm_cmsis_nn_status arm_nn_depthwise_conv_nt_t_padded_s8(const q7_t *lhs,
  *                  - Output bias
  *                  - rhs
  */
-arm_cmsis_nn_status arm_nn_depthwise_conv_nt_t_s8(const q7_t *lhs,
-                                                  const q7_t *rhs,
+arm_cmsis_nn_status arm_nn_depthwise_conv_nt_t_s8(const int8_t *lhs,
+                                                  const int8_t *rhs,
                                                   const int32_t lhs_offset,
                                                   const int32_t active_ch,
                                                   const int32_t total_ch,
@@ -521,7 +550,7 @@ arm_cmsis_nn_status arm_nn_depthwise_conv_nt_t_s8(const q7_t *lhs,
                                                   const int32_t activation_max,
                                                   const uint16_t row_x_col,
                                                   const int32_t *const output_bias,
-                                                  q7_t *out);
+                                                  int8_t *out);
 
 /**
  * @brief Depthwise convolution of transposed rhs matrix with 4 lhs matrices. To be used in non-padded cases.
@@ -550,7 +579,7 @@ arm_cmsis_nn_status arm_nn_depthwise_conv_nt_t_s8(const q7_t *lhs,
  *                  - rhs
  */
 int16_t *arm_nn_depthwise_conv_nt_t_s16(const int16_t *lhs,
-                                        const q7_t *rhs,
+                                        const int8_t *rhs,
                                         const uint16_t num_ch,
                                         const int32_t *out_shift,
                                         const int32_t *out_mult,
@@ -561,36 +590,13 @@ int16_t *arm_nn_depthwise_conv_nt_t_s16(const int16_t *lhs,
                                         int16_t *out);
 
 /**
- *@brief Matrix-multiplication function for convolution with reordered columns
- *@param[in]       pA          pointer to operand A
- *@param[in]       pInBuffer   pointer to operand B, always conssists of 2 vectors
- *@param[in]       ch_im_out   numRow of A
- *@param[in]       numCol_A    numCol of A
- *@param[in]       bias_shift  amount of left-shift for bias
- *@param[in]       out_shift   amount of right-shift for output
- *@param[in]       bias        the bias
- *@param[in,out]   pOut        pointer to output
- *@return     The function returns the incremented output pointer
- *
- *@details  This function assumes that data in pInBuffer are reordered
- */
-q7_t *arm_nn_mat_mult_kernel_q7_q15_reordered(const q7_t *pA,
-                                              const q15_t *pInBuffer,
-                                              const uint16_t ch_im_out,
-                                              const uint16_t numCol_A,
-                                              const uint16_t bias_shift,
-                                              const uint16_t out_shift,
-                                              const q7_t *bias,
-                                              q7_t *pOut);
-
-/**
-  @brief         Read 2 q15 elements and post increment pointer.
+  @brief         Read 2 s16 elements and post increment pointer.
   @param[in]     in_q15   Pointer to pointer that holds address of input.
   @return        q31 value
  */
-__STATIC_FORCEINLINE q31_t arm_nn_read_q15x2_ia(const q15_t **in_q15)
+__STATIC_FORCEINLINE int32_t arm_nn_read_q15x2_ia(const int16_t **in_q15)
 {
-    q31_t val;
+    int32_t val;
 
     memcpy(&val, *in_q15, 4);
     *in_q15 += 2;
@@ -599,51 +605,51 @@ __STATIC_FORCEINLINE q31_t arm_nn_read_q15x2_ia(const q15_t **in_q15)
 }
 
 /**
-  @brief         Read 4 q7 from q7 pointer and post increment pointer.
-  @param[in]     in_q7       Pointer to pointer that holds address of input.
+  @brief         Read 4 s8 from s8 pointer and post increment pointer.
+  @param[in]     in_s8       Pointer to pointer that holds address of input.
   @return        q31 value
  */
-__STATIC_FORCEINLINE q31_t arm_nn_read_q7x4_ia(const q7_t **in_q7)
+__STATIC_FORCEINLINE int32_t arm_nn_read_s8x4_ia(const int8_t **in_s8)
 {
-    q31_t val;
-    memcpy(&val, *in_q7, 4);
-    *in_q7 += 4;
+    int32_t val;
+    memcpy(&val, *in_s8, 4);
+    *in_s8 += 4;
 
     return (val);
 }
 
 /**
-  @brief         Read 2 q15 from q15 pointer.
-  @param[in]     in_q15   pointer to address of input.
-  @return        q31 value
+  @brief         Read 2 int16 values from int16 pointer.
+  @param[in]     in     pointer to address of input.
+  @return        s32    value
  */
-__STATIC_FORCEINLINE q31_t arm_nn_read_q15x2(const q15_t *in_q15)
+__STATIC_FORCEINLINE int32_t arm_nn_read_s16x2(const int16_t *in)
 {
-    q31_t val;
-    memcpy(&val, in_q15, 4);
+    int32_t val;
+    memcpy(&val, in, 4);
 
     return (val);
 }
 
 /**
-  @brief         Read 4 q7 values.
-  @param[in]     in_q7       pointer to address of input.
-  @return        q31 value
+  @brief         Read 4 s8 values.
+  @param[in]     in_s8       pointer to address of input.
+  @return        s32 value
  */
-__STATIC_FORCEINLINE q31_t arm_nn_read_q7x4(const q7_t *in_q7)
+__STATIC_FORCEINLINE int32_t arm_nn_read_s8x4(const int8_t *in_s8)
 {
-    q31_t val;
-    memcpy(&val, in_q7, 4);
+    int32_t val;
+    memcpy(&val, in_s8, 4);
 
     return (val);
 }
 
 /**
-  @brief         Write four q7 to q7 pointer and increment pointer afterwards.
+  @brief         Write four s8 to s8 pointer and increment pointer afterwards.
   @param[in]     in       Double pointer to input value
   @param[in]     value    Four bytes to copy
  */
-__STATIC_FORCEINLINE void arm_nn_write_q7x4_ia(q7_t **in, q31_t value)
+__STATIC_FORCEINLINE void arm_nn_write_s8x4_ia(int8_t **in, int32_t value)
 {
     memcpy(*in, &value, 4);
     *in += 4;
@@ -656,7 +662,7 @@ __STATIC_FORCEINLINE void arm_nn_write_q7x4_ia(q7_t **in, q31_t value)
  * @param[in]       block_size  Number of bytes to copy.
  *
  */
-__STATIC_FORCEINLINE void arm_memset_q7(q7_t *dst, const q7_t val, uint32_t block_size)
+__STATIC_FORCEINLINE void arm_memset_s8(int8_t *dst, const int8_t val, uint32_t block_size)
 {
 #if defined(ARM_MATH_MVEI)
     __asm volatile("   vdup.8                  q0, %[set_val]             \n"
@@ -676,61 +682,38 @@ __STATIC_FORCEINLINE void arm_memset_q7(q7_t *dst, const q7_t val, uint32_t bloc
 #if defined(ARM_MATH_DSP)
 
 /**
- * @brief read and expand one q7 word into two q15 words
+ * @brief read and expand one s8 word into two s16 words with ordering.
  */
-
-__STATIC_FORCEINLINE const q7_t *read_and_pad(const q7_t *source, q31_t *out1, q31_t *out2)
+__STATIC_FORCEINLINE const int8_t *read_and_pad(const int8_t *source, int32_t *out1, int32_t *out2)
 {
-    q31_t inA = arm_nn_read_q7x4_ia(&source);
-    q31_t inAbuf1 = __SXTB16_RORn((uint32_t)inA, 8);
-    q31_t inAbuf2 = __SXTB16(inA);
+    int32_t inA = arm_nn_read_s8x4_ia(&source);
+    int32_t inAbuf1 = SXTB16_RORn((uint32_t)inA, 8);
+    int32_t inAbuf2 = SXTB16(inA);
 
-#ifndef ARM_MATH_BIG_ENDIAN
-    *out2 = (int32_t)(__PKHTB(inAbuf1, inAbuf2, 16));
-    *out1 = (int32_t)(__PKHBT(inAbuf2, inAbuf1, 16));
-#else
-    *out1 = (int32_t)(__PKHTB(inAbuf1, inAbuf2, 16));
-    *out2 = (int32_t)(__PKHBT(inAbuf2, inAbuf1, 16));
-#endif
+    #ifndef ARM_MATH_BIG_ENDIAN
+    *out2 = (int32_t)(PKHTB(inAbuf1, inAbuf2, 16));
+    *out1 = (int32_t)(PKHBT(inAbuf2, inAbuf1, 16));
+    #else
+    *out1 = (int32_t)(PKHTB(inAbuf1, inAbuf2, 16));
+    *out2 = (int32_t)(PKHBT(inAbuf2, inAbuf1, 16));
+    #endif
 
     return source;
 }
 
 /**
- * @brief read and expand one q7 word into two q15 words with reordering
+ * @brief read and expand one s8 word into two s16 words with no additional ordering.
  */
-
-__STATIC_FORCEINLINE const q7_t *read_and_pad_reordered(const q7_t *source, q31_t *out1, q31_t *out2)
+__STATIC_FORCEINLINE const int8_t *read_and_pad_reordered(const int8_t *source, int32_t *out1, int32_t *out2)
 {
-    q31_t inA = arm_nn_read_q7x4_ia(&source);
-#ifndef ARM_MATH_BIG_ENDIAN
-    *out2 = __SXTB16(__ROR((uint32_t)inA, 8));
-    *out1 = __SXTB16(inA);
-#else
-    *out1 = __SXTB16(__ROR((uint32_t)inA, 8));
-    *out2 = __SXTB16(inA);
-#endif
-
-    return source;
-}
-
-/**
- * @brief read and expand one q7 word into two q15 words with reordering and add an offset
- */
-__STATIC_FORCEINLINE const q7_t *
-read_and_pad_reordered_with_offset(const q7_t *source, q31_t *out1, q31_t *out2, q31_t offset)
-{
-    q31_t inA = arm_nn_read_q7x4_ia(&source);
-
-#ifndef ARM_MATH_BIG_ENDIAN
-    *out2 = __SXTB16(__ROR((uint32_t)inA, 8));
-    *out1 = __SXTB16(inA);
-#else
-    *out1 = __SXTB16(__ROR((uint32_t)inA, 8));
-    *out2 = __SXTB16(inA);
-#endif
-    *out1 = __QADD16(*out1, offset);
-    *out2 = __QADD16(*out2, offset);
+    int32_t inA = arm_nn_read_s8x4_ia(&source);
+    #ifndef ARM_MATH_BIG_ENDIAN
+    *out2 = SXTB16(ROR((uint32_t)inA, 8));
+    *out1 = SXTB16(inA);
+    #else
+    *out1 = SXTB16(ROR((uint32_t)inA, 8));
+    *out2 = SXTB16(inA);
+    #endif
 
     return source;
 }
@@ -759,17 +742,17 @@ read_and_pad_reordered_with_offset(const q7_t *source, q31_t *out1, q31_t *out2,
  *            clamped in the range provided by activation min and max.
  *            Supported framework: TensorFlow Lite micro.
  */
-q7_t *arm_nn_mat_mult_kernel_s8_s16(const q7_t *input_a,
-                                    const q15_t *input_b,
-                                    const uint16_t output_ch,
-                                    const int32_t *out_shift,
-                                    const int32_t *out_mult,
-                                    const int32_t out_offset,
-                                    const int16_t activation_min,
-                                    const int16_t activation_max,
-                                    const uint16_t num_col_a,
-                                    const int32_t *const output_bias,
-                                    q7_t *out_0);
+int8_t *arm_nn_mat_mult_kernel_s8_s16(const int8_t *input_a,
+                                      const int16_t *input_b,
+                                      const uint16_t output_ch,
+                                      const int32_t *out_shift,
+                                      const int32_t *out_mult,
+                                      const int32_t out_offset,
+                                      const int16_t activation_min,
+                                      const int16_t activation_max,
+                                      const int32_t num_col_a,
+                                      const int32_t *const output_bias,
+                                      int8_t *out_0);
 
 /**
  * @brief Common softmax function for s8 input and s8 or s16 output
@@ -799,9 +782,9 @@ void arm_nn_softmax_common_s8(const int8_t *input,
  * @brief macro for adding rounding offset
  */
 #ifndef ARM_NN_TRUNCATE
-#define NN_ROUND(out_shift) ((0x1 << out_shift) >> 1)
+    #define NN_ROUND(out_shift) ((0x1 << out_shift) >> 1)
 #else
-#define NN_ROUND(out_shift) 0
+    #define NN_ROUND(out_shift) 0
 #endif
 
 // Macros for shortening quantization functions' names and avoid long lines
@@ -823,18 +806,18 @@ void arm_nn_softmax_common_s8(const int8_t *input,
  * @return          Result of multiplication.
  *
  */
-__STATIC_FORCEINLINE q31_t arm_nn_doubling_high_mult(const q31_t m1, const q31_t m2)
+__STATIC_FORCEINLINE int32_t arm_nn_doubling_high_mult(const int32_t m1, const int32_t m2)
 {
-    q31_t result = 0;
+    int32_t result = 0;
     // Rounding offset to add for a right shift of 31
-    q63_t mult = 1 << 30;
+    int64_t mult = 1 << 30;
 
     if ((m1 < 0) ^ (m2 < 0))
     {
         mult = 1 - mult;
     }
     // Gets resolved as a SMLAL instruction
-    mult = mult + (q63_t)m1 * m2;
+    mult = mult + (int64_t)m1 * m2;
 
     // Utilize all of the upper 32 bits. This is the doubling step
     // as well.
@@ -861,9 +844,9 @@ __STATIC_FORCEINLINE q31_t arm_nn_doubling_high_mult(const q31_t m1, const q31_t
  *                  this function.
  *
  */
-__STATIC_FORCEINLINE q31_t arm_nn_doubling_high_mult_no_sat(const q31_t m1, const q31_t m2)
+__STATIC_FORCEINLINE int32_t arm_nn_doubling_high_mult_no_sat(const int32_t m1, const int32_t m2)
 {
-    q31_t result = 0;
+    int32_t result = 0;
     union arm_nn_long_long mult;
 
     // Rounding offset to add for a right shift of 31
@@ -871,7 +854,7 @@ __STATIC_FORCEINLINE q31_t arm_nn_doubling_high_mult_no_sat(const q31_t m1, cons
     mult.word.high = 0;
 
     // Gets resolved as a SMLAL instruction
-    mult.long_long = mult.long_long + (q63_t)m1 * m2;
+    mult.long_long = mult.long_long + (int64_t)m1 * m2;
 
     // Utilize all of the upper 32 bits. This is the doubling step
     // as well.
@@ -888,17 +871,17 @@ __STATIC_FORCEINLINE q31_t arm_nn_doubling_high_mult_no_sat(const q31_t m1, cons
  * @return          Rounded result of division. Midpoint is rounded away from zero.
  *
  */
-__STATIC_FORCEINLINE q31_t arm_nn_divide_by_power_of_two(const q31_t dividend, const q31_t exponent)
+__STATIC_FORCEINLINE int32_t arm_nn_divide_by_power_of_two(const int32_t dividend, const int32_t exponent)
 {
-    q31_t result = 0;
-    const q31_t remainder_mask = (1 << exponent) - 1;
+    int32_t result = 0;
+    const int32_t remainder_mask = (1 << exponent) - 1;
     int32_t remainder = remainder_mask & dividend;
 
     // Basic division
     result = dividend >> exponent;
 
     // Adjust 'result' for rounding (mid point away from zero)
-    q31_t threshold = remainder_mask >> 1;
+    int32_t threshold = remainder_mask >> 1;
     if (result < 0)
     {
         threshold++;
@@ -920,7 +903,7 @@ __STATIC_FORCEINLINE q31_t arm_nn_divide_by_power_of_two(const q31_t dividend, c
  * @return          Returns (val * multiplier)/(2 ^ shift)
  *
  */
-__STATIC_FORCEINLINE q31_t arm_nn_requantize(const q31_t val, const q31_t multiplier, const q31_t shift)
+__STATIC_FORCEINLINE int32_t arm_nn_requantize(const int32_t val, const int32_t multiplier, const int32_t shift)
 {
 #ifdef CMSIS_NN_USE_SINGLE_ROUNDING
     const int64_t total_shift = 31 - shift;
@@ -946,12 +929,14 @@ __STATIC_FORCEINLINE q31_t arm_nn_requantize(const q31_t val, const q31_t multip
  * @return          Returns (val * multiplier)/(2 ^ shift)
  *
  */
-__STATIC_FORCEINLINE q31_t arm_nn_requantize_s64(const q63_t val, const q31_t reduced_multiplier, const q31_t shift)
+__STATIC_FORCEINLINE int32_t arm_nn_requantize_s64(const int64_t val,
+                                                   const int32_t reduced_multiplier,
+                                                   const int32_t shift)
 {
-    const q63_t new_val = val * reduced_multiplier;
+    const int64_t new_val = val * reduced_multiplier;
 
-    q31_t result = new_val >> (14 - shift); // 64->32 bit reduction
-    result = (result + 1) >> 1;             // Last shift position and insert round
+    int32_t result = new_val >> (14 - shift); // 64->32 bit reduction
+    result = (result + 1) >> 1;               // Last shift position and insert round
 
     return result;
 }
@@ -963,7 +948,7 @@ __STATIC_FORCEINLINE q31_t arm_nn_requantize_s64(const q63_t val, const q31_t re
  * @param[in]       block_size  Number of bytes to copy.
  *
  */
-__STATIC_FORCEINLINE void arm_memcpy_q7(q7_t *__RESTRICT dst, const q7_t *__RESTRICT src, uint32_t block_size)
+__STATIC_FORCEINLINE void arm_memcpy_s8(int8_t *__RESTRICT dst, const int8_t *__RESTRICT src, uint32_t block_size)
 {
 #if defined(ARM_MATH_MVEI)
     __asm volatile("   wlstp.8                 lr, %[cnt], 1f             \n"
@@ -987,7 +972,7 @@ __STATIC_FORCEINLINE void arm_memcpy_q7(q7_t *__RESTRICT dst, const q7_t *__REST
  * @param[in]       block_size  Number of bytes to copy.
  *
  */
-__STATIC_FORCEINLINE void arm_memcpy_q15(q15_t *__RESTRICT dst, const q15_t *__RESTRICT src, uint32_t block_size)
+__STATIC_FORCEINLINE void arm_memcpy_q15(int16_t *__RESTRICT dst, const int16_t *__RESTRICT src, uint32_t block_size)
 {
     memcpy(dst, src, block_size);
 }
@@ -1000,7 +985,7 @@ __STATIC_FORCEINLINE void arm_memcpy_q15(q15_t *__RESTRICT dst, const q15_t *__R
  * @return          Result of multiplication.
  *
  */
-__STATIC_FORCEINLINE int32x4_t arm_doubling_high_mult_mve(const int32x4_t m1, const q31_t m2)
+__STATIC_FORCEINLINE int32x4_t arm_doubling_high_mult_mve(const int32x4_t m1, const int32_t m2)
 {
     return vqrdmulhq_n_s32(m1, m2);
 }
@@ -1013,7 +998,7 @@ __STATIC_FORCEINLINE int32x4_t arm_doubling_high_mult_mve(const int32x4_t m1, co
  * @return          Rounded result of division. Midpoint is rounded away from zero.
  *
  */
-__STATIC_FORCEINLINE int32x4_t arm_divide_by_power_of_two_mve(const int32x4_t dividend, const q31_t exponent)
+__STATIC_FORCEINLINE int32x4_t arm_divide_by_power_of_two_mve(const int32x4_t dividend, const int32_t exponent)
 {
     const int32x4_t shift = vdupq_n_s32(-exponent);
     const int32x4_t fixup = vshrq_n_s32(vandq_s32(dividend, shift), 31);
@@ -1030,9 +1015,9 @@ __STATIC_FORCEINLINE int32x4_t arm_divide_by_power_of_two_mve(const int32x4_t di
  * @return          Returns (val * multiplier)/(2 ^ shift)
  *
  */
-__STATIC_FORCEINLINE int32x4_t arm_requantize_mve(const int32x4_t val, const q31_t multiplier, const q31_t shift)
+__STATIC_FORCEINLINE int32x4_t arm_requantize_mve(const int32x4_t val, const int32_t multiplier, const int32_t shift)
 {
-#ifdef CMSIS_NN_USE_SINGLE_ROUNDING
+    #ifdef CMSIS_NN_USE_SINGLE_ROUNDING
     const int right_shift = MIN(-1, shift);
     const int left_shift = shift - right_shift;
 
@@ -1043,10 +1028,10 @@ __STATIC_FORCEINLINE int32x4_t arm_requantize_mve(const int32x4_t val, const q31
     result = vrshlq_s32(result, right_shift_dup);
 
     return result;
-#else
+    #else
     return arm_divide_by_power_of_two_mve(
         arm_doubling_high_mult_mve(vshlq_s32(val, vdupq_n_s32(LEFT_SHIFT(shift))), multiplier), RIGHT_SHIFT(shift));
-#endif
+    #endif
 }
 
 __STATIC_FORCEINLINE int32x4_t arm_doubling_high_mult_mve_32x4(const int32x4_t m1, const int32x4_t m2)
@@ -1066,7 +1051,7 @@ __STATIC_FORCEINLINE int32x4_t arm_requantize_mve_32x4(const int32x4_t val,
                                                        const int32x4_t multiplier,
                                                        const int32x4_t shift)
 {
-#ifdef CMSIS_NN_USE_SINGLE_ROUNDING
+    #ifdef CMSIS_NN_USE_SINGLE_ROUNDING
     const int32x4_t right_shift = vminq_s32(vdupq_n_s32(-1), shift);
     const int32x4_t left_shift = vqsubq_s32(shift, right_shift);
 
@@ -1074,7 +1059,7 @@ __STATIC_FORCEINLINE int32x4_t arm_requantize_mve_32x4(const int32x4_t val,
     result = vrshlq_s32(result, right_shift);
 
     return result;
-#else
+    #else
     const int32x4_t zz = vdupq_n_s32(0);
     const mve_pred16_t p = vcmpgtq_n_s32(shift, 0);
 
@@ -1083,7 +1068,7 @@ __STATIC_FORCEINLINE int32x4_t arm_requantize_mve_32x4(const int32x4_t val,
 
     return arm_divide_by_power_of_two_mve_32x4(arm_doubling_high_mult_mve_32x4(vshlq_s32(val, left_shift), multiplier),
                                                right_shift);
-#endif
+    #endif
 }
 #endif
 
@@ -1122,7 +1107,7 @@ __STATIC_FORCEINLINE int32_t arm_nn_exp_on_negative_values(int32_t val)
     return SELECT_USING_MASK(mask, NN_Q31_MAX, result);
 }
 
-__STATIC_FORCEINLINE q31_t arm_nn_mult_by_power_of_two(const int32_t val, const int32_t exp)
+__STATIC_FORCEINLINE int32_t arm_nn_mult_by_power_of_two(const int32_t val, const int32_t exp)
 {
     const int32_t thresh = ((1 << (31 - exp)) - 1);
     int32_t result = val << exp;
@@ -1146,17 +1131,190 @@ __STATIC_FORCEINLINE int32_t arm_nn_one_over_one_plus_x_for_x_in_0_1(int32_t val
 }
 
 /**
-  @brief         Write 2 q15 elements and post increment pointer.
+  @brief         Write 2 s16 elements and post increment pointer.
   @param[in]     dest_q15  Pointer to pointer that holds address of destination.
   @param[in]     src_q31   Input value to be written.
  */
-__STATIC_FORCEINLINE void arm_nn_write_q15x2_ia(q15_t **dest_q15, q31_t src_q31)
+__STATIC_FORCEINLINE void arm_nn_write_q15x2_ia(int16_t **dest_q15, int32_t src_q31)
 {
-    q31_t val = src_q31;
+    int32_t val = src_q31;
 
     memcpy(*dest_q15, &val, 4);
     *dest_q15 += 2;
 }
+
+/**
+  @brief         Write 2 s8 elements and post increment pointer.
+  @param[in]     dst  Pointer to pointer that holds address of destination.
+  @param[in]     src  Input value to be written.
+ */
+__STATIC_FORCEINLINE void arm_nn_write_s8x2_ia(int8_t **dst, int16_t src)
+{
+    memcpy(*dst, &src, 2);
+    *dst += 2;
+}
+
+// Support functions for LSTM
+/**
+ * @brief Update LSTM function for an iteration step
+ *
+ * param[in]    input                           Input data
+ * param[in]    input_to_input_weight           Input to input gate weights
+ * param[in]    input_to_forget_weight          Input to forget gate weights
+ * param[in]    input_to_cell_weight            Input to cell gate weights
+ * param[in]    input_to_output_weight          Input to output weights
+ * param[in]    recurrent_to_input_weight       Recurrent signal to input weights
+ * param[in]    recurrent_to_forget_weight      Recurrent signal to forget gate weights
+ * param[in]    recurrent_to_cell_weight        Recurrent signal to cell gate weighst
+ * param[in]    recurrent_to_output_weight      Recurrent signal to output weights
+ * param[in]    lstm                            LSTM parameters
+ * param[in]    n_batch                         Batch size
+ * param[in]    n_cell                          Cell size
+ * param[in]    n_input                         Input size
+ * param[in]    n_output                        Output size
+ * param[out]   output_state                    Output state
+ * param[out]   cell_state                      Internal state
+ * param[out]   output                          Output signal
+ * param[in] *scratch_buffers                   Struct containing scratch buffers
+ */
+arm_cmsis_nn_status arm_nn_lstm_step_s8_s16(const int8_t *input,
+                                            const int8_t *input_to_input_weight,
+                                            const int8_t *input_to_forget_weight,
+                                            const int8_t *input_to_cell_weight,
+                                            const int8_t *input_to_output_weight,
+                                            const int8_t *recurrent_to_input_weight,
+                                            const int8_t *recurrent_to_forget_weight,
+                                            const int8_t *recurrent_to_cell_weight,
+                                            const int8_t *recurrent_to_output_weight,
+                                            const cmsis_nn_lstm_params *lstm,
+                                            const int n_batch,
+                                            const int n_cell,
+                                            const int n_input,
+                                            const int n_output,
+                                            int8_t *output_state,
+                                            int16_t *cell_state,
+                                            int8_t *output,
+                                            cmsis_nn_lstm_context *scratch_buffers);
+
+/**
+ * @brief         Updates a LSTM gate for an iteration step of LSTM function, int8x8_16 version.
+ *
+ * param[in]    input                           Input data
+ * param[in]    input_to_gate_weights           Input to gate weights
+ * param[in]    input_to_gate_bias              Input to gate weights
+ * param[in]    input_to_gate_scaling           Input to gate scaling
+ * param[in]    activation                      Actival min and max values
+ * param[in]    output_state                    Output state
+ * param[in]    recurrent_to_gate_weights       Recurrent to gate weights
+ * param[in]    recurrent_to_gate_bias          Recurrent to gate bias
+ * param[in]    recurrent_to_gate_scaling       Recurrent to gate scaling
+ * param[in]    n_batch                         Batch size
+ * param[in]    n_input                         Input size
+ * param[out]   n_output                        Output size
+ * param[in]    activation_type                 Activation type (sigmoid or tanh)
+ * param[out]   n_cell                          Cell size
+ */
+void arm_nn_lstm_calculate_gate_s8_s16(const int8_t *input,
+                                       const int8_t *input_to_gate_weights,
+                                       const int32_t *input_to_gate_bias,
+                                       const cmsis_nn_scaling input_to_gate_scaling,
+                                       const int8_t *output_state,
+                                       const int8_t *recurrent_to_gate_weights,
+                                       const int32_t *recurrent_to_gate_bias,
+                                       const cmsis_nn_scaling recurrent_to_gate_scaling,
+                                       const int32_t n_batch,
+                                       const int32_t n_input,
+                                       const int32_t n_output,
+                                       const int32_t n_cell,
+                                       const arm_nn_activation_type activation_type,
+                                       int16_t *gate);
+
+/**
+ * @brief       Update cell state for a single LSTM iteration step, int8x8_16 version.
+ * @param[in]   n_block             total number of cells for all batches
+ * @param[in]   cell_state_scale    Scaling factor of cell state
+ * @param[in]   cell_state          Input/output vector, size n_batch*n_cell
+ * @param[in]   input_gate          Input vector of size n_block
+ * @param[in]   forget_gate         Input/scratch vector of size n_block, always modified
+ * @param[in]   cell_gate           Input vector of size, n_block
+ */
+void arm_nn_lstm_update_cell_state_s16(const int32_t n_block,
+                                       const int32_t cell_state_scale,
+                                       int16_t *cell_state,
+                                       const int16_t *input_gate,
+                                       const int16_t *forget_gate,
+                                       const int16_t *cell_gate);
+
+/**
+ * @brief       Calculate the output state tensor of an LSTM step, s8 input/output and s16 weight version.
+ *
+ * @param[in]       n_batch                     The number of distinct vectors in each array
+ * @param[in]       n_cell                      Number of cells
+ * @param[in,out]   cell_state                  Cell state, size n_batch*n_cell
+ * @param[in]       cell_state_scale            Scaling of cell_state
+ * @param[in]       output_gate                 Output gate
+ * @param[in]       hidden_scale                Effective scaling of cell_state .* output_gate
+ * @param[in]       hidden_offset               Zero point for cell_state .* output_gate
+ * @param[out]      output_state                Output state
+ * @param[in]       cell_gate_scratch           Scratch buffer
+ */
+void arm_nn_lstm_update_output_s8_s16(const int n_batch,
+                                      const int n_cell,
+                                      int16_t *cell_state,
+                                      const int32_t cell_state_scale,
+                                      const int16_t *output_gate,
+                                      const cmsis_nn_scaling hidden_scale,
+                                      const int32_t hidden_offset,
+                                      int8_t *output_state,
+                                      int16_t *cell_gate_scratch);
+
+/**
+ * @brief The result of the multiplication is accumulated to the passed result buffer.
+ * Multiplies a matrix by a "batched" vector (i.e. a matrix with a batch dimension composed by input vectors independent
+ * from each other).
+ *
+ * @param[in]   lhs_in           Batched vector
+ * @param[in]   rhs_in           Weights - input matrix (H(Rows)xW(Columns))
+ * @param[in]   bias             Bias vector
+ * @param[out]  dst              Output
+ * @param[in]   dst_offset       Output offset
+ * @param[in]   dst_multiplier   Multiplier for quantization
+ * @param[in]   dst_shift        Shift for quantization
+ * @param[in]   rhs_cols         Vector/matarix column length
+ * @param[in]   rhs_rows         Row count of matrix
+ * @param[in]   batch            Batch size
+ */
+void arm_nn_vec_mat_mul_result_acc_s8(const int8_t *lhs_in,
+                                      const int8_t *rhs_in,
+                                      const int32_t *bias,
+                                      int16_t *dst,
+                                      const int32_t dst_offset,
+                                      const int32_t dst_multiplier,
+                                      const int32_t dst_shift,
+                                      const int32_t rhs_cols,
+                                      const int32_t rhs_rows,
+                                      const int32_t batch);
+
+/**
+ * @brief s16 elementwise multiplication with s8 output
+ * @param[in]       input_1_vect        pointer to input vector 1
+ * @param[in]       input_2_vect        pointer to input vector 2
+ * @param[in,out]   output              pointer to output vector
+ * @param[in]       out_offset          output offset
+ * @param[in]       out_mult            output multiplier
+ * @param[in]       out_shift           output shift
+ * @param[in]       block_size          number of samples
+ * @return          The function returns ARM_CMSIS_NN_SUCCESS
+ *
+ * @details   Supported framework: TensorFlow Lite micro
+ */
+arm_cmsis_nn_status arm_elementwise_mul_s16_s8(const int16_t *input_1_vect,
+                                               const int16_t *input_2_vect,
+                                               int8_t *output,
+                                               const int32_t out_offset,
+                                               const int32_t out_mult,
+                                               const int32_t out_shift,
+                                               const int32_t block_size);
 
 #ifdef __cplusplus
 }

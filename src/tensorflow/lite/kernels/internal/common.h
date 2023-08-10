@@ -26,6 +26,7 @@ limitations under the License.
 #include <functional>
 
 #include "third_party/gemmlowp/fixedpoint/fixedpoint.h"
+#include "tensorflow/lite/core/macros.h"
 #include "tensorflow/lite/kernels/internal/cppmath.h"
 #include "tensorflow/lite/kernels/internal/optimized/neon_check.h"
 #include "tensorflow/lite/kernels/internal/types.h"
@@ -250,42 +251,11 @@ inline int32_t MultiplyByQuantizedMultiplierGreaterThanOne(
                                            quantized_multiplier);
 }
 
-inline int32_t MultiplyByQuantizedMultiplier(int32_t x,
-                                             int32_t quantized_multiplier,
-                                             int shift) {
-  using gemmlowp::RoundingDivideByPOT;
-  using gemmlowp::SaturatingRoundingDoublingHighMul;
-  int left_shift = shift > 0 ? shift : 0;
-  int right_shift = shift > 0 ? 0 : -shift;
-  return RoundingDivideByPOT(SaturatingRoundingDoublingHighMul(
-                                 x * (1 << left_shift), quantized_multiplier),
-                             right_shift);
-}
+TFLITE_NOINLINE int32_t MultiplyByQuantizedMultiplier(
+    int32_t x, int32_t quantized_multiplier, int shift);
 
-inline int32_t MultiplyByQuantizedMultiplier(int64_t x,
-                                             int32_t quantized_multiplier,
-                                             int shift) {
-  // Inputs:
-  // - quantized_multiplier has fixed point at bit 31
-  // - shift is -31 to +7 (negative for right shift)
-  //
-  // Assumptions: The following input ranges are assumed
-  // - quantize_scale>=0  (the usual range is (1<<30) to (1>>31)-1)
-  // - scaling is chosen so final scaled result fits in int32_t
-  // - input x is in the range -(1<<47) <= x < (1<<47)
-  assert(quantized_multiplier >= 0);
-  assert(shift >= -31 && shift < 8);
-  assert(x >= -(static_cast<int64_t>(1) << 47) &&
-         x < (static_cast<int64_t>(1) << 47));
-
-  int32_t reduced_multiplier = (quantized_multiplier < 0x7FFF0000)
-                                   ? ((quantized_multiplier + (1 << 15)) >> 16)
-                                   : 0x7FFF;
-  int total_shift = 15 - shift;
-  x = (x * (int64_t)reduced_multiplier) + ((int64_t)1 << (total_shift - 1));
-  int32_t result = x >> total_shift;
-  return result;
-}
+TFLITE_NOINLINE int32_t MultiplyByQuantizedMultiplier(
+    int64_t x, int32_t quantized_multiplier, int shift);
 
 #ifdef USE_NEON
 // Round uses ARM's rounding shift right.
@@ -328,14 +298,16 @@ template <typename T>
 int CountLeadingZeros(T integer_input) {
   static_assert(std::is_unsigned<T>::value,
                 "Only unsigned integer types handled.");
-#if defined(__GNUC__)
-  return integer_input ? __builtin_clz(integer_input)
-                       : std::numeric_limits<T>::digits;
-#else
   if (integer_input == 0) {
     return std::numeric_limits<T>::digits;
   }
-
+#if defined(__GNUC__)
+  if (std::is_same<T, uint32_t>::value) {
+    return __builtin_clz(integer_input);
+  } else if (std::is_same<T, uint64_t>::value) {
+    return __builtin_clzll(integer_input);
+  }
+#endif
   const T one_in_leading_positive = static_cast<T>(1)
                                     << (std::numeric_limits<T>::digits - 1);
   int leading_zeros = 0;
@@ -344,7 +316,6 @@ int CountLeadingZeros(T integer_input) {
     ++leading_zeros;
   }
   return leading_zeros;
-#endif
 }
 
 template <typename T>
@@ -1039,8 +1010,8 @@ inline void NdArrayDescsForElementwiseBroadcast(const Dims<N>& input0_dims,
 
 // Copies dims to desc, calculating strides.
 template <int N>
-inline void CopyDimsToDesc(const RuntimeShape& input_shape,
-                           NdArrayDesc<N>* desc_out) {
+TFLITE_NOINLINE void CopyDimsToDesc(const RuntimeShape& input_shape,
+                                    NdArrayDesc<N>* desc_out) {
   int desc_stride = 1;
   for (int i = N - 1; i >= 0; --i) {
     desc_out->extents[i] = input_shape.Dims(i);

@@ -50,7 +50,7 @@ TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
 
 }  // namespace
 
-TfLiteRegistration Register_NEG() {
+TFLMRegistration Register_NEG() {
   return tflite::micro::RegisterOp(nullptr, nullptr, Eval);
 }
 

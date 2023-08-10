@@ -49,28 +49,28 @@ TfLiteStatus CalculateOpDataDepthwiseConv(
 
 TfLiteStatus DepthwiseConvPrepare(TfLiteContext* context, TfLiteNode* node);
 
-// This is the most generic TfLiteRegistration. The actual supported types may
-// still be target dependent. The only requirement is that every implementation
-// (reference or optimized) must define this function.
-TfLiteRegistration Register_DEPTHWISE_CONV_2D();
+// This is the most generic TFLMRegistration. The actual supported types
+// may still be target dependent. The only requirement is that every
+// implementation (reference or optimized) must define this function.
+TFLMRegistration Register_DEPTHWISE_CONV_2D();
 
 #if defined(ARDUINO)
-// Returns a TfLiteRegistration struct for kernel variant that only supports
+// Returns a TFLMRegistration struct for kernel variant that only supports
 // int8 activations and int8 weights and uses the latency optimized
 // implementations.
-TfLiteRegistration Register_DEPTHWISE_CONV_2D_INT8();
+TFLMRegistration Register_DEPTHWISE_CONV_2D_INT8();
 
-// Returns a TfLiteRegistration struct for kernel variant that only supports
+// Returns a TFLMRegistration struct for kernel variant that only supports
 // int16 activations and int8 weights and uses the latency optimized
 // implementations.
-TfLiteRegistration Register_DEPTHWISE_CONV_2D_INT16();
+TFLMRegistration Register_DEPTHWISE_CONV_2D_INT16();
 
 #else
-inline TfLiteRegistration Register_DEPTHWISE_CONV_2D_INT8() {
+inline TFLMRegistration Register_DEPTHWISE_CONV_2D_INT8() {
   return Register_DEPTHWISE_CONV_2D();
 }
 
-inline TfLiteRegistration Register_DEPTHWISE_CONV_2D_INT16() {
+inline TFLMRegistration Register_DEPTHWISE_CONV_2D_INT16() {
   return Register_DEPTHWISE_CONV_2D();
 }
 #endif

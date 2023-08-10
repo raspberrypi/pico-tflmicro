@@ -21,8 +21,8 @@
  * Title:        arm_reshape_s8.c
  * Description:  Reshape a s8 vector
  *
- * $Date:        4 Aug 2022
- * $Revision:    V.1.0.1
+ * $Date:        26 October 2022
+ * $Revision:    V.1.0.2
  *
  * Target Processor:  Cortex-M cores
  *
@@ -49,7 +49,7 @@
 
 void arm_reshape_s8(const int8_t *input, int8_t *output, const uint32_t total_size)
 {
-    arm_memcpy_q7(output, input, total_size);
+    arm_memcpy_s8(output, input, total_size);
 }
 
 /**

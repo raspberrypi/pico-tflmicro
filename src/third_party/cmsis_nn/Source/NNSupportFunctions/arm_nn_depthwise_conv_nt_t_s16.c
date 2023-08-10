@@ -21,8 +21,8 @@
  * Title:        arm_nn_depthwise_conv_nt_t_s16.c
  * Description:  Depthwise convolution on matrices with no padding.
  *
- * $Date:        6 July 2022
- * $Revision:    V.1.0.0
+ * $Date:        26 October 2022
+ * $Revision:    V.1.0.1
  *
  * Target Processor:  Cortex-M processors with MVE extension
  * -------------------------------------------------------------------- */
@@ -45,7 +45,7 @@
  *
  */
 int16_t *arm_nn_depthwise_conv_nt_t_s16(const int16_t *lhs,
-                                        const q7_t *rhs,
+                                        const int8_t *rhs,
                                         const uint16_t num_ch,
                                         const int32_t *out_shift,
                                         const int32_t *out_mult,

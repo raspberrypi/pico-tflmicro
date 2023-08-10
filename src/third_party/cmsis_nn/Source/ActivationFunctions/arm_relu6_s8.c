@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010-2019 Arm Limited or its affiliates. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright 2010-2019, 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -21,8 +21,8 @@
  * Title:        arm_relu6_s8.c
  * Description:  Basic s8 version of ReLU6
  *
- * $Date:        09. October 2020
- * $Revision:    V.1.0.1
+ * $Date:        26 October 2022
+ * $Revision:    V.1.0.2
  *
  * Target Processor:  Cortex-M cores
  *
@@ -47,7 +47,7 @@
  *
  */
 
-void arm_relu6_s8(q7_t *data, uint16_t size)
+void arm_relu6_s8(int8_t *data, uint16_t size)
 {
     int32_t i;
 

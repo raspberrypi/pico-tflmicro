@@ -1,20 +1,22 @@
 #!/bin/bash -xe
 
-UPSTREAM_REPO_URL=https://github.com/tensorflow/tflite-micro-arduino-examples
-
-BUILD_DIR=${PWD}/build
+UPSTREAM_REPO_URL=https://github.com/petewarden/tflite-micro-arduino-examples
+ROOT_DIR=${PWD}
+BUILD_DIR=${ROOT_DIR}/build
 ARDUINO_REPO_DIR=${BUILD_DIR}/arduino_repo
 rm -rf ${ARDUINO_REPO_DIR}
 mkdir -p ${BUILD_DIR}
 git clone ${UPSTREAM_REPO_URL} ${ARDUINO_REPO_DIR} --depth=1
+
 rm -rf src
 mkdir src
 cp -r ${ARDUINO_REPO_DIR}/src/tensorflow src/tensorflow
 cp -r ${ARDUINO_REPO_DIR}/src/third_party src/third_party
+cp -r ${ARDUINO_REPO_DIR}/signal src/signal
 cp sync/micro_time.cpp src/tensorflow/lite/micro/micro_time.cpp
 cp sync/system_setup.cpp src/tensorflow/lite/micro/system_setup.cpp
 cp sync/micro_profiler.cpp src/tensorflow/lite/micro/micro_profiler.cpp
-cp sync/arm_nn_mat_mult_nt_t_s8.c src/third_party/cmsis_nn/Source/NNSupportFunctions/arm_nn_mat_mult_nt_t_s8.c
+#cp sync/arm_nn_mat_mult_nt_t_s8.c src/third_party/cmsis_nn/Source/NNSupportFunctions/arm_nn_mat_mult_nt_t_s8.c
 mkdir -p src/tensorflow/lite/micro/benchmarks
 cp sync/micro_benchmark.h src/tensorflow/lite/micro/benchmarks
 

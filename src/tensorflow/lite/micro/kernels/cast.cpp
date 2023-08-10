@@ -107,7 +107,7 @@ TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
 }
 }  // namespace
 
-TfLiteRegistration Register_CAST() {
+TFLMRegistration Register_CAST() {
   return tflite::micro::RegisterOp(nullptr, Prepare, Eval);
 }
 

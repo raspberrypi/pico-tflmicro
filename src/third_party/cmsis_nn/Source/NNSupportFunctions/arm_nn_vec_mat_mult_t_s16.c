@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2020-2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2020-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -21,14 +21,15 @@
  * Title:        arm_nn_vec_mat_mult_t_s16
  * Description:  s16 vector by matrix (transposed) multiplication
  *
- * $Date:        11 August 2022
- * $Revision:    V.2.1.0
+ * $Date:        5 January 2023
+ * $Revision:    V.2.2.0
  *
- * Target Processor:  Cortex-M
+ * Target :  Arm(R) M-Profile Architecture
  *
  * -------------------------------------------------------------------- */
 
 #include "third_party/cmsis_nn/Include/arm_nnsupportfunctions.h"
+
 #define MAX_COL_COUNT (512)
 
 /**
@@ -46,10 +47,10 @@
  * Refer header file for details.
  *
  */
-arm_cmsis_nn_status arm_nn_vec_mat_mult_t_s16(const q15_t *lhs,
-                                              const q7_t *rhs,
-                                              const q63_t *bias,
-                                              q15_t *dst,
+arm_cmsis_nn_status arm_nn_vec_mat_mult_t_s16(const int16_t *lhs,
+                                              const int8_t *rhs,
+                                              const int64_t *bias,
+                                              int16_t *dst,
                                               const int32_t dst_multiplier,
                                               const int32_t dst_shift,
                                               const int32_t rhs_cols,
@@ -66,7 +67,7 @@ arm_cmsis_nn_status arm_nn_vec_mat_mult_t_s16(const q15_t *lhs,
         rhs_cols_fast = MAX_COL_COUNT;
     }
 
-#if defined(ARM_MATH_MVEI)
+    #if defined(ARM_MATH_MVEI)
     int32_t row_loop_cnt = rhs_rows / 4;
     int32_t col_loop_cnt = (rhs_cols_fast + 7) / 8;
 
@@ -140,25 +141,25 @@ arm_cmsis_nn_status arm_nn_vec_mat_mult_t_s16(const q15_t *lhs,
         tmp = arm_nn_requantize_s64(result_64_0, dst_multiplier, dst_shift);
         tmp = MAX(tmp, activation_min);
         tmp = MIN(tmp, activation_max);
-        *dst++ = (q15_t)tmp;
+        *dst++ = (int16_t)tmp;
 
         tmp = 0;
         tmp = arm_nn_requantize_s64(result_64_1, dst_multiplier, dst_shift);
         tmp = MAX(tmp, activation_min);
         tmp = MIN(tmp, activation_max);
-        *dst++ = (q15_t)tmp;
+        *dst++ = (int16_t)tmp;
 
         tmp = 0;
         tmp = arm_nn_requantize_s64(result_64_2, dst_multiplier, dst_shift);
         tmp = MAX(tmp, activation_min);
         tmp = MIN(tmp, activation_max);
-        *dst++ = (q15_t)tmp;
+        *dst++ = (int16_t)tmp;
 
         tmp = 0;
         tmp = arm_nn_requantize_s64(result_64_3, dst_multiplier, dst_shift);
         tmp = MAX(tmp, activation_min);
         tmp = MIN(tmp, activation_max);
-        *dst++ = (q15_t)tmp;
+        *dst++ = (int16_t)tmp;
 
         rhs += 4 * rhs_cols;
     }
@@ -209,20 +210,20 @@ arm_cmsis_nn_status arm_nn_vec_mat_mult_t_s16(const q15_t *lhs,
         tmp = arm_nn_requantize_s64(result_64, dst_multiplier, dst_shift);
         tmp = MAX(tmp, activation_min);
         tmp = MIN(tmp, activation_max);
-        *dst++ = (q15_t)tmp;
+        *dst++ = (int16_t)tmp;
 
         rhs += rhs_cols;
     }
 
-#else // ARM_MATH_MVEI
+    #else // ARM_MATH_MVEI
 
     const int32_t row_loop_cnt = rhs_rows / 2;
 
     for (int32_t i = 0; i < row_loop_cnt; i++)
     {
 
-        q63_t acc_64_0 = 0;
-        q63_t acc_64_1 = 0;
+        int64_t acc_64_0 = 0;
+        int64_t acc_64_1 = 0;
         int32_t acc_0 = 0;
         int32_t acc_1 = 0;
 
@@ -242,13 +243,13 @@ arm_cmsis_nn_status arm_nn_vec_mat_mult_t_s16(const q15_t *lhs,
 
             rhs_0 = read_and_pad(rhs_0, &ker_0, &ker_1);
 
-            acc_0 = __SMLAD(ker_0, vec_part_0, acc_0);
-            acc_0 = __SMLAD(ker_1, vec_part_1, acc_0);
+            acc_0 = SMLAD(ker_0, vec_part_0, acc_0);
+            acc_0 = SMLAD(ker_1, vec_part_1, acc_0);
 
             rhs_1 = read_and_pad(rhs_1, &ker_0, &ker_1);
 
-            acc_1 = __SMLAD(ker_0, vec_part_0, acc_1);
-            acc_1 = __SMLAD(ker_1, vec_part_1, acc_1);
+            acc_1 = SMLAD(ker_0, vec_part_0, acc_1);
+            acc_1 = SMLAD(ker_1, vec_part_1, acc_1);
         }
 
         acc_64_0 += acc_0;
@@ -269,22 +270,22 @@ arm_cmsis_nn_status arm_nn_vec_mat_mult_t_s16(const q15_t *lhs,
             acc_64_0 += *bias++;
             acc_64_1 += *bias++;
         }
-        q31_t tmp;
+        int32_t tmp;
 
         tmp = arm_nn_requantize_s64(acc_64_0, dst_multiplier, dst_shift);
         tmp = MAX(tmp, activation_min);
         tmp = MIN(tmp, activation_max);
-        *dst++ = (q15_t)tmp;
+        *dst++ = (int16_t)tmp;
 
         tmp = arm_nn_requantize_s64(acc_64_1, dst_multiplier, dst_shift);
         tmp = MAX(tmp, activation_min);
         tmp = MIN(tmp, activation_max);
-        *dst++ = (q15_t)tmp;
+        *dst++ = (int16_t)tmp;
     }
 
     if (rhs_rows & 0x1)
     {
-        q63_t acc_64_0 = 0;
+        int64_t acc_64_0 = 0;
         int32_t acc_0 = 0;
         const int32_t col_loop_cnt = rhs_cols_fast / 4;
 
@@ -297,10 +298,10 @@ arm_cmsis_nn_status arm_nn_vec_mat_mult_t_s16(const q15_t *lhs,
             rhs_0 = read_and_pad(rhs_0, &ker_0, &ker_1);
 
             vec = arm_nn_read_q15x2_ia(&lhs_vec);
-            acc_0 = __SMLAD(ker_0, vec, acc_0);
+            acc_0 = SMLAD(ker_0, vec, acc_0);
 
             vec = arm_nn_read_q15x2_ia(&lhs_vec);
-            acc_0 = __SMLAD(ker_1, vec, acc_0);
+            acc_0 = SMLAD(ker_1, vec, acc_0);
         }
 
         acc_64_0 += acc_0;
@@ -317,26 +318,26 @@ arm_cmsis_nn_status arm_nn_vec_mat_mult_t_s16(const q15_t *lhs,
         {
             acc_64_0 += *bias++;
         }
-        q31_t tmp;
+        int32_t tmp;
         tmp = arm_nn_requantize_s64(acc_64_0, dst_multiplier, dst_shift);
         tmp = MAX(tmp, activation_min);
         tmp = MIN(tmp, activation_max);
-        *dst++ = (q15_t)tmp;
+        *dst++ = (int16_t)tmp;
     }
 
-#endif // ARM_MATH_MVEI
-#else  // ARM_MATH_DSP
+    #endif // ARM_MATH_MVEI
+#else      // ARM_MATH_DSP
     for (int i_row_loop_cnt = 0; i_row_loop_cnt < rhs_rows; i_row_loop_cnt++)
     {
-        const q15_t *lhs_ptr = lhs;
-        const q7_t *rhs_ptr_0 = &rhs[0];
+        const int16_t *lhs_ptr = lhs;
+        const int8_t *rhs_ptr_0 = &rhs[0];
 
-        q63_t result = 0;
+        int64_t result = 0;
 
         for (int32_t rhs_cols_idx = 0; rhs_cols_idx < rhs_cols; ++rhs_cols_idx)
         {
-            const q63_t rhs_value0 = (int8_t)*rhs_ptr_0;
-            const q63_t lhs_value = *lhs_ptr;
+            const int64_t rhs_value0 = (int8_t)*rhs_ptr_0;
+            const int64_t lhs_value = *lhs_ptr;
 
             result += lhs_value * rhs_value0;
 
@@ -355,10 +356,10 @@ arm_cmsis_nn_status arm_nn_vec_mat_mult_t_s16(const q15_t *lhs,
         result = ((result) > (activation_min) ? (result) : (activation_min));
         result = ((result) < (activation_max) ? (result) : (activation_max));
 
-        *dst++ = (q15_t)result;
+        *dst++ = (int16_t)result;
         rhs += rhs_cols;
     }
-#endif // ARM_MATH_DSP
+#endif     // ARM_MATH_DSP
 
     return ARM_CMSIS_NN_SUCCESS;
 }

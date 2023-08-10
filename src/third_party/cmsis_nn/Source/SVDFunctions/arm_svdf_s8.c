@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010-2022 Arm Limited or its affiliates.
+ * SPDX-FileCopyrightText: Copyright 2010-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -21,10 +21,10 @@
  * Title:        arm_svdf_s8.c
  * Description:  S8 basic SVDF layer function
  *
- * $Date:        4 May 2022
- * $Revision:    V.4.0.1
+ * $Date:        5 January 2023
+ * $Revision:    V.5.1.0
  *
- * Target Processor:  Cortex-M processors
+ * Target :  Arm(R) M-Profile Architecture
  *
  * -------------------------------------------------------------------- */
 
@@ -53,26 +53,26 @@ arm_cmsis_nn_status arm_svdf_s8(const cmsis_nn_context *input_ctx,
                                 const cmsis_nn_per_tensor_quant_params *input_quant_params,
                                 const cmsis_nn_per_tensor_quant_params *output_quant_params,
                                 const cmsis_nn_dims *input_dims,
-                                const q7_t *input_data,
+                                const int8_t *input_data,
                                 const cmsis_nn_dims *state_dims,
-                                q7_t *state_data,
+                                int8_t *state_data,
                                 const cmsis_nn_dims *weights_feature_dims,
-                                const q7_t *weights_feature_data,
+                                const int8_t *weights_feature_data,
                                 const cmsis_nn_dims *weights_time_dims,
-                                const q7_t *weights_time_data,
+                                const int8_t *weights_time_data,
                                 const cmsis_nn_dims *bias_dims,
-                                const q31_t *bias_data,
+                                const int32_t *bias_data,
                                 const cmsis_nn_dims *output_dims,
-                                q7_t *output_data)
+                                int8_t *output_data)
 {
     (void)bias_dims;
     (void)state_dims;
     (void)output_dims;
 
-    const q31_t multiplier_in = input_quant_params->multiplier;
-    const q31_t shift_in = input_quant_params->shift;
-    const q31_t multiplier_out = output_quant_params->multiplier;
-    const q31_t shift_2 = output_quant_params->shift;
+    const int32_t multiplier_in = input_quant_params->multiplier;
+    const int32_t shift_in = input_quant_params->shift;
+    const int32_t multiplier_out = output_quant_params->multiplier;
+    const int32_t shift_2 = output_quant_params->shift;
     const int32_t zp_in = svdf_params->input_offset;
     const int32_t zp_out = svdf_params->output_offset;
     const int32_t in_activation_min = svdf_params->input_activation.min;
@@ -91,13 +91,13 @@ arm_cmsis_nn_status arm_svdf_s8(const cmsis_nn_context *input_ctx,
     {
         return ARM_CMSIS_NN_ARG_ERROR;
     }
-    q31_t *buffer_a = (q31_t *)input_ctx->buf;
+    int32_t *buffer_a = (int32_t *)input_ctx->buf;
 
     if (output_ctx->buf == NULL)
     {
         return ARM_CMSIS_NN_ARG_ERROR;
     }
-    q31_t *buffer_b = (q31_t *)output_ctx->buf;
+    int32_t *buffer_b = (int32_t *)output_ctx->buf;
 
     // Left shift state
     memmove((int8_t *)state_data,
@@ -107,16 +107,15 @@ arm_cmsis_nn_status arm_svdf_s8(const cmsis_nn_context *input_ctx,
     // Matrix multiplication input * feature weight
     for (int i_batch = 0; i_batch < input_batches; i_batch++)
     {
-        q7_t *res_ptr = state_data + (time_batches * i_batch * feature_batches) + (time_batches - 1);
-        const q7_t *weight = weights_feature_data;
-        const q7_t *input = input_data + i_batch * input_height;
+        int8_t *res_ptr = state_data + (time_batches * i_batch * feature_batches) + (time_batches - 1);
+        const int8_t *weight = weights_feature_data;
+        const int8_t *input = input_data + i_batch * input_height;
 
         arm_cmsis_nn_status res = arm_nn_vec_mat_mult_t_s8(input,
                                                            weight,
                                                            NULL,
                                                            res_ptr,
                                                            -zp_in,
-                                                           0,
                                                            0,
                                                            multiplier_in,
                                                            shift_in,
@@ -134,7 +133,7 @@ arm_cmsis_nn_status arm_svdf_s8(const cmsis_nn_context *input_ctx,
 
     // Matrix multiplicate time weight * state tensors
     {
-        q31_t *ptr_a = buffer_a;
+        int32_t *ptr_a = buffer_a;
         const int8_t *v2 = state_data;
         for (int i_batch = 0; i_batch < input_batches; i_batch++)
         {
@@ -152,11 +151,11 @@ arm_cmsis_nn_status arm_svdf_s8(const cmsis_nn_context *input_ctx,
                 {
                     j += 4;
 
-                    q31_t r1_1, r1_2, r2_1, r2_2;
+                    int32_t r1_1, r1_2, r2_1, r2_2;
                     v1 = read_and_pad_reordered(v1, &r1_1, &r1_2);
                     v2 = read_and_pad_reordered(v2, &r2_1, &r2_2);
-                    sum = __SMLAD(r1_1, r2_1, sum);
-                    sum = __SMLAD(r1_2, r2_2, sum);
+                    sum = SMLAD(r1_1, r2_1, sum);
+                    sum = SMLAD(r1_2, r2_2, sum);
                 }
 
                 // Process the remaining data
@@ -187,8 +186,8 @@ arm_cmsis_nn_status arm_svdf_s8(const cmsis_nn_context *input_ctx,
         {
             for (int i = 0; i < input_batches; i++)
             {
-                q31_t *output_temp = buffer_b + i * feature_batches;
-                const q31_t *ptr_a = buffer_a + i * feature_batches;
+                int32_t *output_temp = buffer_b + i * feature_batches;
+                const int32_t *ptr_a = buffer_a + i * feature_batches;
 
                 const int32_t *bi = bias_data;
                 for (int j = 0; j < feature_batches; j++)
@@ -201,8 +200,8 @@ arm_cmsis_nn_status arm_svdf_s8(const cmsis_nn_context *input_ctx,
         {
             for (int i_batch = 0; i_batch < input_batches; i_batch++)
             {
-                q31_t *output_data_temp = buffer_b + i_batch * unit_count;
-                q31_t *ptr_a = buffer_a + i_batch * feature_batches;
+                int32_t *output_data_temp = buffer_b + i_batch * unit_count;
+                int32_t *ptr_a = buffer_a + i_batch * feature_batches;
 
                 for (int i = 0; i < unit_count; i++)
                 {
@@ -221,8 +220,8 @@ arm_cmsis_nn_status arm_svdf_s8(const cmsis_nn_context *input_ctx,
     {
         for (int i_batch = 0; i_batch < input_batches; i_batch++)
         {
-            q31_t *output_data_temp = buffer_b + i_batch * unit_count;
-            q31_t *ptr_a = buffer_a + i_batch * feature_batches;
+            int32_t *output_data_temp = buffer_b + i_batch * unit_count;
+            int32_t *ptr_a = buffer_a + i_batch * feature_batches;
 
             for (int i = 0; i < unit_count; i++)
             {
@@ -258,7 +257,7 @@ arm_cmsis_nn_status arm_svdf_s8(const cmsis_nn_context *input_ctx,
 #else
     for (int i = 0; i < input_batches * unit_count; i++)
     {
-        output_data[i] = (q7_t)CLAMP(
+        output_data[i] = (int8_t)CLAMP(
             arm_nn_requantize(buffer_b[i], multiplier_out, shift_2) + zp_out, out_activation_max, out_activation_min);
     }
 #endif

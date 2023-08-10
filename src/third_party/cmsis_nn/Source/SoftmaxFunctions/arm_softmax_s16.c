@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Arm Limited or its affiliates.
+ * SPDX-FileCopyrightText: Copyright 2022-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -21,10 +21,10 @@
  * Title:        arm_softmax_s16.c
  * Description:  S16 softmax function
  *
- * $Date:        19 April 2022
- * $Revision:    V.2.0.0
+ * $Date:        5 January 2023
+ * $Revision:    V.2.1.0
  *
- * Target Processor:  Cortex-M cores
+ * Target :  Arm(R) M-Profile Architecture
  *
  * -------------------------------------------------------------------- */
 
@@ -84,7 +84,7 @@ arm_cmsis_nn_status arm_softmax_s16(const int16_t *input,
             sum += cached_exp_results[col];
         }
 
-        const int32_t headroom = __CLZ(sum);
+        const int32_t headroom = CLZ(sum);
 
         // Compute the reciprocal 1/sum
         const int32_t shifted_sum = (((sum) << (headroom - 1)) + (1 << 13)) >> 14;
