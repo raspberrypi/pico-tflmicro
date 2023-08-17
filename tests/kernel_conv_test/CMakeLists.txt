@@ -24,6 +24,8 @@ set_target_properties(
 target_sources(kernel_conv_test
   PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/../../tests/kernel_conv_test/conv_test.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/../../tests/kernel_conv_test/conv_test_common.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/../../tests/kernel_conv_test/conv_test_data.cpp
 )
 
 target_link_libraries(
