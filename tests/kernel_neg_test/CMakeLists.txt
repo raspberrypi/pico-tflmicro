@@ -21,6 +21,9 @@ set_target_properties(
   COMPILE_FLAGS -nostdlib
 )
 
+pico_enable_stdio_usb(kernel_neg_test 1)
+pico_enable_stdio_uart(kernel_neg_test 0)
+
 target_sources(kernel_neg_test
   PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/../../tests/kernel_neg_test/neg_test.cpp

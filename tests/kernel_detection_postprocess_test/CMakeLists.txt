@@ -21,6 +21,9 @@ set_target_properties(
   COMPILE_FLAGS -nostdlib
 )
 
+pico_enable_stdio_usb(kernel_detection_postprocess_test 1)
+pico_enable_stdio_uart(kernel_detection_postprocess_test 0)
+
 target_sources(kernel_detection_postprocess_test
   PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/../../tests/kernel_detection_postprocess_test/detection_postprocess_test.cpp

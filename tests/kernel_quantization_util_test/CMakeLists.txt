@@ -21,6 +21,9 @@ set_target_properties(
   COMPILE_FLAGS -nostdlib
 )
 
+pico_enable_stdio_usb(kernel_quantization_util_test 1)
+pico_enable_stdio_uart(kernel_quantization_util_test 0)
+
 target_sources(kernel_quantization_util_test
   PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/../../tests/kernel_quantization_util_test/quantization_util_test.cpp

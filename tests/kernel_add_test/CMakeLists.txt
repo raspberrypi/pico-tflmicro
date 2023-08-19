@@ -21,6 +21,9 @@ set_target_properties(
   COMPILE_FLAGS -nostdlib
 )
 
+pico_enable_stdio_usb(kernel_add_test 1)
+pico_enable_stdio_uart(kernel_add_test 0)
+
 target_sources(kernel_add_test
   PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/../../tests/kernel_add_test/add_test.cpp

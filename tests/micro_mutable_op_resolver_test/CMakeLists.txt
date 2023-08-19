@@ -21,6 +21,9 @@ set_target_properties(
   COMPILE_FLAGS -nostdlib
 )
 
+pico_enable_stdio_usb(micro_mutable_op_resolver_test 1)
+pico_enable_stdio_uart(micro_mutable_op_resolver_test 0)
+
 target_sources(micro_mutable_op_resolver_test
   PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/../../tests/micro_mutable_op_resolver_test/micro_mutable_op_resolver_test.cpp

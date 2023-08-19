@@ -21,6 +21,9 @@ set_target_properties(
   COMPILE_FLAGS -nostdlib
 )
 
+pico_enable_stdio_usb(linear_memory_planner_test 1)
+pico_enable_stdio_uart(linear_memory_planner_test 0)
+
 target_sources(linear_memory_planner_test
   PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/../../tests/linear_memory_planner_test/linear_memory_planner_test.cpp

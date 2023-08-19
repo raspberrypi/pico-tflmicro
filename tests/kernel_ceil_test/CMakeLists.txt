@@ -21,6 +21,9 @@ set_target_properties(
   COMPILE_FLAGS -nostdlib
 )
 
+pico_enable_stdio_usb(kernel_ceil_test 1)
+pico_enable_stdio_uart(kernel_ceil_test 0)
+
 target_sources(kernel_ceil_test
   PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/../../tests/kernel_ceil_test/ceil_test.cpp

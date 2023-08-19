@@ -21,6 +21,9 @@ set_target_properties(
   COMPILE_FLAGS -nostdlib
 )
 
+pico_enable_stdio_usb(testing_helpers_test 1)
+pico_enable_stdio_uart(testing_helpers_test 0)
+
 target_sources(testing_helpers_test
   PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/../../tests/testing_helpers_test/testing_helpers_test.cpp

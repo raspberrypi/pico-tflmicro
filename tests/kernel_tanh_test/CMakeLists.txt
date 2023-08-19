@@ -21,6 +21,9 @@ set_target_properties(
   COMPILE_FLAGS -nostdlib
 )
 
+pico_enable_stdio_usb(kernel_tanh_test 1)
+pico_enable_stdio_uart(kernel_tanh_test 0)
+
 target_sources(kernel_tanh_test
   PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/../../tests/kernel_tanh_test/tanh_test.cpp

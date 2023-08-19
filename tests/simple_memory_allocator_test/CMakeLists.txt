@@ -21,6 +21,9 @@ set_target_properties(
   COMPILE_FLAGS -nostdlib
 )
 
+pico_enable_stdio_usb(simple_memory_allocator_test 1)
+pico_enable_stdio_uart(simple_memory_allocator_test 0)
+
 target_sources(simple_memory_allocator_test
   PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/../../tests/simple_memory_allocator_test/simple_memory_allocator_test.cpp

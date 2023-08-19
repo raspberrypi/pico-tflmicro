@@ -21,6 +21,9 @@ set_target_properties(
   COMPILE_FLAGS -nostdlib
 )
 
+pico_enable_stdio_usb(greedy_memory_planner_test 1)
+pico_enable_stdio_uart(greedy_memory_planner_test 0)
+
 target_sources(greedy_memory_planner_test
   PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/../../tests/greedy_memory_planner_test/greedy_memory_planner_test.cpp

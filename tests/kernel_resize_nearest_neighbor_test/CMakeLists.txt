@@ -21,6 +21,9 @@ set_target_properties(
   COMPILE_FLAGS -nostdlib
 )
 
+pico_enable_stdio_usb(kernel_resize_nearest_neighbor_test 1)
+pico_enable_stdio_uart(kernel_resize_nearest_neighbor_test 0)
+
 target_sources(kernel_resize_nearest_neighbor_test
   PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/../../tests/kernel_resize_nearest_neighbor_test/resize_nearest_neighbor_test.cpp

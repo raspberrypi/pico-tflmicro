@@ -21,6 +21,9 @@ set_target_properties(
   COMPILE_FLAGS -nostdlib
 )
 
+pico_enable_stdio_usb(kernel_sub_test 1)
+pico_enable_stdio_uart(kernel_sub_test 0)
+
 target_sources(kernel_sub_test
   PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/../../tests/kernel_sub_test/sub_test.cpp

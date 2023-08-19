@@ -21,6 +21,9 @@ set_target_properties(
   COMPILE_FLAGS -nostdlib
 )
 
+pico_enable_stdio_usb(memory_helpers_test 1)
+pico_enable_stdio_uart(memory_helpers_test 0)
+
 target_sources(memory_helpers_test
   PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/../../tests/memory_helpers_test/memory_helpers_test.cpp
