@@ -51,7 +51,7 @@ target_link_libraries(
 )
 
 target_sources(pico-tflmicro
-  PUBLIC
+  PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/src/signal/micro/kernels/delay.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/signal/micro/kernels/delay_flexbuffers_generated_data.h
   ${CMAKE_CURRENT_LIST_DIR}/src/signal/micro/kernels/energy.cpp
