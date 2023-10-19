@@ -21,8 +21,8 @@
  * Title:        arm_nn_compiler.h
  * Description:  Generic compiler header
  *
- * $Date:        31 January 2023
- * $Revision:    V.1.1.0
+ * $Date:        15 August 2023
+ * $Revision:    V.1.2.1
  *
  * Target :  Arm(R) M-Profile Architecture
  * -------------------------------------------------------------------- */
@@ -71,6 +71,9 @@
     #endif
     #ifndef __STATIC_FORCEINLINE
         #define __STATIC_FORCEINLINE __FORCEINLINE __STATIC_INLINE
+    #endif
+    #ifndef __RESTRICT
+        #define __RESTRICT __restrict
     #endif
 
 #elif defined(_MSC_VER)
@@ -133,6 +136,10 @@
 
 #if defined(__ARM_ARCH) || defined(__ARM_ACLE)
     #include <arm_acle.h>
+#endif
+
+#if defined(__GNUC__)
+    #include <stdint.h>
 #endif
 
 /**

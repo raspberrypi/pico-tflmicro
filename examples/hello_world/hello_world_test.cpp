@@ -1,4 +1,4 @@
-/* Copyright 2019 The TensorFlow Authors. All Rights Reserved.
+/* Copyright 2023 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -15,117 +15,145 @@ limitations under the License.
 
 #include <math.h>
 
-#include "tensorflow/lite/micro/all_ops_resolver.h"
-#include "model.h"
-#include "tensorflow/lite/micro/tflite_bridge/micro_error_reporter.h"
+#include "tensorflow/lite/core/c/common.h"
+#include "hello_world_float_model_data.h"
+#include "hello_world_int8_model_data.h"
 #include "tensorflow/lite/micro/micro_interpreter.h"
-#include "tensorflow/lite/micro/testing/micro_test.h"
+#include "tensorflow/lite/micro/micro_log.h"
+#include "tensorflow/lite/micro/micro_mutable_op_resolver.h"
+#include "tensorflow/lite/micro/micro_profiler.h"
+#include "tensorflow/lite/micro/recording_micro_interpreter.h"
+#include "tensorflow/lite/micro/system_setup.h"
 #include "tensorflow/lite/schema/schema_generated.h"
 
-TF_LITE_MICRO_TESTS_BEGIN
+namespace {
+using HelloWorldOpResolver = tflite::MicroMutableOpResolver<1>;
 
-TF_LITE_MICRO_TEST(LoadModelAndPerformInference) {
-  // Define the input and the expected output
-  float x = 0.0f;
-  float y_true = sin(x);
+TfLiteStatus RegisterOps(HelloWorldOpResolver& op_resolver) {
+  TF_LITE_ENSURE_STATUS(op_resolver.AddFullyConnected());
+  return kTfLiteOk;
+}
+}  // namespace
 
-  // Set up logging
-  tflite::MicroErrorReporter micro_error_reporter;
+TfLiteStatus ProfileMemoryAndLatency() {
+  tflite::MicroProfiler profiler;
+  HelloWorldOpResolver op_resolver;
+  TF_LITE_ENSURE_STATUS(RegisterOps(op_resolver));
 
-  // Map the model into a usable data structure. This doesn't involve any
-  // copying or parsing, it's a very lightweight operation.
-  const tflite::Model* model = ::tflite::GetModel(g_model);
-  if (model->version() != TFLITE_SCHEMA_VERSION) {
-    TF_LITE_REPORT_ERROR(&micro_error_reporter,
-                         "Model provided is schema version %d not equal "
-                         "to supported version %d.\n",
-                         model->version(), TFLITE_SCHEMA_VERSION);
-  }
+  // Arena size just a round number. The exact arena usage can be determined
+  // using the RecordingMicroInterpreter.
+  constexpr int kTensorArenaSize = 3000;
+  uint8_t tensor_arena[kTensorArenaSize];
+  constexpr int kNumResourceVariables = 24;
 
-  // This pulls in all the operation implementations we need
-  tflite::AllOpsResolver resolver;
+  tflite::RecordingMicroAllocator* allocator(
+      tflite::RecordingMicroAllocator::Create(tensor_arena, kTensorArenaSize));
+  tflite::RecordingMicroInterpreter interpreter(
+      tflite::GetModel(g_hello_world_float_model_data), op_resolver, allocator,
+      tflite::MicroResourceVariables::Create(allocator, kNumResourceVariables),
+      &profiler);
 
-  constexpr int kTensorArenaSize = 2000;
+  TF_LITE_ENSURE_STATUS(interpreter.AllocateTensors());
+  TFLITE_CHECK_EQ(interpreter.inputs_size(), 1);
+  interpreter.input(0)->data.f[0] = 1.f;
+  TF_LITE_ENSURE_STATUS(interpreter.Invoke());
+
+  MicroPrintf("");  // Print an empty new line
+  profiler.LogTicksPerTagCsv();
+
+  MicroPrintf("");  // Print an empty new line
+  interpreter.GetMicroAllocator().PrintAllocations();
+  return kTfLiteOk;
+}
+
+TfLiteStatus LoadFloatModelAndPerformInference() {
+  const tflite::Model* model =
+      ::tflite::GetModel(g_hello_world_float_model_data);
+  TFLITE_CHECK_EQ(model->version(), TFLITE_SCHEMA_VERSION);
+
+  HelloWorldOpResolver op_resolver;
+  TF_LITE_ENSURE_STATUS(RegisterOps(op_resolver));
+
+  // Arena size just a round number. The exact arena usage can be determined
+  // using the RecordingMicroInterpreter.
+  constexpr int kTensorArenaSize = 3000;
   uint8_t tensor_arena[kTensorArenaSize];
 
-  // Build an interpreter to run the model with
-  tflite::MicroInterpreter interpreter(model, resolver, tensor_arena,
+  tflite::MicroInterpreter interpreter(model, op_resolver, tensor_arena,
                                        kTensorArenaSize);
-  // Allocate memory from the tensor_arena for the model's tensors
-  TF_LITE_MICRO_EXPECT_EQ(interpreter.AllocateTensors(), kTfLiteOk);
+  TF_LITE_ENSURE_STATUS(interpreter.AllocateTensors());
 
-  // Obtain a pointer to the model's input tensor
+  // Check if the predicted output is within a small range of the
+  // expected output
+  float epsilon = 0.05f;
+  constexpr int kNumTestValues = 4;
+  float golden_inputs[kNumTestValues] = {0.f, 1.f, 3.f, 5.f};
+
+  for (int i = 0; i < kNumTestValues; ++i) {
+    interpreter.input(0)->data.f[0] = golden_inputs[i];
+    TF_LITE_ENSURE_STATUS(interpreter.Invoke());
+    float y_pred = interpreter.output(0)->data.f[0];
+    TFLITE_CHECK_LE(abs(sin(golden_inputs[i]) - y_pred), epsilon);
+  }
+
+  return kTfLiteOk;
+}
+
+TfLiteStatus LoadQuantModelAndPerformInference() {
+  // Map the model into a usable data structure. This doesn't involve any
+  // copying or parsing, it's a very lightweight operation.
+  const tflite::Model* model =
+      ::tflite::GetModel(g_hello_world_int8_model_data);
+  TFLITE_CHECK_EQ(model->version(), TFLITE_SCHEMA_VERSION);
+
+  HelloWorldOpResolver op_resolver;
+  TF_LITE_ENSURE_STATUS(RegisterOps(op_resolver));
+
+  // Arena size just a round number. The exact arena usage can be determined
+  // using the RecordingMicroInterpreter.
+  constexpr int kTensorArenaSize = 3000;
+  uint8_t tensor_arena[kTensorArenaSize];
+
+  tflite::MicroInterpreter interpreter(model, op_resolver, tensor_arena,
+                                       kTensorArenaSize);
+
+  TF_LITE_ENSURE_STATUS(interpreter.AllocateTensors());
+
   TfLiteTensor* input = interpreter.input(0);
+  TFLITE_CHECK_NE(input, nullptr);
 
-  // Make sure the input has the properties we expect
-  TF_LITE_MICRO_EXPECT(input != nullptr);
-  // The property "dims" tells us the tensor's shape. It has one element for
-  // each dimension. Our input is a 2D tensor containing 1 element, so "dims"
-  // should have size 2.
-  TF_LITE_MICRO_EXPECT_EQ(2, input->dims->size);
-  // The value of each element gives the length of the corresponding tensor.
-  // We should expect two single element tensors (one is contained within the
-  // other).
-  TF_LITE_MICRO_EXPECT_EQ(1, input->dims->data[0]);
-  TF_LITE_MICRO_EXPECT_EQ(1, input->dims->data[1]);
-  // The input is an 8 bit integer value
-  TF_LITE_MICRO_EXPECT_EQ(kTfLiteInt8, input->type);
-
-  // Get the input quantization parameters
-  float input_scale = input->params.scale;
-  int input_zero_point = input->params.zero_point;
-
-  // Quantize the input from floating-point to integer
-  int8_t x_quantized = x / input_scale + input_zero_point;
-  // Place the quantized input in the model's input tensor
-  input->data.int8[0] = x_quantized;
-
-  // Run the model and check that it succeeds
-  TfLiteStatus invoke_status = interpreter.Invoke();
-  TF_LITE_MICRO_EXPECT_EQ(kTfLiteOk, invoke_status);
-
-  // Obtain a pointer to the output tensor and make sure it has the
-  // properties we expect. It should be the same as the input tensor.
   TfLiteTensor* output = interpreter.output(0);
-  TF_LITE_MICRO_EXPECT_EQ(2, output->dims->size);
-  TF_LITE_MICRO_EXPECT_EQ(1, output->dims->data[0]);
-  TF_LITE_MICRO_EXPECT_EQ(1, output->dims->data[1]);
-  TF_LITE_MICRO_EXPECT_EQ(kTfLiteInt8, output->type);
+  TFLITE_CHECK_NE(output, nullptr);
 
-  // Get the output quantization parameters
   float output_scale = output->params.scale;
   int output_zero_point = output->params.zero_point;
 
-  // Obtain the quantized output from model's output tensor
-  int8_t y_pred_quantized = output->data.int8[0];
-  // Dequantize the output from integer to floating-point
-  float y_pred = (y_pred_quantized - output_zero_point) * output_scale;
+  // Check if the predicted output is within a small range of the
+  // expected output
+  float epsilon = 0.05;
 
-  // Check if the output is within a small range of the expected output
-  float epsilon = 0.05f;
-  TF_LITE_MICRO_EXPECT_NEAR(y_true, y_pred, epsilon);
+  constexpr int kNumTestValues = 4;
+  float golden_inputs_float[kNumTestValues] = {0.77, 1.57, 2.3, 3.14};
 
-  // Run inference on several more values and confirm the expected outputs
-  x = 1.f;
-  y_true = sin(x);
-  input->data.int8[0] = x / input_scale + input_zero_point;
-  interpreter.Invoke();
-  y_pred = (output->data.int8[0] - output_zero_point) * output_scale;
-  TF_LITE_MICRO_EXPECT_NEAR(y_true, y_pred, epsilon);
+  // The int8 values are calculated using the following formula
+  // (golden_inputs_float[i] / input->params.scale + input->params.scale)
+  int8_t golden_inputs_int8[kNumTestValues] = {-96, -63, -34, 0};
 
-  x = 3.f;
-  y_true = sin(x);
-  input->data.int8[0] = x / input_scale + input_zero_point;
-  interpreter.Invoke();
-  y_pred = (output->data.int8[0] - output_zero_point) * output_scale;
-  TF_LITE_MICRO_EXPECT_NEAR(y_true, y_pred, epsilon);
+  for (int i = 0; i < kNumTestValues; ++i) {
+    input->data.int8[0] = golden_inputs_int8[i];
+    TF_LITE_ENSURE_STATUS(interpreter.Invoke());
+    float y_pred = (output->data.int8[0] - output_zero_point) * output_scale;
+    TFLITE_CHECK_LE(abs(sin(golden_inputs_float[i]) - y_pred), epsilon);
+  }
 
-  x = 5.f;
-  y_true = sin(x);
-  input->data.int8[0] = x / input_scale + input_zero_point;
-  interpreter.Invoke();
-  y_pred = (output->data.int8[0] - output_zero_point) * output_scale;
-  TF_LITE_MICRO_EXPECT_NEAR(y_true, y_pred, epsilon);
+  return kTfLiteOk;
 }
 
-TF_LITE_MICRO_TESTS_END
+int main(int argc, char* argv[]) {
+  tflite::InitializeTarget();
+  TF_LITE_ENSURE_STATUS(ProfileMemoryAndLatency());
+  TF_LITE_ENSURE_STATUS(LoadFloatModelAndPerformInference());
+  TF_LITE_ENSURE_STATUS(LoadQuantModelAndPerformInference());
+  MicroPrintf("~~~ALL TESTS PASSED~~~\n");
+  return kTfLiteOk;
+}

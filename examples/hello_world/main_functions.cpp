@@ -14,12 +14,12 @@ limitations under the License.
 ==============================================================================*/
 
 #include "constants.h"
+#include "hello_world_float_model_data.h"
 #include "main_functions.h"
-#include "model.h"
 #include "output_handler.h"
-#include "tensorflow/lite/micro/all_ops_resolver.h"
 #include "tensorflow/lite/micro/micro_interpreter.h"
 #include "tensorflow/lite/micro/micro_log.h"
+#include "tensorflow/lite/micro/micro_mutable_op_resolver.h"
 #include "tensorflow/lite/micro/system_setup.h"
 #include "tensorflow/lite/schema/schema_generated.h"
 
@@ -41,7 +41,7 @@ void setup() {
 
   // Map the model into a usable data structure. This doesn't involve any
   // copying or parsing, it's a very lightweight operation.
-  model = tflite::GetModel(g_model);
+  model = tflite::GetModel(g_hello_world_float_model_data);
   if (model->version() != TFLITE_SCHEMA_VERSION) {
     MicroPrintf(
         "Model provided is schema version %d not equal "
@@ -52,7 +52,12 @@ void setup() {
 
   // This pulls in all the operation implementations we need.
   // NOLINTNEXTLINE(runtime-global-variables)
-  static tflite::AllOpsResolver resolver;
+  static tflite::MicroMutableOpResolver<1> resolver;
+  TfLiteStatus resolve_status = resolver.AddFullyConnected();
+  if (resolve_status != kTfLiteOk) {
+    MicroPrintf("Op resolution failed");
+    return;
+  }
 
   // Build an interpreter to run the model with.
   static tflite::MicroInterpreter static_interpreter(

@@ -21,8 +21,8 @@
  * Title:        arm_fully_connected_get_buffer_sizes_s8.c
  * Description:  Collection of get buffer size functions for fully connected s8 layer function.
  *
- * $Date:        31 January 2023
- * $Revision:    V.1.0.0
+ * $Date:        15 August 2023
+ * $Revision:    V.1.1.0
  *
  * Target :  Arm(R) M-Profile Architecture
  *
@@ -39,20 +39,24 @@
  * @{
  */
 
-int32_t arm_fully_connected_s8_get_buffer_size(const cmsis_nn_dims *filter_dims)
+int32_t arm_fully_connected_s8_get_buffer_size_dsp(const cmsis_nn_dims *filter_dims)
 {
     (void)filter_dims;
     return 0;
 }
 
-int32_t arm_fully_connected_s8_get_buffer_size_dsp(const cmsis_nn_dims *filter_dims)
-{
-    return arm_fully_connected_s8_get_buffer_size(filter_dims);
-}
-
 int32_t arm_fully_connected_s8_get_buffer_size_mve(const cmsis_nn_dims *filter_dims)
 {
-    return arm_fully_connected_s8_get_buffer_size(filter_dims);
+    return filter_dims->c * sizeof(int32_t);
+}
+
+int32_t arm_fully_connected_s8_get_buffer_size(const cmsis_nn_dims *filter_dims)
+{
+#if defined(ARM_MATH_MVEI)
+    return arm_fully_connected_s8_get_buffer_size_mve(filter_dims);
+#else
+    return arm_fully_connected_s8_get_buffer_size_dsp(filter_dims);
+#endif
 }
 
 /**

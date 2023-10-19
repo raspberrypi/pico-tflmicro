@@ -24,9 +24,9 @@ set_target_properties(
 
 target_sources(hello_world_test
   PRIVATE
+  ${CMAKE_CURRENT_LIST_DIR}/hello_world_float_model_data.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/hello_world_int8_model_data.cpp
   ${CMAKE_CURRENT_LIST_DIR}/hello_world_test.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/model.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/model.h
 )
 
 target_link_libraries(
@@ -61,13 +61,13 @@ set_target_properties(
 target_sources(hello_world
   PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/constants.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/hello_world_float_model_data.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/hello_world_int8_model_data.cpp
   ${CMAKE_CURRENT_LIST_DIR}/main.cpp
   ${CMAKE_CURRENT_LIST_DIR}/main_functions.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/model.cpp
   ${CMAKE_CURRENT_LIST_DIR}/rp2/output_handler.cpp
   ${CMAKE_CURRENT_LIST_DIR}/constants.h
   ${CMAKE_CURRENT_LIST_DIR}/main_functions.h
-  ${CMAKE_CURRENT_LIST_DIR}/model.h
   ${CMAKE_CURRENT_LIST_DIR}/output_handler.h
 )
 

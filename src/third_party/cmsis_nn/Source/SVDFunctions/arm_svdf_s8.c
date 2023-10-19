@@ -21,8 +21,8 @@
  * Title:        arm_svdf_s8.c
  * Description:  S8 basic SVDF layer function
  *
- * $Date:        5 January 2023
- * $Revision:    V.5.1.0
+ * $Date:        5 September 2023
+ * $Revision:    V.6.0.0
  *
  * Target :  Arm(R) M-Profile Architecture
  *
@@ -47,7 +47,8 @@
  *
  */
 
-arm_cmsis_nn_status arm_svdf_s8(const cmsis_nn_context *input_ctx,
+arm_cmsis_nn_status arm_svdf_s8(const cmsis_nn_context *ctx,
+                                const cmsis_nn_context *input_ctx,
                                 const cmsis_nn_context *output_ctx,
                                 const cmsis_nn_svdf_params *svdf_params,
                                 const cmsis_nn_per_tensor_quant_params *input_quant_params,
@@ -68,6 +69,13 @@ arm_cmsis_nn_status arm_svdf_s8(const cmsis_nn_context *input_ctx,
     (void)bias_dims;
     (void)state_dims;
     (void)output_dims;
+
+#if defined(ARM_MATH_MVEI)
+    if (ctx->buf == NULL)
+    {
+        return (ARM_CMSIS_NN_ARG_ERROR);
+    }
+#endif
 
     const int32_t multiplier_in = input_quant_params->multiplier;
     const int32_t shift_in = input_quant_params->shift;
@@ -99,6 +107,8 @@ arm_cmsis_nn_status arm_svdf_s8(const cmsis_nn_context *input_ctx,
     }
     int32_t *buffer_b = (int32_t *)output_ctx->buf;
 
+    int32_t *kernel_sum_data = (int32_t *)ctx->buf;
+
     // Left shift state
     memmove((int8_t *)state_data,
             (int8_t *)state_data + 1,
@@ -108,11 +118,11 @@ arm_cmsis_nn_status arm_svdf_s8(const cmsis_nn_context *input_ctx,
     for (int i_batch = 0; i_batch < input_batches; i_batch++)
     {
         int8_t *res_ptr = state_data + (time_batches * i_batch * feature_batches) + (time_batches - 1);
-        const int8_t *weight = weights_feature_data;
         const int8_t *input = input_data + i_batch * input_height;
 
         arm_cmsis_nn_status res = arm_nn_vec_mat_mult_t_s8(input,
-                                                           weight,
+                                                           weights_feature_data,
+                                                           kernel_sum_data,
                                                            NULL,
                                                            res_ptr,
                                                            -zp_in,

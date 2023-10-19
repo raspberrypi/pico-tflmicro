@@ -21,8 +21,8 @@
  * Title:        arm_nnfunctions.h
  * Description:  Public header file for CMSIS NN Library
  *
- * $Date:        13 January 2023
- * $Revision:    V.11.3.0
+ * $Date:        5 September 2023
+ * $Revision:    V.12.0.0
  *
  * Target :  Arm(R) M-Profile Architecture
  * -------------------------------------------------------------------- */
@@ -1032,7 +1032,10 @@ int32_t arm_depthwise_conv_s8_opt_get_buffer_size(const cmsis_nn_dims *input_dim
  *                               C_OUT : Output depth
  *                               H & W : Not used.
  * @param[in, out] output_data    Output data pointer. Data type: int8
- * @return     The function returns <code>ARM_CMSIS_NN_SUCCESS</code>
+ *
+ * @return     The function returns either
+ *                  <code>ARM_CMSIS_NN_ARG_ERROR</code> if argument constraints fail. or,
+ *                  <code>ARM_CMSIS_NN_SUCCESS</code> on successful completion.
  *
  * @details
  *    - Supported framework: TensorFlow Lite
@@ -1050,7 +1053,23 @@ arm_cmsis_nn_status arm_fully_connected_s8(const cmsis_nn_context *ctx,
                                            int8_t *output_data);
 
 /**
+ * @brief Calculate vector sums that may be required by arm_fully_connected_s8().
+ * @param[in, out]      vector_sum_buf              Buffer for vector sums
+ * @param[in]           vector_cols                 Number of vector columns
+ * @param[in]           vector_rows                 Number of vector rows
+ * @param[in]           vector_data                 Vector or weigths data
+ * @return              The function returns
+ *                         <code>ARM_CMSIS_NN_SUCCESS</code> - Successful operation
+ *                         <code>ARM_CMSIS_NN_ARG_ERROR</code> - If not for Arm(R) Helium Architecture case.
+ */
+arm_cmsis_nn_status arm_vector_sum_s8(int32_t *vector_sum_buf,
+                                      const int32_t vector_cols,
+                                      const int32_t vector_rows,
+                                      const int8_t *vector_data);
+
+/**
  * @brief Get size of additional buffer required by arm_fully_connected_s8().
+ *        See also arm_vector_sum_s8, which is required if buffer size is > 0.
  * @param[in]      filter_dims             dimension of filter
  * @return         The function returns    required buffer size in bytes
  *
@@ -1851,6 +1870,15 @@ void arm_concatenation_s8_w(const int8_t *input,
 /**
  * @brief s8 SVDF function with 8 bit state tensor and 8 bit time weights
  *
+ * @param[in, out] ctx                Function context (e.g. temporary buffer). Check the function
+ *                                    definition file to see if an additional buffer is required.
+ *                                    Optional function arm_fully_connected_s8_get_buffer_size() provides the buffer
+ *                                    size if an additional buffer is required.
+ *                                    The caller is expected to clear the buffer ,if applicable, for security reasons.
+
+ * @param[in, out] ctx                Function context that contains the additional buffer if required by the function.
+ *                                    arm_fully_connected_s8_get_buffer_size will return the buffer_size if required.
+ *                                    The caller is expected to clear the buffer ,if applicable, for security reasons.
  * @param[in]   input_ctx             Temporary scratch buffer
  *                                    The caller is expected to clear the buffer ,if applicable, for security reasons.
  * @param[in]   output_ctx            Temporary output scratch buffer
@@ -1873,12 +1901,15 @@ void arm_concatenation_s8_w(const int8_t *input,
  * @param[in]   output_dims           Output tensor dimensions
  * @param[out]  output_data           Pointer to the output tensor
  *
- * @return     The function returns <code>ARM_CMSIS_NN_SUCCESS</code>
+ * @return     The function returns either
+ *                  <code>ARM_CMSIS_NN_ARG_ERROR</code> if argument constraints fail. or,
+ *                  <code>ARM_CMSIS_NN_SUCCESS</code> on successful completion.
  *
  * @details
  *    1. Supported framework: TensorFlow Lite micro
  */
-arm_cmsis_nn_status arm_svdf_s8(const cmsis_nn_context *input_ctx,
+arm_cmsis_nn_status arm_svdf_s8(const cmsis_nn_context *ctx,
+                                const cmsis_nn_context *input_ctx,
                                 const cmsis_nn_context *output_ctx,
                                 const cmsis_nn_svdf_params *svdf_params,
                                 const cmsis_nn_per_tensor_quant_params *input_quant_params,
@@ -2011,6 +2042,34 @@ arm_cmsis_nn_status arm_lstm_unidirectional_s16_s8(cmsis_nn_lstm_context *scratc
                                                    int8_t *output_state,
                                                    int16_t *cell_state,
                                                    int8_t *output_data);
+
+/**
+ * @brief Get size of additional buffer required by arm_svdf_s8().
+ * @param[in]      filter_dims             dimension of filter
+ * @return         The function returns    required buffer size in bytes
+ *
+ */
+int32_t arm_svdf_s8_get_buffer_size(const cmsis_nn_dims *filter_dims);
+
+/**
+ * @brief Get size of additional buffer required by arm_svdf_s8() for processors with DSP extension.
+ *        Refer to arm_svdf_s8_get_buffer_size() for function argument details.
+ *
+ * @note       Intended for compilation on Host. If compiling for an Arm target, use
+ *             arm_svdf_s8_get_buffer_size().
+ *
+ */
+int32_t arm_svdf_s8_get_buffer_size_dsp(const cmsis_nn_dims *filter_dims);
+
+/**
+ * @brief Get size of additional buffer required by arm_svdf_s8() for Arm(R) Helium Architecture case.
+ *        Refer to arm_svdf_s8_get_buffer_size() for function argument details.
+ *
+ * @note       Intended for compilation on Host. If compiling for an Arm target, use
+ *             arm_svdf_s8_get_buffer_size().
+ *
+ */
+int32_t arm_svdf_s8_get_buffer_size_mve(const cmsis_nn_dims *filter_dims);
 
 #ifdef __cplusplus
 }

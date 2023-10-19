@@ -21,8 +21,8 @@
  * Title:        arm_nnsupportfunctions.h
  * Description:  Public header file of support functions for CMSIS NN Library
  *
- * $Date:        23 Mars 2023
- * $Revision:    V.16.0.0
+ * $Date:        08 June 2023
+ * $Revision:    V.17.0.0
  *
  * Target :  Arm(R) M-Profile Architecture
  * -------------------------------------------------------------------- */
@@ -394,6 +394,7 @@ arm_cmsis_nn_status arm_nn_mat_mult_nt_t_s8(const int8_t *lhs,
  */
 arm_cmsis_nn_status arm_nn_vec_mat_mult_t_s8(const int8_t *lhs,
                                              const int8_t *rhs,
+                                             const int32_t *kernel_sum,
                                              const int32_t *bias,
                                              int8_t *dst,
                                              const int32_t lhs_offset,
@@ -722,17 +723,18 @@ __STATIC_FORCEINLINE const int8_t *read_and_pad_reordered(const int8_t *source, 
 
 /**
  * @brief Matrix-multiplication function for convolution with per-channel requantization.
- * @param[in]       input_a     pointer to operand A
- * @param[in]       input_b     pointer to operand B, always consists of 2 vectors.
- * @param[in]       output_ch   number of rows of A
- * @param[in]       out_shift  pointer to per output channel requantization shift parameter.
- * @param[in]       out_mult   pointer to per output channel requantization multiplier parameter.
- * @param[in]       out_offset      output tensor offset.
- * @param[in]       activation_min   minimum value to clamp the output to. Range : int8
- * @param[in]       activation_max   maximum value to clamp the output to. Range : int8
- * @param[in]       num_col_a   number of columns of A
- * @param[in]       output_bias per output channel bias. Range : int32
- * @param[in,out]   out_0       pointer to output
+ * @param[in]       input_a            pointer to operand A
+ * @param[in]       input_b            pointer to operand B, always consists of 2 vectors.
+ * @param[in]       output_ch          number of rows of A
+ * @param[in]       out_shift          pointer to per output channel requantization shift parameter.
+ * @param[in]       out_mult           pointer to per output channel requantization multiplier parameter.
+ * @param[in]       out_offset         output tensor offset.
+ * @param[in]       activation_min     minimum value to clamp the output to. Range : int8
+ * @param[in]       activation_max     maximum value to clamp the output to. Range : int8
+ * @param[in]       num_col_a          number of columns of A
+ * @param[in]       aligned_num_col_a  number of columns of A aligned by 4
+ * @param[in]       output_bias        per output channel bias. Range : int32
+ * @param[in,out]   out_0              pointer to output
  * @return     The function returns one of the two
  *              1. The incremented output pointer for a successful operation or
  *              2. NULL if implementation is not available.
@@ -751,6 +753,7 @@ int8_t *arm_nn_mat_mult_kernel_s8_s16(const int8_t *input_a,
                                       const int16_t activation_min,
                                       const int16_t activation_max,
                                       const int32_t num_col_a,
+                                      const int32_t aligned_num_col_a,
                                       const int32_t *const output_bias,
                                       int8_t *out_0);
 

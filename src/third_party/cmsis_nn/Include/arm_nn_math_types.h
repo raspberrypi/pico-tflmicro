@@ -21,8 +21,8 @@
  * Title:        arm_nn_math_types.h
  * Description:  Compiler include and basic types
  *
- * $Date:        4 January 2023
- * $Revision:    V.1.3.2
+ * $Date:        15 August 2023
+ * $Revision:    V.1.3.3
  *
  * Target :  Arm(R) M-Profile Architecture
  * -------------------------------------------------------------------- */
@@ -52,7 +52,7 @@ extern "C" {
     #endif
 #endif
 
-#if defined(__ARM_FEATURE_MVE)
+#if (defined(__ARM_FEATURE_MVE) && (__ARM_FEATURE_MVE & 1))
     #ifndef ARM_MATH_MVEI
         #define ARM_MATH_MVEI 1
     #endif

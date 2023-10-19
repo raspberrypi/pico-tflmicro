@@ -57,6 +57,7 @@
 #endif
 arm_cmsis_nn_status arm_nn_vec_mat_mult_t_s8(const int8_t *lhs,
                                              const int8_t *rhs,
+                                             const int32_t *kernel_sum,
                                              const int32_t *bias,
                                              int8_t *dst,
                                              const int32_t lhs_offset,
@@ -70,7 +71,7 @@ arm_cmsis_nn_status arm_nn_vec_mat_mult_t_s8(const int8_t *lhs,
                                              const int32_t address_offset)
 {
 #if defined(ARM_MATH_MVEI)
-    const int32_t row_loop_cnt = rhs_rows / 3;
+    const int32_t row_loop_cnt = rhs_rows / 4;
     const uint32x4_t address_offset_array = {0, address_offset, address_offset * 2, address_offset * 3};
 
     for (int i_row_loop_cnt = 0; i_row_loop_cnt < row_loop_cnt; i_row_loop_cnt++)
@@ -78,6 +79,7 @@ arm_cmsis_nn_status arm_nn_vec_mat_mult_t_s8(const int8_t *lhs,
         int32_t acc_0 = 0;
         int32_t acc_1 = 0;
         int32_t acc_2 = 0;
+        int32_t acc_3 = 0;
 
         const int32_t col_loop_cnt = (rhs_cols + 15) / 16;
 
@@ -85,15 +87,14 @@ arm_cmsis_nn_status arm_nn_vec_mat_mult_t_s8(const int8_t *lhs,
         const int8_t *rhs_0 = rhs;
         const int8_t *rhs_1 = rhs + rhs_cols;
         const int8_t *rhs_2 = rhs + 2 * rhs_cols;
+        const int8_t *rhs_3 = rhs + 3 * rhs_cols;
 
-        int32_t rhs_sum_0 = 0;
-        int32_t rhs_sum_1 = 0;
-        int32_t rhs_sum_2 = 0;
         if (bias)
         {
             acc_0 = *bias++;
             acc_1 = *bias++;
             acc_2 = *bias++;
+            acc_3 = *bias++;
         }
 
         uint32_t col_cnt = (uint32_t)rhs_cols;
@@ -106,53 +107,48 @@ arm_cmsis_nn_status arm_nn_vec_mat_mult_t_s8(const int8_t *lhs,
             const int8x16_t input = vldrbq_z_s8(lhs_vec, p);
 
             const int8x16_t ker_0 = vldrbq_z_s8(rhs_0, p);
-            rhs_sum_0 = vaddvaq_s8(rhs_sum_0, ker_0);
             acc_0 = vmladavaq_s8(acc_0, ker_0, input);
 
             const int8x16_t ker_1 = vldrbq_z_s8(rhs_1, p);
-            rhs_sum_1 = vaddvaq_s8(rhs_sum_1, ker_1);
             acc_1 = vmladavaq_s8(acc_1, ker_1, input);
 
             const int8x16_t ker_2 = vldrbq_z_s8(rhs_2, p);
-            rhs_sum_2 = vaddvaq_s8(rhs_sum_2, ker_2);
             acc_2 = vmladavaq_s8(acc_2, ker_2, input);
+
+            const int8x16_t ker_3 = vldrbq_z_s8(rhs_3, p);
+            acc_3 = vmladavaq_s8(acc_3, ker_3, input);
 
             lhs_vec += 16;
             rhs_0 += 16;
             rhs_1 += 16;
             rhs_2 += 16;
+            rhs_3 += 16;
         }
-        rhs += 3 * rhs_cols;
+        rhs += 4 * rhs_cols;
 
-        int32x4_t acc = {acc_0, acc_1, acc_2, 0};
-        const int32x4_t rhs_sum = {rhs_sum_0, rhs_sum_1, rhs_sum_2, 0};
+        int32x4_t acc = {acc_0, acc_1, acc_2, acc_3};
+
+        const int32x4_t rhs_sum = {kernel_sum[0], kernel_sum[1], kernel_sum[2], kernel_sum[3]};
         acc += vdupq_n_s32(lhs_offset) * rhs_sum;
+        kernel_sum += 4;
 
         acc = arm_requantize_mve(acc, dst_multiplier, dst_shift);
         acc = vaddq_s32(acc, vdupq_n_s32(dst_offset));
         acc = vmaxq_s32(acc, vdupq_n_s32(activation_min));
         acc = vminq_s32(acc, vdupq_n_s32(activation_max));
 
-        const mve_pred16_t p = vctp32q(3);
-        if (address_offset > 1L)
-        {
-            vstrbq_scatter_offset_p_s32(dst, address_offset_array, acc, p);
-        }
-        else
-        {
-            vstrbq_p_s32(dst, acc, p);
-        }
-        dst += 3 * address_offset;
+        vstrbq_scatter_offset_s32(dst, address_offset_array, acc);
+
+        dst += 4 * address_offset;
     }
 
-    const int loop_cnt = rhs_rows % 3;
+    const int loop_cnt = rhs_rows % 4;
     for (int i_row_loop_cnt = 0; i_row_loop_cnt < loop_cnt; i_row_loop_cnt++)
     {
         int32_t acc_0 = 0;
         const int32_t col_loop_cnt = (rhs_cols + 15) / 16;
         const int8_t *lhs_vec = lhs;
         const int8_t *rhs_0 = rhs;
-        int32_t rhs_sum_0 = 0;
         uint32_t col_cnt = (uint32_t)rhs_cols;
 
         for (int i = 0; i < col_loop_cnt; i++)
@@ -162,7 +158,6 @@ arm_cmsis_nn_status arm_nn_vec_mat_mult_t_s8(const int8_t *lhs,
             const int8x16_t input = vldrbq_z_s8(lhs_vec, p);
 
             const int8x16_t ker_0 = vldrbq_z_s8(rhs_0, p);
-            rhs_sum_0 = vaddvaq_s8(rhs_sum_0, ker_0);
             acc_0 = vmladavaq_s8(acc_0, ker_0, input);
 
             lhs_vec += 16;
@@ -175,7 +170,8 @@ arm_cmsis_nn_status arm_nn_vec_mat_mult_t_s8(const int8_t *lhs,
             acc_0 += *bias;
             bias++;
         }
-        const int32_t offsets = rhs_sum_0 * lhs_offset;
+        const int32_t rhs_sum = kernel_sum[i_row_loop_cnt];
+        const int32_t offsets = rhs_sum * lhs_offset;
         acc_0 += offsets;
         acc_0 = arm_nn_requantize(acc_0, dst_multiplier, dst_shift);
         acc_0 += dst_offset;
@@ -187,6 +183,8 @@ arm_cmsis_nn_status arm_nn_vec_mat_mult_t_s8(const int8_t *lhs,
     }
 
 #elif defined(ARM_MATH_DSP)
+    (void)kernel_sum;
+
     const int32_t row_loop_cnt = rhs_rows / 2;
     const int16_t lhs_offset_s16 = (int16_t)lhs_offset;
     const uint32_t lhs_offset_s16x2 = PKHBT(lhs_offset_s16, lhs_offset_s16, 16);
@@ -302,6 +300,7 @@ arm_cmsis_nn_status arm_nn_vec_mat_mult_t_s8(const int8_t *lhs,
     }
 
 #else
+    (void)kernel_sum;
 
     const int32_t row_loop_cnt = rhs_rows / 3;
 

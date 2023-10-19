@@ -1,12 +1,41 @@
 #!/bin/bash -xe
 
-UPSTREAM_REPO_URL=https://github.com/petewarden/tflite-micro-arduino-examples
+TFLM_REPO_URL=https://github.com/tensorflow/tflite-micro
 ROOT_DIR=${PWD}
 BUILD_DIR=${ROOT_DIR}/build
+TFLM_REPO_DIR=${BUILD_DIR}/tflm_repo
 ARDUINO_REPO_DIR=${BUILD_DIR}/arduino_repo
+TFLM_TREE_DIR="${BUILD_DIR}/tflm_tree"
+
+rm -rf ${TFLM_REPO_DIR}
+mkdir -p ${TFLM_REPO_DIR}
+cd "${TFLM_REPO_DIR}"
+git clone --depth 1 --single-branch ${TFLM_REPO_URL}
+cd tflite-micro
+
+make -f tensorflow/lite/micro/tools/make/Makefile clean_downloads
+
+TARGET=cortex_m_generic
+OPTIMIZED_KERNEL_DIR=cmsis_nn
+TARGET_ARCH=project_generation
+
+# Create the TFLM base tree
+rm -rf ${TFLM_TREE_DIR}
+mkdir -p ${TFLM_TREE_DIR}
+python3 tensorflow/lite/micro/tools/project_generation/create_tflm_tree.py \
+  -e hello_world -e micro_speech -e person_detection \
+  --makefile_options="TARGET=${TARGET} OPTIMIZED_KERNEL_DIR=${OPTIMIZED_KERNEL_DIR} TARGET_ARCH=${TARGET_ARCH}" \
+  "${TFLM_TREE_DIR}"
+
+# Create the final tree in ${ARDUINO_REPO_DIR} using the base tree in ${TFLM_TREE_DIR}
+# The create_tflm_arduino.py script takes care of cleaning ${ARDUINO_REPO_DIR}
 rm -rf ${ARDUINO_REPO_DIR}
-mkdir -p ${BUILD_DIR}
-git clone ${UPSTREAM_REPO_URL} ${ARDUINO_REPO_DIR} --depth=1
+mkdir -p ${ARDUINO_REPO_DIR}
+cd "${ROOT_DIR}"
+python3 sync/create_tflm_arduino.py \
+  --output_dir="${ARDUINO_REPO_DIR}" \
+  --base_dir="${TFLM_TREE_DIR}" \
+  --manifest_file=sync/MANIFEST.ini
 
 rm -rf src
 mkdir src

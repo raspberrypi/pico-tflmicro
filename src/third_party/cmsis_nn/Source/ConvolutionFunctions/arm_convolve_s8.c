@@ -21,8 +21,8 @@
  * Title:        arm_convolve_s8.c
  * Description:  s8 version of convolution using symmetric quantization.
  *
- * $Date:        21 Mars 2023
- * $Revision:    V.3.4.0
+ * $Date:        08 June 2023
+ * $Revision:    V.3.5.0
  *
  * Target :  Arm(R) M-Profile Architecture
  *
@@ -101,8 +101,11 @@ arm_cmsis_nn_status arm_convolve_s8(const cmsis_nn_context *ctx,
         int8_t *im2col_buf = (int8_t *)buffer_a;
         const int32_t rhs_rows = output_dims->c;
 #else
+        const int32_t remainder = rhs_cols % 4;
+        const int32_t aligned_rhs_cols = remainder != 0 ? rhs_cols + 4 - remainder : rhs_cols;
+
         /* Use as a ping-pong buffer for unordered elements */
-        int8_t *im2col_buf = (int8_t *)buffer_a + rhs_cols * 2;
+        int8_t *im2col_buf = (int8_t *)buffer_a + aligned_rhs_cols * 2;
         int16_t *im2col_buf_start_s16 = buffer_a;
 #endif
         int8_t *out = output_data;
@@ -167,7 +170,7 @@ arm_cmsis_nn_status arm_convolve_s8(const cmsis_nn_context *ctx,
     #else
                 arm_q7_to_q15_with_offset(im2col_buf - rhs_cols, im2col_buf_start_s16, rhs_cols, (int16_t)input_offset);
     #endif
-                im2col_buf_start_s16 += rhs_cols;
+                im2col_buf_start_s16 += aligned_rhs_cols;
 
                 if (lhs_rows == 2)
                 {
@@ -180,12 +183,13 @@ arm_cmsis_nn_status arm_convolve_s8(const cmsis_nn_context *ctx,
                                                         out_activation_min,
                                                         out_activation_max,
                                                         rhs_cols,
+                                                        aligned_rhs_cols,
                                                         bias_data,
                                                         out);
 
                     /* counter reset */
                     im2col_buf_start_s16 = buffer_a;
-                    im2col_buf = (int8_t *)buffer_a + rhs_cols * 2;
+                    im2col_buf = (int8_t *)buffer_a + aligned_rhs_cols * 2;
                     lhs_rows = 0;
                 }
 #endif
