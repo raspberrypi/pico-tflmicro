@@ -38,6 +38,7 @@ target_compile_definitions(
 set_target_properties(
   pico-tflmicro
   PROPERTIES
+  COMPILE_FLAGS -Os
   COMPILE_FLAGS -fno-rtti
   COMPILE_FLAGS -fno-exceptions
   COMPILE_FLAGS -fno-threadsafe-statics
@@ -95,8 +96,4 @@ target_link_libraries(
 add_subdirectory("examples/hello_world")
 add_subdirectory("examples/person_detection")
 
-add_subdirectory("tests/greedy_memory_planner_test")
-add_subdirectory("tests/kernel_activations_test")
-add_subdirectory("tests/kernel_add_test")
-add_subdirectory("tests/kernel_conv_test")
-add_subdirectory("tests/kernel_depthwise_conv_test")
+{{TEST_FOLDERS}}

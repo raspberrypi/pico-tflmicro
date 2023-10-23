@@ -1,4 +1,3 @@
-
 cmake_minimum_required(VERSION 3.12)
 
 project(micro_mutable_op_resolver_test C CXX ASM)
@@ -15,6 +14,7 @@ target_include_directories(micro_mutable_op_resolver_test
 set_target_properties(
   micro_mutable_op_resolver_test
   PROPERTIES
+  COMPILE_FLAGS -Os
   COMPILE_FLAGS -fno-rtti
   COMPILE_FLAGS -fno-exceptions
   COMPILE_FLAGS -fno-threadsafe-statics
@@ -27,6 +27,7 @@ pico_enable_stdio_uart(micro_mutable_op_resolver_test 0)
 target_sources(micro_mutable_op_resolver_test
   PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/../../tests/micro_mutable_op_resolver_test/micro_mutable_op_resolver_test.cpp
+
 )
 
 target_link_libraries(

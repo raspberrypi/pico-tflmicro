@@ -1,4 +1,3 @@
-
 cmake_minimum_required(VERSION 3.12)
 
 project(memory_helpers_test C CXX ASM)
@@ -15,6 +14,7 @@ target_include_directories(memory_helpers_test
 set_target_properties(
   memory_helpers_test
   PROPERTIES
+  COMPILE_FLAGS -Os
   COMPILE_FLAGS -fno-rtti
   COMPILE_FLAGS -fno-exceptions
   COMPILE_FLAGS -fno-threadsafe-statics
@@ -27,6 +27,7 @@ pico_enable_stdio_uart(memory_helpers_test 0)
 target_sources(memory_helpers_test
   PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/../../tests/memory_helpers_test/memory_helpers_test.cpp
+
 )
 
 target_link_libraries(

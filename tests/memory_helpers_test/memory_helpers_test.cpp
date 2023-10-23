@@ -113,11 +113,32 @@ TF_LITE_MICRO_TEST(TestAlignSizeUp) {
   TF_LITE_MICRO_EXPECT_EQ(static_cast<size_t>(32), tflite::AlignSizeUp(23, 16));
 }
 
+TF_LITE_MICRO_TEST(TestTemplatedAlignSizeUp) {
+  // Test structure to test AlignSizeUp.
+  struct alignas(32) TestAlignSizeUp {
+    // Opaque blob
+    float blob_data[4];
+  };
+
+  TF_LITE_MICRO_EXPECT_EQ(static_cast<size_t>(32),
+                          tflite::AlignSizeUp<TestAlignSizeUp>());
+  TF_LITE_MICRO_EXPECT_EQ(static_cast<size_t>(64),
+                          tflite::AlignSizeUp<TestAlignSizeUp>(2));
+}
+
 TF_LITE_MICRO_TEST(TestTypeSizeOf) {
   size_t size;
   TF_LITE_MICRO_EXPECT_EQ(kTfLiteOk,
+                          tflite::TfLiteTypeSizeOf(kTfLiteFloat16, &size));
+  TF_LITE_MICRO_EXPECT_EQ(sizeof(int16_t), size);
+
+  TF_LITE_MICRO_EXPECT_EQ(kTfLiteOk,
                           tflite::TfLiteTypeSizeOf(kTfLiteFloat32, &size));
   TF_LITE_MICRO_EXPECT_EQ(sizeof(float), size);
+
+  TF_LITE_MICRO_EXPECT_EQ(kTfLiteOk,
+                          tflite::TfLiteTypeSizeOf(kTfLiteFloat64, &size));
+  TF_LITE_MICRO_EXPECT_EQ(sizeof(double), size);
 
   TF_LITE_MICRO_EXPECT_EQ(kTfLiteOk,
                           tflite::TfLiteTypeSizeOf(kTfLiteInt16, &size));
@@ -126,6 +147,10 @@ TF_LITE_MICRO_TEST(TestTypeSizeOf) {
   TF_LITE_MICRO_EXPECT_EQ(kTfLiteOk,
                           tflite::TfLiteTypeSizeOf(kTfLiteInt32, &size));
   TF_LITE_MICRO_EXPECT_EQ(sizeof(int32_t), size);
+
+  TF_LITE_MICRO_EXPECT_EQ(kTfLiteOk,
+                          tflite::TfLiteTypeSizeOf(kTfLiteUInt32, &size));
+  TF_LITE_MICRO_EXPECT_EQ(sizeof(uint32_t), size);
 
   TF_LITE_MICRO_EXPECT_EQ(kTfLiteOk,
                           tflite::TfLiteTypeSizeOf(kTfLiteUInt8, &size));
@@ -164,25 +189,23 @@ TF_LITE_MICRO_TEST(TestBytesRequiredForTensor) {
       tflite::testing::Create1dFlatbufferTensor(100);
   size_t bytes;
   size_t type_size;
-  TF_LITE_MICRO_EXPECT_EQ(
-      kTfLiteOk, tflite::BytesRequiredForTensor(*tensor100, &bytes, &type_size,
-                                                micro_test::reporter));
+  TF_LITE_MICRO_EXPECT_EQ(kTfLiteOk, tflite::BytesRequiredForTensor(
+                                         *tensor100, &bytes, &type_size));
   TF_LITE_MICRO_EXPECT_EQ(static_cast<size_t>(400), bytes);
   TF_LITE_MICRO_EXPECT_EQ(static_cast<size_t>(4), type_size);
 
   const tflite::Tensor* tensor200 =
       tflite::testing::Create1dFlatbufferTensor(200);
-  TF_LITE_MICRO_EXPECT_EQ(
-      kTfLiteOk, tflite::BytesRequiredForTensor(*tensor200, &bytes, &type_size,
-                                                micro_test::reporter));
+  TF_LITE_MICRO_EXPECT_EQ(kTfLiteOk, tflite::BytesRequiredForTensor(
+                                         *tensor200, &bytes, &type_size));
   TF_LITE_MICRO_EXPECT_EQ(static_cast<size_t>(800), bytes);
   TF_LITE_MICRO_EXPECT_EQ(static_cast<size_t>(4), type_size);
 }
 
 TF_LITE_MICRO_TEST(TestAllocateOutputDimensionsFromInput) {
   constexpr int kDimsLen = 4;
-  const int input1_dims[] = {1, 1};
-  const int input2_dims[] = {kDimsLen, 5, 5, 5, 5};
+  int input1_dims[] = {1, 1};
+  int input2_dims[] = {kDimsLen, 5, 5, 5, 5};
   int output_dims[] = {0, 0, 0, 0, 0};
   TfLiteTensor input_tensor1 = tflite::testing::CreateTensor<int32_t>(
       nullptr, tflite::testing::IntArrayFromInts(input1_dims));

@@ -40,6 +40,32 @@ TF_LITE_MICRO_TEST(CreateQuantizedBiasTensor) {
   }
 }
 
+TF_LITE_MICRO_TEST(PackInt4Basic) {
+  int8_t input[4] = {7, 3, 2, 5};
+  int input_size = 4;
+  const int8_t expect_output[2] = {0x37, 0x52};
+  int output_size = 2;
+
+  tflite::testing::PackInt4ValuesDenselyInPlace(
+      reinterpret_cast<uint8_t*>(input), input_size);
+  for (int i = 0; i < output_size; i++) {
+    TF_LITE_MICRO_EXPECT_EQ(expect_output[i], input[i]);
+  }
+}
+
+TF_LITE_MICRO_TEST(PackInt4BasicOddLength) {
+  int8_t input[4] = {1, 3, 2};
+  const int8_t expect_output[2] = {0x31, 0x2};
+  int output_size = 2;
+  int input_size = 3;
+
+  tflite::testing::PackInt4ValuesDenselyInPlace(
+      reinterpret_cast<uint8_t*>(input), input_size);
+  for (int i = 0; i < output_size; i++) {
+    TF_LITE_MICRO_EXPECT_EQ(expect_output[i], input[i]);
+  }
+}
+
 TF_LITE_MICRO_TEST(CreatePerChannelQuantizedBiasTensor) {
   float input_scale = 0.5;
   float weight_scales[] = {0.5, 1, 2, 4};
@@ -75,7 +101,7 @@ TF_LITE_MICRO_TEST(CreatePerChannelQuantizedBiasTensor) {
 TF_LITE_MICRO_TEST(CreateSymmetricPerChannelQuantizedTensor) {
   const int tensor_size = 12;
   constexpr int channels = 2;
-  const int dims_arr[] = {4, channels, 3, 2, 1};
+  int dims_arr[] = {4, channels, 3, 2, 1};
   int8_t quantized[12];
   const float pre_quantized[] = {-127, -55, -4, -3, -2, -1,
                                  0,    1,   2,  3,  4,  63.5};
