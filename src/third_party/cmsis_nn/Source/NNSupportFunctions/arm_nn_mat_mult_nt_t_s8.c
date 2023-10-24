@@ -39,6 +39,199 @@
  * @{
  */
 
+// Uncomment this to try the experimental dual core support on the RP2040.
+//#define TF_LITE_PICO_MULTICORE
+
+#ifdef TF_LITE_PICO_MULTICORE
+
+#include "pico/stdlib.h"
+#include "pico/multicore.h"
+
+static void calculate_two_rows(
+    const int8_t *lhs,
+    const int8_t *rhs,
+    const int32_t *bias,
+    int8_t* dst,
+    const int32_t *dst_multipliers,
+    const int32_t *dst_shifts,
+    const int32_t lhs_rows,
+    const int32_t rhs_rows,
+    const int32_t rhs_cols,
+    const int32_t lhs_offset,
+    const int32_t dst_offset,
+    const int32_t activation_min,
+    const int32_t activation_max,
+    const int32_t lhs_cols_offset,
+    const int32_t rhs_rows_idx) {
+
+    const int8_t *lhs_ptr = &lhs[0];
+    int8_t *dst_ptr = &dst[0];
+
+    int32_t lhs_offset_contribution0 = 0;
+    int32_t lhs_offset_contribution1 = 0;
+
+    for (int32_t x = 0; x < rhs_cols; ++x)
+    {
+        lhs_offset_contribution0 += rhs[x];
+        lhs_offset_contribution1 += rhs[x + rhs_cols];
+    }
+
+    lhs_offset_contribution0 *= lhs_offset;
+    lhs_offset_contribution1 *= lhs_offset;
+    if (bias)
+    {
+        lhs_offset_contribution0 += bias[rhs_rows_idx];
+        lhs_offset_contribution1 += bias[rhs_rows_idx + 1];
+    }
+
+    int32_t lhs_rows_idx = lhs_rows >> 1;
+
+    while (lhs_rows_idx)
+    {
+        const int8_t *rhs_ptr = &rhs[0];
+
+        int32_t res00 = lhs_offset_contribution0;
+        int32_t res01 = lhs_offset_contribution1;
+        int32_t res10 = lhs_offset_contribution0;
+        int32_t res11 = lhs_offset_contribution1;
+
+        for (int32_t rhs_cols_idx = rhs_cols; rhs_cols_idx != 0; rhs_cols_idx--)
+        {
+            int8_t rhs_value0 = rhs_ptr[0];
+            int8_t rhs_value1 = rhs_ptr[rhs_cols];
+            int8_t lhs_value = lhs_ptr[0];
+
+            res00 += lhs_value * rhs_value0;
+            res01 += lhs_value * rhs_value1;
+
+            lhs_value = lhs_ptr[lhs_cols_offset];
+            res10 += lhs_value * rhs_value0;
+            res11 += lhs_value * rhs_value1;
+
+            ++rhs_ptr;
+            ++lhs_ptr;
+        }
+
+        // Quantize down
+        res00 = arm_nn_requantize(res00, dst_multipliers[rhs_rows_idx], dst_shifts[rhs_rows_idx]);
+        res01 = arm_nn_requantize(res01, dst_multipliers[rhs_rows_idx + 1], dst_shifts[rhs_rows_idx + 1]);
+        res10 = arm_nn_requantize(res10, dst_multipliers[rhs_rows_idx], dst_shifts[rhs_rows_idx]);
+        res11 = arm_nn_requantize(res11, dst_multipliers[rhs_rows_idx + 1], dst_shifts[rhs_rows_idx + 1]);
+
+        // Add offset
+        res00 += dst_offset;
+        res01 += dst_offset;
+        res10 += dst_offset;
+        res11 += dst_offset;
+
+        // Clamp the result
+        res00 = MAX(res00, activation_min);
+        res00 = MIN(res00, activation_max);
+        res01 = MAX(res01, activation_min);
+        res01 = MIN(res01, activation_max);
+        res10 = MAX(res10, activation_min);
+        res10 = MIN(res10, activation_max);
+        res11 = MAX(res11, activation_min);
+        res11 = MIN(res11, activation_max);
+
+        dst_ptr[0] = (int8_t)res00;
+        dst_ptr[1] = (int8_t)res01;
+        dst_ptr += rhs_rows;
+        dst_ptr[0] = (int8_t)res10;
+        dst_ptr[1] = (int8_t)res11;
+        dst_ptr += rhs_rows;
+
+        lhs_ptr -= rhs_cols;
+        lhs_ptr += 2 * lhs_cols_offset;
+
+        lhs_rows_idx--;
+    }
+
+    // Left-over rows
+    if (lhs_rows % 2)
+    {
+        const int8_t *rhs_ptr = &rhs[0];
+
+        int32_t res00 = lhs_offset_contribution0;
+        int32_t res01 = lhs_offset_contribution1;
+
+        for (int32_t rhs_cols_idx = rhs_cols; rhs_cols_idx != 0; rhs_cols_idx--)
+        {
+            int8_t rhs_value0 = rhs_ptr[0];
+            int8_t rhs_value1 = rhs_ptr[rhs_cols];
+            int8_t lhs_value = lhs_ptr[0];
+
+            res00 += lhs_value * rhs_value0;
+            res01 += lhs_value * rhs_value1;
+
+            ++rhs_ptr;
+            ++lhs_ptr;
+        }
+
+        // Quantize down
+        res00 = arm_nn_requantize(res00, dst_multipliers[rhs_rows_idx], dst_shifts[rhs_rows_idx]);
+        res01 = arm_nn_requantize(res01, dst_multipliers[rhs_rows_idx + 1], dst_shifts[rhs_rows_idx + 1]);
+
+        // Add offset
+        res00 += dst_offset;
+        res01 += dst_offset;
+
+        // Clamp the result
+        res00 = MAX(res00, activation_min);
+        res00 = MIN(res00, activation_max);
+        res01 = MAX(res01, activation_min);
+        res01 = MIN(res01, activation_max);
+
+        dst_ptr[0] = (int8_t)res00;
+        dst_ptr[1] = (int8_t)res01;
+    }
+}
+
+static void calculate_row_range(
+    int32_t rhs_rows_start,
+    int32_t rhs_rows_end,
+    const int8_t *lhs,
+    const int8_t *rhs,
+    const int32_t *bias,
+    int8_t* dst,
+    const int32_t *dst_multipliers,
+    const int32_t *dst_shifts,
+    const int32_t lhs_rows,
+    const int32_t rhs_rows,
+    const int32_t rhs_cols,
+    const int32_t lhs_offset,
+    const int32_t dst_offset,
+    const int32_t activation_min,
+    const int32_t activation_max,
+    const int32_t lhs_cols_offset) {
+
+    for (int32_t rhs_rows_idx = rhs_rows_start; rhs_rows_idx < rhs_rows_end; rhs_rows_idx += 2)
+    {
+        calculate_two_rows(
+            lhs,
+            rhs,
+            bias,
+            dst,
+            dst_multipliers,
+            dst_shifts,
+            lhs_rows,
+            rhs_rows,
+            rhs_cols,
+            lhs_offset,
+            dst_offset,
+            activation_min,
+            activation_max,
+            lhs_cols_offset,
+            rhs_rows_idx);
+
+        rhs += 2 * rhs_cols;
+        dst += 2;
+    }
+
+}
+
+#endif  // TF_LITE_PICO_MULTICORE
+
 /*
  * s8 matrix multiplication with the right-hand-side matrix transposed
  *
@@ -618,6 +811,52 @@ arm_cmsis_nn_status arm_nn_mat_mult_nt_t_s8(const int8_t *lhs,
         }
     }
 #else
+
+#if defined(TF_LITE_PICO_MULTICORE)
+
+    const int32_t mid_range = (rhs_rows / 2) * 2;
+
+    calculate_row_range(
+        0,
+        mid_range,
+        lhs,
+        rhs,
+        bias,
+        dst,
+        dst_multipliers,
+        dst_shifts,
+        lhs_rows,
+        rhs_rows,
+        rhs_cols,
+        lhs_offset,
+        dst_offset,
+        activation_min,
+        activation_max,
+        lhs_cols_offset);
+
+    calculate_row_range(
+        mid_range,
+        (rhs_rows - 1),
+        lhs,
+        rhs,
+        bias,
+        dst,
+        dst_multipliers,
+        dst_shifts,
+        lhs_rows,
+        rhs_rows,
+        rhs_cols,
+        lhs_offset,
+        dst_offset,
+        activation_min,
+        activation_max,
+        lhs_cols_offset);
+
+    const int32_t rows_processed = (rhs_rows / 2) * 2;
+    rhs += rows_processed * rhs_cols;
+    dst += rows_processed;
+
+#else
     for (int32_t rhs_rows_idx = 0; rhs_rows_idx <= (rhs_rows - 2); rhs_rows_idx += 2)
     {
         const int8_t *lhs_ptr = &lhs[0];
@@ -745,6 +984,7 @@ arm_cmsis_nn_status arm_nn_mat_mult_nt_t_s8(const int8_t *lhs,
         rhs += 2 * rhs_cols;
         dst += 2;
     }
+#endif 
 
     if (rhs_rows % 2)
     {
