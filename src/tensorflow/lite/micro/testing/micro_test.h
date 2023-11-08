@@ -57,6 +57,8 @@ limitations under the License.
 #include "tensorflow/lite/c/common.h"
 #include "tensorflow/lite/micro/micro_error_reporter.h"
 
+#include "pico/stdlib.h"
+
 namespace micro_test {
 extern int tests_passed;
 extern int tests_failed;
@@ -75,10 +77,12 @@ extern tflite::ErrorReporter* reporter;
   }                                            \
                                                \
   int main(int argc, char** argv) {            \
+    stdio_init_all();                          \
     micro_test::tests_passed = 0;              \
     micro_test::tests_failed = 0;              \
     tflite::MicroErrorReporter error_reporter; \
-    micro_test::reporter = &error_reporter;
+    micro_test::reporter = &error_reporter;    \
+    while (true) {
 
 #define TF_LITE_MICRO_TESTS_END                                \
   micro_test::reporter->Report(                                \
@@ -86,10 +90,12 @@ extern tflite::ErrorReporter* reporter;
       (micro_test::tests_failed + micro_test::tests_passed));  \
   if (micro_test::tests_failed == 0) {                         \
     micro_test::reporter->Report("~~~ALL TESTS PASSED~~~\n");  \
-    return kTfLiteOk;                                          \
   } else {                                                     \
     micro_test::reporter->Report("~~~SOME TESTS FAILED~~~\n"); \
-    return kTfLiteError;                                       \
+  }                                                            \
+  micro_test::tests_passed = 0;                                \
+  micro_test::tests_failed = 0;                                \
+  sleep_ms(1000);                                              \
   }                                                            \
   }
 

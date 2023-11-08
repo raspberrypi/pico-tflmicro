@@ -25,6 +25,8 @@ limitations under the License.
 #include "tensorflow/lite/schema/schema_generated.h"
 #include "tensorflow/lite/version.h"
 
+#include "pico/stdlib.h"
+
 // Globals, used for compatibility with Arduino-style sketches.
 namespace {
 tflite::ErrorReporter* error_reporter = nullptr;
@@ -46,6 +48,7 @@ static uint8_t tensor_arena[kTensorArenaSize];
 
 // The name of this function is important for Arduino compatibility.
 void setup() {
+  stdio_init_all();
   // Set up logging. Google style is to avoid globals or statics because of
   // lifetime uncertainty, but since this has a trivial destructor it's okay.
   // NOLINTNEXTLINE(runtime-global-variables)
@@ -113,5 +116,6 @@ void loop() {
   // Process the inference results.
   int8_t person_score = output->data.uint8[kPersonIndex];
   int8_t no_person_score = output->data.uint8[kNotAPersonIndex];
+  printf("%d %d\n", person_score, no_person_score);
   RespondToDetection(error_reporter, person_score, no_person_score);
 }

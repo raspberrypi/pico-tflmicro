@@ -32,4 +32,7 @@ target_link_libraries(
   pico-tflmicro_test
 )
 
+pico_enable_stdio_usb(kernel_conv_test 1)
+pico_enable_stdio_uart(kernel_conv_test 0)
+
 pico_add_extra_outputs(kernel_conv_test)

@@ -339,14 +339,14 @@ TfLiteStatus MicroInterpreter::Invoke() {
 
     if (registration->invoke) {
       TfLiteStatus invoke_status;
-#ifndef NDEBUG  // Omit profiler overhead from release builds.
+//#ifndef NDEBUG  // Omit profiler overhead from release builds.
       // The case where profiler == nullptr is handled by
       // ScopedOperatorProfile.
       tflite::Profiler* profiler =
           reinterpret_cast<tflite::Profiler*>(context_.profiler);
       ScopedOperatorProfile scoped_profiler(
           profiler, OpNameFromRegistration(registration), i);
-#endif
+//#endif
       invoke_status = registration->invoke(&context_, node);
 
       // All TfLiteTensor structs used in the kernel are allocated from temp

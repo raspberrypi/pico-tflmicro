@@ -104,8 +104,12 @@ target_sources(person_detection_test_int8
 target_link_libraries(
   person_detection_test_int8
   pico-tflmicro
+  pico_stdlib
   hardware_pwm
 )
+
+pico_enable_stdio_usb(person_detection_test_int8 1)
+pico_enable_stdio_uart(person_detection_test_int8 0)
 
 pico_add_extra_outputs(person_detection_test_int8)
 
@@ -144,8 +148,12 @@ target_sources(person_detection_int8
 target_link_libraries(
   person_detection_int8
   pico-tflmicro
+  pico_stdlib
   hardware_pwm
 )
+
+pico_enable_stdio_usb(person_detection_int8 1)
+pico_enable_stdio_uart(person_detection_int8 0)
 
 pico_add_extra_outputs(person_detection_int8)
 
