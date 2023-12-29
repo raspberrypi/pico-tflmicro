@@ -95,6 +95,15 @@ inline TFLMRegistration Register_CONV_2D_INT8REF() {
 }
 #endif  // defined(XTENSA)
 
+#if defined(ARDUINO)
+// Returns a TFLMRegistration struct for kernel variant that only supports
+// int8 activations and int4 weights and uses the latency optimized
+// implementations.
+TFLMRegistration Register_CONV_2D_INT4();
+#else
+inline TFLMRegistration Register_CONV_2D_INT4() { return Register_CONV_2D(); }
+#endif  // defined(ARDUINO)
+
 #if defined(ARDUINO) || defined(XTENSA)
 // Returns a TFLMRegistration struct for kernel variant that only supports
 // int8 activations and int8 weights and uses the latency optimized

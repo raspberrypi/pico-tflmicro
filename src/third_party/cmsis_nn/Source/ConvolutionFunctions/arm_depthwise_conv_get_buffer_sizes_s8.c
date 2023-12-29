@@ -21,8 +21,8 @@
  * Title:        arm_depthwise_conv_get_buffer_sizes_s8.c
  * Description:  Collection of get buffer size functions for the various s8 convolution layer functions.
  *
- * $Date:        20 January 2023
- * $Revision:    V.1.0.0
+ * $Date:        30 October 2023
+ * $Revision:    V.1.1.0
  *
  * Target :  Arm(R) M-Profile Architecture
  *
@@ -47,8 +47,7 @@ __STATIC_INLINE int32_t arm_depthwise_conv_s8_opt_get_buffer_size_mve(const cmsi
     return (4 * CH_IN_BLOCK_MVE * filter_dims->w * filter_dims->h) * (int32_t)sizeof(int8_t);
 }
 
-__STATIC_INLINE int32_t arm_depthwise_conv_s8_opt_get_buffer_size_dsp(const cmsis_nn_dims *input_dims,
-                                                                      const cmsis_nn_dims *filter_dims)
+int32_t arm_depthwise_conv_s8_opt_get_buffer_size_dsp(const cmsis_nn_dims *input_dims, const cmsis_nn_dims *filter_dims)
 {
     return (input_dims->c * filter_dims->w * filter_dims->h) * sizeof(int16_t);
 }

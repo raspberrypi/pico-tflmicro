@@ -21,8 +21,8 @@
  * Title:        arm_nnsupportfunctions.h
  * Description:  Public header file of support functions for CMSIS NN Library
  *
- * $Date:        08 June 2023
- * $Revision:    V.17.0.0
+ * $Date:        13 November 2023
+ * $Revision:    V.17.6.0
  *
  * Target :  Arm(R) M-Profile Architecture
  * -------------------------------------------------------------------- */
@@ -160,7 +160,22 @@ void arm_q7_to_q15_with_offset(const int8_t *src, int16_t *dst, int32_t block_si
  *
  */
 void arm_s8_to_s16_unordered_with_offset(const int8_t *src, int16_t *dst, int32_t block_size, int16_t offset);
+
 #endif
+
+/**
+ * @brief Get the required buffer size for optimized s8 depthwise convolution
+ *        function with constraint that in_channel equals out_channel.
+ *        This is for processors with DSP extension.
+ *        Refer to arm_depthwise_conv_s8_opt_get_buffer_size() for function argument details.
+ *
+ * @note  Intended for compilation on Host. If compiling for an Arm target, use
+ *        arm_depthwise_conv_s8_opt_get_buffer_size(). Note also this is a support function,
+ *        so not recommended to call directly even on Host.
+ *
+ */
+int32_t arm_depthwise_conv_s8_opt_get_buffer_size_dsp(const cmsis_nn_dims *input_dims,
+                                                      const cmsis_nn_dims *filter_dims);
 
 /**
  * @brief Depthwise conv on an im2col buffer where the input channel equals output channel.
@@ -330,6 +345,53 @@ int8_t *arm_nn_mat_mul_core_4x_s8(const int32_t row_elements,
  *        This function assumes:
  *        - LHS input matrix NOT transposed (nt)
  *        - RHS input matrix transposed (t)
+ *        - RHS is int8 packed with 2x int4
+ *        - LHS is int8
+ *
+ *  @note This operation also performs the broadcast bias addition before the requantization
+ *
+ * @param[in]  lhs                Pointer to the LHS input matrix
+ * @param[in]  rhs                Pointer to the RHS input matrix
+ * @param[in]  bias               Pointer to the bias vector. The length of this vector is equal to the number of
+ *                                output columns (or RHS input rows)
+ * @param[out] dst                Pointer to the output matrix with "m" rows and "n" columns
+ * @param[in]  dst_multipliers    Pointer to the multipliers vector needed for the per-channel requantization.
+ *                                The length of this vector is equal to the number of output columns (or RHS input
+ *                                rows)
+ * @param[in]  dst_shifts         Pointer to the shifts vector needed for the per-channel requantization. The length
+ *                                of this vector is equal to the number of output columns (or RHS input rows)
+ * @param[in]  lhs_rows           Number of LHS input rows
+ * @param[in]  rhs_rows           Number of RHS input rows
+ * @param[in]  rhs_cols           Number of LHS/RHS input columns
+ * @param[in]  lhs_offset         Offset to be applied to the LHS input value
+ * @param[in]  dst_offset         Offset to be applied the output result
+ * @param[in]  activation_min     Minimum value to clamp down the output. Range : int8
+ * @param[in]  activation_max     Maximum value to clamp up the output. Range : int8
+ * @param[in]  lhs_cols_offset    Column offset between subsequent lhs_rows
+ *
+ * @return     The function returns <code>ARM_CMSIS_NN_SUCCESS</code>
+ *
+ */
+arm_cmsis_nn_status arm_nn_mat_mult_nt_t_s4(const int8_t *lhs,
+                                            const int8_t *rhs,
+                                            const int32_t *bias,
+                                            int8_t *dst,
+                                            const int32_t *dst_multipliers,
+                                            const int32_t *dst_shifts,
+                                            const int32_t lhs_rows,
+                                            const int32_t rhs_rows,
+                                            const int32_t rhs_cols,
+                                            const int32_t lhs_offset,
+                                            const int32_t dst_offset,
+                                            const int32_t activation_min,
+                                            const int32_t activation_max,
+                                            const int32_t lhs_cols_offset);
+
+/**
+ * @brief General Matrix-multiplication function with per-channel requantization.
+ *        This function assumes:
+ *        - LHS input matrix NOT transposed (nt)
+ *        - RHS input matrix transposed (t)
  *
  *  @note This operation also performs the broadcast bias addition before the requantization
  *
@@ -371,10 +433,76 @@ arm_cmsis_nn_status arm_nn_mat_mult_nt_t_s8(const int8_t *lhs,
                                             const int32_t lhs_cols_offset);
 
 /**
+ * @brief General Matrix-multiplication function with int8 input and int32 output.
+ *        This function assumes:
+ *        - LHS input matrix NOT transposed (nt)
+ *        - RHS input matrix transposed (t)
+ *
+ * @note  Dst/output buffer must be zeroed out before calling this function.
+ *
+ * @param[in]  lhs                Pointer to the LHS input matrix
+ * @param[in]  rhs                Pointer to the RHS input matrix
+ * @param[out] dst                Pointer to the output matrix with "m" rows and "n" columns
+ * @param[in]  lhs_rows           Number of LHS input rows
+ * @param[in]  rhs_rows           Number of LHS input columns/RHS input rows
+ * @param[in]  rhs_cols           Number of RHS input columns
+ * @param[in]  lhs_offset         Offset to be applied to the LHS input value
+ * @param[in]  dst_idx_offset     Offset between subsequent output results
+ *
+ * @return     The function returns <code>ARM_CMSIS_NN_SUCCESS</code>
+ *
+ */
+arm_cmsis_nn_status arm_nn_mat_mult_nt_t_s8_s32(const int8_t *lhs,
+                                                const int8_t *rhs,
+                                                int32_t *dst,
+                                                const int32_t lhs_rows,
+                                                const int32_t rhs_rows,
+                                                const int32_t rhs_cols,
+                                                const int32_t lhs_offset,
+                                                const int32_t dst_idx_offset);
+
+/**
+ * @brief s4 Vector by Matrix (transposed) multiplication
+ *
+ * @param[in]      lhs             Input left-hand side vector
+ * @param[in]      packed_rhs      Input right-hand side matrix (transposed)
+ * @param[in]      bias            Input bias
+ * @param[out]     dst             Output vector
+ * @param[in]      lhs_offset      Offset to be added to the input values of the left-hand side vector.
+ *                                 Range: -127 to 128
+ * @param[in]      dst_offset      Offset to be added to the output values. Range: -127 to 128
+ * @param[in]      dst_multiplier  Output multiplier
+ * @param[in]      dst_shift       Output shift
+ * @param[in]      rhs_cols        Number of columns in the right-hand side input matrix
+ * @param[in]      rhs_rows        Number of rows in the right-hand side input matrix
+ * @param[in]      activation_min  Minimum value to clamp the output to. Range: int8
+ * @param[in]      activation_max  Maximum value to clamp the output to. Range: int8
+ * @param[in]      address_offset  Memory position offset for dst. First output is stored at 'dst', the
+ *                                 second at 'dst + address_offset' and so on. Default value is typically 1.
+ *
+ * @return         The function returns <code>ARM_CMSIS_NN_SUCCESS</code>
+ *
+ */
+arm_cmsis_nn_status arm_nn_vec_mat_mult_t_s4(const int8_t *lhs,
+                                             const int8_t *packed_rhs,
+                                             const int32_t *bias,
+                                             int8_t *dst,
+                                             const int32_t lhs_offset,
+                                             const int32_t dst_offset,
+                                             const int32_t dst_multiplier,
+                                             const int32_t dst_shift,
+                                             const int32_t rhs_cols,
+                                             const int32_t rhs_rows,
+                                             const int32_t activation_min,
+                                             const int32_t activation_max,
+                                             const int32_t address_offset);
+
+/**
  * @brief s8 Vector by Matrix (transposed) multiplication
  *
  * @param[in]      lhs             Input left-hand side vector
  * @param[in]      rhs             Input right-hand side matrix (transposed)
+ * @param[in]      kernel_sum      Kernel sums of the kernels (rhs). See arm_vector_sum_s8 for more info.
  * @param[in]      bias            Input bias
  * @param[out]     dst             Output vector
  * @param[in]      lhs_offset      Offset to be added to the input values of the left-hand side vector.
@@ -620,6 +748,20 @@ __STATIC_FORCEINLINE int32_t arm_nn_read_s8x4_ia(const int8_t **in_s8)
 }
 
 /**
+  @brief         Read 2 s8 from s8 pointer and post increment pointer.
+  @param[in]     in_s8    Pointer to pointer that holds address of input.
+  @return        q31      value
+ */
+__STATIC_FORCEINLINE int32_t arm_nn_read_s8x2_ia(const int8_t **in_s8)
+{
+    int32_t val;
+    memcpy(&val, *in_s8, 2);
+    *in_s8 += 2;
+
+    return (val);
+}
+
+/**
   @brief         Read 2 int16 values from int16 pointer.
   @param[in]     in     pointer to address of input.
   @return        s32    value
@@ -641,6 +783,18 @@ __STATIC_FORCEINLINE int32_t arm_nn_read_s8x4(const int8_t *in_s8)
 {
     int32_t val;
     memcpy(&val, in_s8, 4);
+
+    return (val);
+}
+/**
+  @brief         Read 2 s8 values.
+  @param[in]     in_s8    pointer to address of input.
+  @return        s32      value
+ */
+__STATIC_FORCEINLINE int32_t arm_nn_read_s8x2(const int8_t *in_s8)
+{
+    int32_t val;
+    memcpy(&val, in_s8, 2);
 
     return (val);
 }
@@ -683,6 +837,57 @@ __STATIC_FORCEINLINE void arm_memset_s8(int8_t *dst, const int8_t val, uint32_t 
 #if defined(ARM_MATH_DSP)
 
 /**
+ * @brief read and expand one s4 word into two s8 words.
+ */
+__STATIC_FORCEINLINE void read_and_pad_s4(const int8_t *source, int32_t *out1, int32_t *out2)
+{
+    int16_t in = arm_nn_read_s8x2(source);
+    int32_t inA = (in & 0x00FF) | ((in & 0xFF00) << 8);
+
+    *out1 = SXTB16_RORn(__sxtb16(inA << 4), 4);
+    *out2 = SXTB16_RORn(__sxtb16(inA), 4);
+}
+
+/**
+ * @brief read and expand one s4 word into two s8 words.
+ * @details   The s4 elements are not evenly aligned on the byte boundary, so 3 bytes need to be read instead of 2.
+ *            In other words first nibble to read start at the middle of a byte.
+ *            byte index, s4 element
+ *            0,          s4_x
+ *            0,          s4_0
+ *            1,          s4_1
+ *            1,          s4_2
+ *            2,          s4_3
+ *            2,          s4_x
+ */
+__STATIC_FORCEINLINE void read_and_pad_s4_uneven(const int8_t *source, int32_t *out1, int32_t *out2)
+{
+    int32_t inA1 = (source[0] & 0xFF) | ((source[1] & 0xFF) << 16);
+    int32_t inA2 = (source[1] & 0xFF) | ((source[2] & 0xFF) << 16);
+
+    *out1 = SXTB16_RORn(__sxtb16(inA2 << 4), 4);
+    *out2 = SXTB16_RORn(__sxtb16(inA1), 4);
+}
+
+/**
+ * @brief read and expand one s4 word into two s16 words with ordering.
+ */
+__STATIC_FORCEINLINE void read_and_pad_s4_ordered(const int8_t *source, int32_t *out1, int32_t *out2)
+{
+    int16_t in = arm_nn_read_s8x2(source);
+    int32_t inA = (in & 0x00FF) | ((in & 0xFF00) << 8);
+    int32_t inAbuf1 = SXTB16_RORn(__sxtb16(inA), 4);
+    int32_t inAbuf2 = SXTB16_RORn(__sxtb16(inA << 4), 4);
+    #ifndef ARM_MATH_BIG_ENDIAN
+    *out2 = (int32_t)(PKHTB(inAbuf1, inAbuf2, 16));
+    *out1 = (int32_t)(PKHBT(inAbuf2, inAbuf1, 16));
+    #else
+    *out1 = (int32_t)(PKHTB(inAbuf1, inAbuf2, 16));
+    *out2 = (int32_t)(PKHBT(inAbuf2, inAbuf1, 16));
+    #endif
+}
+
+/**
  * @brief read and expand one s8 word into two s16 words with ordering.
  */
 __STATIC_FORCEINLINE const int8_t *read_and_pad(const int8_t *source, int32_t *out1, int32_t *out2)
@@ -721,6 +926,39 @@ __STATIC_FORCEINLINE const int8_t *read_and_pad_reordered(const int8_t *source, 
 
 #endif
 
+/**
+ * @brief Matrix-multiplication function for convolution with per-channel requantization and 4 bit weights.
+ * @param[in]       input_a            pointer to operand A, int8 packed with 2x int4.
+ * @param[in]       input_b            pointer to operand B, always consists of 2 vectors.
+ * @param[in]       output_ch          number of rows of A
+ * @param[in]       out_shift          pointer to per output channel requantization shift parameter.
+ * @param[in]       out_mult           pointer to per output channel requantization multiplier parameter.
+ * @param[in]       out_offset         output tensor offset.
+ * @param[in]       activation_min     minimum value to clamp the output to. Range : int8
+ * @param[in]       activation_max     maximum value to clamp the output to. Range : int8
+ * @param[in]       num_col_a          number of columns of A
+ * @param[in]       output_bias        per output channel bias. Range : int32
+ * @param[in,out]   out_0              pointer to output
+ * @return     The function returns one of the two
+ *              1. The incremented output pointer for a successful operation or
+ *              2. NULL if implementation is not available.
+ *
+ * @details   This function does the matrix multiplication of weight matrix for all output channels
+ *            with 2 columns from im2col and produces two elements/output_channel. The outputs are
+ *            clamped in the range provided by activation min and max.
+ *            Supported framework: TensorFlow Lite micro.
+ */
+int8_t *arm_nn_mat_mult_kernel_s4_s16(const int8_t *input_a,
+                                      const int16_t *input_b,
+                                      const uint16_t output_ch,
+                                      const int32_t *out_shift,
+                                      const int32_t *out_mult,
+                                      const int32_t out_offset,
+                                      const int32_t activation_min,
+                                      const int32_t activation_max,
+                                      const int32_t num_col_a,
+                                      const int32_t *const output_bias,
+                                      int8_t *out_0);
 /**
  * @brief Matrix-multiplication function for convolution with per-channel requantization.
  * @param[in]       input_a            pointer to operand A

@@ -22,8 +22,8 @@
  * Description:  Public header file to contain the CMSIS-NN structs for the
  *               TensorFlowLite micro compliant functions
  *
- * $Date:        8 March 2023
- * $Revision:    V.2.5.0
+ * $Date:        27 October 2023
+ * $Revision:    V.2.6.0
  *
  * Target :  Arm(R) M-Profile Architecture
  * -------------------------------------------------------------------- */
@@ -106,19 +106,31 @@ typedef struct
 /** CMSIS-NN object for the convolution layer parameters */
 typedef struct
 {
-    int32_t input_offset;  /**< Zero value for the input tensor */
-    int32_t output_offset; /**< Zero value for the output tensor */
+    int32_t input_offset;  /**< The negative of the zero value for the input tensor */
+    int32_t output_offset; /**< The negative of the zero value for the output tensor */
     cmsis_nn_tile stride;
     cmsis_nn_tile padding;
     cmsis_nn_tile dilation;
     cmsis_nn_activation activation;
 } cmsis_nn_conv_params;
 
-/** CMSIS-NN object for Depthwise convolution layer parameters */
+/** CMSIS-NN object for the transpose convolution layer parameters */
 typedef struct
 {
-    int32_t input_offset;  /**< Zero value for the input tensor */
-    int32_t output_offset; /**< Zero value for the output tensor */
+    int32_t input_offset;  /**< The negative of the zero value for the input tensor */
+    int32_t output_offset; /**< The negative of the zero value for the output tensor */
+    cmsis_nn_tile stride;
+    cmsis_nn_tile padding;
+    cmsis_nn_tile padding_offsets;
+    cmsis_nn_tile dilation;
+    cmsis_nn_activation activation;
+} cmsis_nn_transpose_conv_params;
+
+/** CMSIS-NN object for the depthwise convolution layer parameters */
+typedef struct
+{
+    int32_t input_offset;  /**< The negative of the zero value for the input tensor */
+    int32_t output_offset; /**< The negative of the zero value for the output tensor */
     int32_t ch_mult;       /**< Channel Multiplier. ch_mult * in_ch = out_ch */
     cmsis_nn_tile stride;
     cmsis_nn_tile padding;
@@ -136,9 +148,9 @@ typedef struct
 /** CMSIS-NN object for Fully Connected layer parameters */
 typedef struct
 {
-    int32_t input_offset;  /**< Zero value for the input tensor */
-    int32_t filter_offset; /**< Zero value for the filter tensor. Not used */
-    int32_t output_offset; /**< Zero value for the output tensor */
+    int32_t input_offset;  /**< The negative of the zero value for the input tensor */
+    int32_t filter_offset; /**< The negative of the zero value for the filter tensor. Not used */
+    int32_t output_offset; /**< The negative of the zero value for the output tensor */
     cmsis_nn_activation activation;
 } cmsis_nn_fc_params;
 
@@ -146,8 +158,8 @@ typedef struct
 typedef struct
 {
     int32_t rank;
-    int32_t input_offset;  /**< Zero value for the input tensor */
-    int32_t output_offset; /**< Zero value for the output tensor */
+    int32_t input_offset;  /**< The negative of the zero value for the input tensor */
+    int32_t output_offset; /**< The negative of the zero value for the output tensor */
     cmsis_nn_activation input_activation;
     cmsis_nn_activation output_activation;
 } cmsis_nn_svdf_params;

@@ -21,8 +21,8 @@
  * Title:        arm_fully_connected_s8
  * Description:  Fully connected function compatible with TF Lite.
  *
- * $Date:        13 January 2023
- * $Revision:    V.5.1.0
+ * $Date:        23 October 2023
+ * $Revision:    V.5.2.0
  *
  * Target :  Arm(R) M-Profile Architecture
  *
@@ -71,7 +71,7 @@ arm_cmsis_nn_status arm_fully_connected_s8(const cmsis_nn_context *ctx,
     }
 #endif
 
-    const int32_t *kernel_sum = ctx->buf;
+    const int32_t *kernel_sum = (const int32_t *) ctx->buf;
 
     while (batch_cnt)
     {
