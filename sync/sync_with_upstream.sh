@@ -62,7 +62,7 @@ sync/create_tests.py ${TFLM_REPO_DIR}/tflite-micro .
 cp sync/micro_time.cpp src/tensorflow/lite/micro/micro_time.cpp
 cp sync/system_setup.cpp src/tensorflow/lite/micro/system_setup.cpp
 cp sync/micro_profiler.cpp src/tensorflow/lite/micro/micro_profiler.cpp
-#cp sync/arm_nn_mat_mult_nt_t_s8.c src/third_party/cmsis_nn/Source/NNSupportFunctions/arm_nn_mat_mult_nt_t_s8.c
+cp sync/arm_nn_mat_mult_nt_t_s8.c src/third_party/cmsis_nn/Source/NNSupportFunctions/arm_nn_mat_mult_nt_t_s8.c
 mkdir -p src/tensorflow/lite/micro/benchmarks
 cp sync/micro_benchmark.h src/tensorflow/lite/micro/benchmarks
 
