@@ -47,8 +47,6 @@
 #include "pico/stdlib.h"
 #include "pico/multicore.h"
 
-#include "trace.h"
-
 typedef struct {
     int32_t rhs_rows_start;
     int32_t rhs_rows_end;
@@ -228,17 +226,6 @@ static void calculate_row_range(
     const int32_t activation_max,
     const int32_t lhs_cols_offset) {
 
-    // TRACE_INT(rhs_rows_start);
-    // TRACE_INT(rhs_rows_end);
-    // TRACE_INT(lhs_rows);
-    // TRACE_INT(rhs_rows);
-    // TRACE_INT(rhs_cols);
-    // TRACE_INT(lhs_offset);
-    // TRACE_INT(dst_offset);
-    // TRACE_INT(activation_min);
-    // TRACE_INT(activation_max);
-    // TRACE_INT(lhs_cols_offset);
-
     const int8_t* current_rhs = rhs + (rhs_rows_start * rhs_cols);
     int8_t* current_dst = dst + rhs_rows_start;
 
@@ -284,25 +271,6 @@ static void mat_mul_task(const MatMulArgs* args) {
     int32_t activation_min = args->activation_min;
     int32_t activation_max = args->activation_max;
     int32_t lhs_cols_offset = args->lhs_cols_offset;
-
-    const int32_t lhs_byte_count = (lhs_rows * rhs_rows);
-    const int32_t rhs_byte_count = (rhs_rows * rhs_cols);
-    TRACE_BYT(lhs, lhs_byte_count);
-    TRACE_BYT(rhs, rhs_byte_count);
-
-    TRACE_INT(rhs_rows_start);
-    TRACE_INT(rhs_rows_end);
-    TRACE_PTR(lhs);
-    TRACE_PTR(rhs);
-    TRACE_PTR(dst);
-    TRACE_INT(lhs_rows);
-    TRACE_INT(rhs_rows);
-    TRACE_INT(rhs_cols);
-    TRACE_INT(lhs_offset);
-    TRACE_INT(dst_offset);
-    TRACE_INT(activation_min);
-    TRACE_INT(activation_max);
-    TRACE_INT(lhs_cols_offset);
 
     calculate_row_range(
         rhs_rows_start,
@@ -914,11 +882,7 @@ arm_cmsis_nn_status arm_nn_mat_mult_nt_t_s8(const int8_t *lhs,
 
 #if defined(TF_LITE_PICO_MULTICORE)
 
-    TRACE_INT(rhs_rows);
     const int32_t mid_range = (rhs_rows / 4) * 2;
-    TRACE_INT(mid_range);
-
-    const int8_t* const original_dst = dst;
 
     MatMulArgs shared_args;
     shared_args.lhs = lhs;
@@ -944,22 +908,13 @@ arm_cmsis_nn_status arm_nn_mat_mult_nt_t_s8(const int8_t *lhs,
     core1_args.rhs_rows_start = mid_range;
     core1_args.rhs_rows_end = rhs_rows - 1;
 
-    const int32_t rhs_byte_count = (rhs_rows * rhs_cols);
-    TRACE_BYT(rhs, rhs_byte_count);
-
-    const int32_t dst_byte_count = (lhs_rows * rhs_rows);
-    memset(dst, 0xff, dst_byte_count);
-
     // Start the second core working.
     g_core1_mat_mul_args = core1_args;
-
-    mat_mul_task(&g_core1_mat_mul_args);
-    TRACE_BYT(original_dst, dst_byte_count);
 
     multicore_reset_core1();
     multicore_launch_core1(core1_mat_mul_worker);
 
-    Do the processing on the first core.
+    // Do the processing on the first core.
     mat_mul_task(&core0_args);
 
     // A result of ARM_CMSIS_NN_SUCCESS means success. Blocks until core 1 is
@@ -969,22 +924,15 @@ arm_cmsis_nn_status arm_nn_mat_mult_nt_t_s8(const int8_t *lhs,
         return core1_result;
     }
 
-    TRACE_BYT(original_dst, dst_byte_count);
-
-    mat_mul_task(&g_core1_mat_mul_args);
-    mat_mul_task(&core0_args);
-
     const int32_t rows_processed = (rhs_rows / 2) * 2;
     const int8_t* new_rhs = rhs + (rows_processed * rhs_cols);
     const int8_t* new_dst = dst + rows_processed;
 
-    // rhs = new_rhs;
-    // dst = new_dst;
+    rhs = new_rhs;
+    dst = new_dst;
 
-    TRACE_BYT(original_dst, dst_byte_count);
-    // Expected 67 44 06 af a5 e7 10 20 67 44 06 af a5 e7 10 20 67 44 06 af a5 e7 10 20 67 44 06 af a5 e7 10 20
 
-// #else
+#else
     for (int32_t rhs_rows_idx = 0; rhs_rows_idx <= (rhs_rows - 2); rhs_rows_idx += 2)
     {
         const int8_t *lhs_ptr = &lhs[0];
@@ -1156,8 +1104,6 @@ arm_cmsis_nn_status arm_nn_mat_mult_nt_t_s8(const int8_t *lhs,
         }
     }
 #endif
-
-    TRACE_BYT(original_dst, dst_byte_count);
 
     return ARM_CMSIS_NN_SUCCESS;
 }
