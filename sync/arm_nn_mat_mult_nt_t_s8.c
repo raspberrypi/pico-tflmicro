@@ -40,12 +40,33 @@
  */
 
 // Uncomment this to try the experimental dual core support on the RP2040.
-//#define TF_LITE_PICO_MULTICORE
+#define TF_LITE_PICO_MULTICORE
 
 #ifdef TF_LITE_PICO_MULTICORE
 
 #include "pico/stdlib.h"
 #include "pico/multicore.h"
+
+typedef struct {
+    int32_t rhs_rows_start;
+    int32_t rhs_rows_end;
+    const int8_t *lhs;
+    const int8_t *rhs;
+    const int32_t *bias;
+    int8_t* dst;
+    const int32_t *dst_multipliers;
+    const int32_t *dst_shifts;
+    int32_t lhs_rows;
+    int32_t rhs_rows;
+    int32_t rhs_cols;
+    int32_t lhs_offset;
+    int32_t dst_offset;
+    int32_t activation_min;
+    int32_t activation_max;
+    int32_t lhs_cols_offset;
+} MatMulArgs;
+
+static MatMulArgs g_core1_mat_mul_args;
 
 static void calculate_two_rows(
     const int8_t *lhs,
@@ -205,13 +226,16 @@ static void calculate_row_range(
     const int32_t activation_max,
     const int32_t lhs_cols_offset) {
 
+    const int8_t* current_rhs = rhs + (rhs_rows_start * rhs_cols);
+    int8_t* current_dst = dst + rhs_rows_start;
+
     for (int32_t rhs_rows_idx = rhs_rows_start; rhs_rows_idx < rhs_rows_end; rhs_rows_idx += 2)
     {
         calculate_two_rows(
             lhs,
-            rhs,
+            current_rhs,
             bias,
-            dst,
+            current_dst,
             dst_multipliers,
             dst_shifts,
             lhs_rows,
@@ -224,10 +248,54 @@ static void calculate_row_range(
             lhs_cols_offset,
             rhs_rows_idx);
 
-        rhs += 2 * rhs_cols;
-        dst += 2;
+        current_rhs += 2 * rhs_cols;
+        current_dst += 2;
     }
 
+}
+
+static void mat_mul_task(const MatMulArgs* args) {
+    const int32_t rhs_rows_start = args->rhs_rows_start;
+    const int32_t rhs_rows_end = args->rhs_rows_end;
+    const int8_t *lhs = args->lhs;
+    const int8_t *rhs = args->rhs;
+    const int32_t *bias = args->bias;
+    int8_t* dst = args->dst;
+    const int32_t *dst_multipliers = args->dst_multipliers;
+    const int32_t *dst_shifts = args->dst_shifts;
+    int32_t lhs_rows = args->lhs_rows;
+    int32_t rhs_rows = args->rhs_rows;
+    int32_t rhs_cols = args->rhs_cols;
+    int32_t lhs_offset = args->lhs_offset;
+    int32_t dst_offset = args->dst_offset;
+    int32_t activation_min = args->activation_min;
+    int32_t activation_max = args->activation_max;
+    int32_t lhs_cols_offset = args->lhs_cols_offset;
+
+    calculate_row_range(
+        rhs_rows_start,
+        rhs_rows_end,
+        lhs,
+        rhs,
+        bias,
+        dst,
+        dst_multipliers,
+        dst_shifts,
+        lhs_rows,
+        rhs_rows,
+        rhs_cols,
+        lhs_offset,
+        dst_offset,
+        activation_min,
+        activation_max,
+        lhs_cols_offset);
+}
+
+static void core1_mat_mul_worker(void) {
+    mat_mul_task(&g_core1_mat_mul_args);
+
+    // Signal we're done by pushing a result of zero.
+    multicore_fifo_push_blocking(ARM_CMSIS_NN_SUCCESS);
 }
 
 #endif  // TF_LITE_PICO_MULTICORE
@@ -814,47 +882,55 @@ arm_cmsis_nn_status arm_nn_mat_mult_nt_t_s8(const int8_t *lhs,
 
 #if defined(TF_LITE_PICO_MULTICORE)
 
-    const int32_t mid_range = (rhs_rows / 2) * 2;
+    const int32_t mid_range = (rhs_rows / 4) * 2;
 
-    calculate_row_range(
-        0,
-        mid_range,
-        lhs,
-        rhs,
-        bias,
-        dst,
-        dst_multipliers,
-        dst_shifts,
-        lhs_rows,
-        rhs_rows,
-        rhs_cols,
-        lhs_offset,
-        dst_offset,
-        activation_min,
-        activation_max,
-        lhs_cols_offset);
+    MatMulArgs shared_args;
+    shared_args.lhs = lhs;
+    shared_args.rhs = rhs;
+    shared_args.bias = bias;
+    shared_args.dst = dst;
+    shared_args.dst_multipliers = dst_multipliers;
+    shared_args.dst_shifts = dst_shifts;
+    shared_args.lhs_rows = lhs_rows;
+    shared_args.rhs_rows = rhs_rows;
+    shared_args.rhs_cols = rhs_cols;
+    shared_args.lhs_offset = lhs_offset;
+    shared_args.dst_offset = dst_offset;
+    shared_args.activation_min = activation_min;
+    shared_args.activation_max = activation_max;
+    shared_args.lhs_cols_offset = lhs_cols_offset;
 
-    calculate_row_range(
-        mid_range,
-        (rhs_rows - 1),
-        lhs,
-        rhs,
-        bias,
-        dst,
-        dst_multipliers,
-        dst_shifts,
-        lhs_rows,
-        rhs_rows,
-        rhs_cols,
-        lhs_offset,
-        dst_offset,
-        activation_min,
-        activation_max,
-        lhs_cols_offset);
+    MatMulArgs core0_args = shared_args;
+    core0_args.rhs_rows_start = 0;
+    core0_args.rhs_rows_end = mid_range;
+
+    MatMulArgs core1_args = shared_args;
+    core1_args.rhs_rows_start = mid_range;
+    core1_args.rhs_rows_end = rhs_rows - 1;
+
+    // Start the second core working.
+    g_core1_mat_mul_args = core1_args;
+
+    multicore_reset_core1();
+    multicore_launch_core1(core1_mat_mul_worker);
+
+    // Do the processing on the first core.
+    mat_mul_task(&core0_args);
+
+    // A result of ARM_CMSIS_NN_SUCCESS means success. Blocks until core 1 is
+    // done.
+    const uint32_t core1_result = multicore_fifo_pop_blocking();
+    if (core1_result != ARM_CMSIS_NN_SUCCESS) {
+        return core1_result;
+    }
 
     const int32_t rows_processed = (rhs_rows / 2) * 2;
-    rhs += rows_processed * rhs_cols;
-    dst += rows_processed;
+    const int8_t* new_rhs = rhs + (rows_processed * rhs_cols);
+    const int8_t* new_dst = dst + rows_processed;
+
+    rhs = new_rhs;
+    dst = new_dst;
+
 
 #else
     for (int32_t rhs_rows_idx = 0; rhs_rows_idx <= (rhs_rows - 2); rhs_rows_idx += 2)
@@ -984,7 +1060,7 @@ arm_cmsis_nn_status arm_nn_mat_mult_nt_t_s8(const int8_t *lhs,
         rhs += 2 * rhs_cols;
         dst += 2;
     }
-#endif 
+#endif
 
     if (rhs_rows % 2)
     {
@@ -1028,6 +1104,7 @@ arm_cmsis_nn_status arm_nn_mat_mult_nt_t_s8(const int8_t *lhs,
         }
     }
 #endif
+
     return ARM_CMSIS_NN_SUCCESS;
 }
 
