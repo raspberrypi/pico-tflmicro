@@ -5,51 +5,59 @@ An Open Source Machine Learning Framework for Everyone.
 
 ## Introduction
 
-This is an experimental version of the [TensorFlow Lite Micro library](https://www.tensorflow.org/lite/microcontrollers)
-for the Raspberry Pi Pico microcontroller. It allows you to run machine learning models to
-do things like voice recognition, detect people in images, recognize gestures from an accelerometer,
-and other sensor analysis tasks.
-The official repository is at [https://github.com/raspberrypi/pico-tflmicro](https://github.com/raspberrypi/pico-tflmicro)
-but this version has upstreamed changes from the Google codebase. It also takes
-advantage of the RP2040's dual cores for increased speed on some operations.
+This is a version of the [TensorFlow Lite Micro library](https://www.tensorflow.org/lite/microcontrollers)
+for the Raspberry Pi Pico microcontroller. It allows you to run machine 
+learning models to do things like voice recognition, detect people in images, recognize gestures from an accelerometer, and other sensor analysis tasks.
+This version has scripts to upstream changes from the Google codebase. It also
+takes advantage of the RP2040's dual cores for increased speed on some 
+operations.
 
 ## Getting Started
 
-First you'll need to follow the Pico setup instructions to initialize the development
-environment on your machine. Once that is done, make sure that the PICO_SDK_PATH
-environment variable has been set to the location of the Pico SDK, either in the shell
-you're building in, or the CMake configure environment variable setting of the extension
-if you're using VS Code.
+First you'll need to follow the Pico setup instructions to initialize the
+development environment on your machine. Once that is done, make sure that the
+`PICO_SDK_PATH` environment variable has been set to the location of the Pico
+SDK, either in the shell you're building in, or the CMake configure environment
+variable setting of the extension if you're using VS Code.
 
-You should then be able to build the library, tests, and examples. The easiest way to
-build is using VS Code's CMake integration, by loading the project and choosing the
-build option at the bottom of the window.
+You should then be able to build the library, tests, and examples. The easiest 
+way to build is using VS Code's CMake integration, by loading the project and choosing the build option at the bottom of the window.
+
+Alternatively you can build the entire project, including tests, by running the
+following commands from a terminal once you're in this repo's directory:
+
+```bash
+mkdir build
+cd build
+cmake ..
+make
+```
 
 ## What's Included
 
-There are several example applications included. The simplest one to begin with is the
-hello_world project. This demonstrates the fundamentals of deploying an ML model on a
-device, driving the Pico's LED in a learned sine-wave pattern.
+There are several example applications included. The simplest one to begin with
+is the hello_world project. This demonstrates the fundamentals of deploying an 
+ML model on a device, driving the Pico's LED in a learned sine-wave pattern.
+Once you have built the project, a UF2 file you can copy to the Pico should be
+present at `build/examples/hello_world/hello_world.uf2`.
 
-Other examples include simple speech recognition, a magic wand gesture recognizer,
-and spotting people in camera images, but because they require audio, accelerometer or
-image inputs you'll need to write some code to hook up your own sensors, since these
-are not included with the base microcontroller.
+Another example is the person detector, but since the Pico doesn't come with
+image inputs you'll need to write some code to hook up your own sensor. You can
+find a fork of TFLM for the Arducam Pico4ML that does this at [arducam.com/pico4ml-an-rp2040-based-platform-for-tiny-machine-learning/](https://www.arducam.com/pico4ml-an-rp2040-based-platform-for-tiny-machine-learning/).
 
 ## Contributing
 
-This repository (https://github.com/usefulsensors/pico-tflmicro) is read-only, because
-it has been automatically generated from the master TensorFlow repository at
-https://github.com/tensorflow/tensorflow. It's maintained by @petewarden on a
-best effort basis, so bugs and PRs may not get addressed. You can generate an 
-updated version of this generated project by running the command:
+This repository (https://github.com/raspberrypi/pico-tflmicro) is read-only,
+because it has been automatically generated from the master TensorFlow 
+repository at https://github.com/tensorflow/tensorflow. It's maintained by
+@petewarden on a best effort basis, so bugs and PRs may not get addressed. You
+can generate an updated version of this generated project by running the command:
 
 ```
 sync/sync_with_upstream.sh
 ```
 
-This should create a Pico-compatible project from the latest version of the TensorFlow
-repository.
+This should create a Pico-compatible project from the latest version of the TensorFlow repository.
 
 ## Learning More
 
@@ -64,6 +72,6 @@ has more details on the design and implementation of the framework.
 
 ## Licensing
 
-The TensorFlow source code is covered by the license described in src/tensorflow/LICENSE,
-components from other libraries have the appropriate licenses included in their
-third_party folders.
+The TensorFlow source code is covered by the Apache 2 license described in 
+src/tensorflow/LICENSE, components from other libraries have the appropriate
+licenses included in their third_party folders.
