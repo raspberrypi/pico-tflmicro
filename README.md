@@ -1,4 +1,3 @@
-
 # TensorFlow Lite Micro
 
 An Open Source Machine Learning Framework for Everyone.
@@ -7,7 +6,8 @@ An Open Source Machine Learning Framework for Everyone.
 
 This is a version of the [TensorFlow Lite Micro library](https://www.tensorflow.org/lite/microcontrollers)
 for the Raspberry Pi Pico microcontroller. It allows you to run machine 
-learning models to do things like voice recognition, detect people in images, recognize gestures from an accelerometer, and other sensor analysis tasks.
+learning models to do things like voice recognition, detect people in images,
+recognize gestures from an accelerometer, and other sensor analysis tasks.
 This version has scripts to upstream changes from the Google codebase. It also
 takes advantage of the RP2040's dual cores for increased speed on some 
 operations.
@@ -21,7 +21,8 @@ SDK, either in the shell you're building in, or the CMake configure environment
 variable setting of the extension if you're using VS Code.
 
 You should then be able to build the library, tests, and examples. The easiest 
-way to build is using VS Code's CMake integration, by loading the project and choosing the build option at the bottom of the window.
+way to build is using VS Code's CMake integration, by loading the project and
+choosing the build option at the bottom of the window.
 
 Alternatively you can build the entire project, including tests, by running the
 following commands from a terminal once you're in this repo's directory:
@@ -57,7 +58,8 @@ can generate an updated version of this generated project by running the command
 sync/sync_with_upstream.sh
 ```
 
-This should create a Pico-compatible project from the latest version of the TensorFlow repository.
+This should create a Pico-compatible project from the latest version of the
+TensorFlow repository.
 
 ## Learning More
 
