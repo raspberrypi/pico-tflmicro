@@ -41,6 +41,32 @@
  * @{
  */
 
+// Uncomment this to try the experimental dual core support on the RP2040.
+#define TF_LITE_PICO_MULTICORE
+
+#ifdef TF_LITE_PICO_MULTICORE
+
+#include "pico/stdlib.h"
+#include "pico/multicore.h"
+
+typedef struct {
+    const cmsis_nn_dw_conv_params *dw_conv_params;
+    const cmsis_nn_per_channel_quant_params *quant_params;
+    const cmsis_nn_dims *input_dims;
+    const int8_t *input;
+    const cmsis_nn_dims *filter_dims;
+    const int8_t *kernel;
+    const int32_t *bias;
+    const cmsis_nn_dims *output_dims;
+    int8_t *output;
+    int32_t start_y;
+    int32_t end_y;
+} DepthwiseArgs;
+
+static DepthwiseArgs g_core1_depthwise_args;
+
+#endif  // TF_LITE_PICO_MULTICORE
+
 /*
  * Optimized s8 depthwise convolution function with constraint that
  * in_channel == out_channel and kernel_x == kernel_y == 3 with pads at most 1
@@ -49,21 +75,18 @@
  *
  */
 
-arm_cmsis_nn_status arm_depthwise_conv_3x3_s8(const cmsis_nn_context *ctx,
-                                              const cmsis_nn_dw_conv_params *dw_conv_params,
-                                              const cmsis_nn_per_channel_quant_params *quant_params,
-                                              const cmsis_nn_dims *input_dims,
-                                              const int8_t *input,
-                                              const cmsis_nn_dims *filter_dims,
-                                              const int8_t *kernel,
-                                              const cmsis_nn_dims *bias_dims,
-                                              const int32_t *bias,
-                                              const cmsis_nn_dims *output_dims,
-                                              int8_t *output)
+void arm_depthwise_conv_3x3_s8_task(const cmsis_nn_dw_conv_params *dw_conv_params,
+                                    const cmsis_nn_per_channel_quant_params *quant_params,
+                                    const cmsis_nn_dims *input_dims,
+                                    const int8_t *input,
+                                    const cmsis_nn_dims *filter_dims,
+                                    const int8_t *kernel,
+                                    const int32_t *bias,
+                                    const cmsis_nn_dims *output_dims,
+                                    int8_t *output,
+                                    const int32_t start_y,
+                                    const int32_t end_y)
 {
-    (void)ctx;
-    (void)bias_dims;
-
     const int32_t input_x = input_dims->w;
     const int32_t input_y = input_dims->h;
     const int32_t input_ch = input_dims->c;
@@ -81,18 +104,9 @@ arm_cmsis_nn_status arm_depthwise_conv_3x3_s8(const cmsis_nn_context *ctx,
     const int32_t output_activation_min = dw_conv_params->activation.min;
     const int32_t output_activation_max = dw_conv_params->activation.max;
 
-    /* Check input constraints input_ch == output_ch */
-    if (input_ch != output_ch)
-    {
-        return ARM_CMSIS_NN_ARG_ERROR;
-    }
-    /* Check input constraints pad_x <= 1 */
-    if (pad_x > 1 || filter_dims->w != 3 || filter_dims->h != 3)
-    {
-        return ARM_CMSIS_NN_ARG_ERROR;
-    }
+
     const int32_t *bias_base = bias;
-    for (int32_t in_h = -pad_y, out_h = 0, out_idx = 0; out_h < output_y; in_h += stride_y, ++out_h)
+    for (int32_t in_h = (start_y * stride_y) - pad_y, out_h = start_y, out_idx = (start_y * output_x * output_ch); out_h < end_y; in_h += stride_y, ++out_h)
     {
         for (int32_t in_w = -pad_x, out_w = 0, ker_h_start = MAX(0, -in_h); out_w < output_x; in_w += stride_x, ++out_w)
         {
@@ -272,6 +286,116 @@ arm_cmsis_nn_status arm_depthwise_conv_3x3_s8(const cmsis_nn_context *ctx,
             }
         }
     }
+}
+
+#ifdef TF_LITE_PICO_MULTICORE
+static void depthwise_task(DepthwiseArgs* args) {
+    arm_depthwise_conv_3x3_s8_task(args->dw_conv_params,
+                                   args->quant_params,
+                                   args->input_dims,
+                                   args->input,
+                                   args->filter_dims,
+                                   args->kernel,
+                                   args->bias,
+                                   args->output_dims,
+                                   args->output,
+                                   args->start_y,
+                                   args->end_y);
+}
+
+static void core1_depthwise_worker(void) {
+    depthwise_task(&g_core1_depthwise_args);
+
+    // Signal we're done by pushing a result of zero.
+    multicore_fifo_push_blocking(ARM_CMSIS_NN_SUCCESS);
+}
+#endif  // TF_LITE_PICO_MULTICORE
+
+arm_cmsis_nn_status arm_depthwise_conv_3x3_s8(const cmsis_nn_context *ctx,
+                                              const cmsis_nn_dw_conv_params *dw_conv_params,
+                                              const cmsis_nn_per_channel_quant_params *quant_params,
+                                              const cmsis_nn_dims *input_dims,
+                                              const int8_t *input,
+                                              const cmsis_nn_dims *filter_dims,
+                                              const int8_t *kernel,
+                                              const cmsis_nn_dims *bias_dims,
+                                              const int32_t *bias,
+                                              const cmsis_nn_dims *output_dims,
+                                              int8_t *output)
+{
+    (void)ctx;
+    (void)bias_dims;
+
+    const int32_t input_ch = input_dims->c;
+    const int32_t output_ch = output_dims->c;
+    const int32_t pad_x = dw_conv_params->padding.w;
+    const int32_t output_y = output_dims->h;
+    const int32_t stride_y = dw_conv_params->stride.h;
+
+    /* Check input constraints input_ch == output_ch */
+    if (input_ch != output_ch)
+    {
+        return ARM_CMSIS_NN_ARG_ERROR;
+    }
+    /* Check input constraints pad_x <= 1 */
+    if (pad_x > 1 || filter_dims->w != 3 || filter_dims->h != 3)
+    {
+        return ARM_CMSIS_NN_ARG_ERROR;
+    }
+
+#ifdef TF_LITE_PICO_MULTICORE
+
+    const int mid_y = (((output_y / stride_y) / 2) * stride_y);
+
+    DepthwiseArgs shared_args;
+    shared_args.dw_conv_params = dw_conv_params;
+    shared_args.quant_params = quant_params;
+    shared_args.input_dims = input_dims;
+    shared_args.input = input;
+    shared_args.filter_dims = filter_dims;
+    shared_args.kernel = kernel;
+    shared_args.bias = bias;
+    shared_args.output_dims = output_dims;
+    shared_args.output = output;
+
+    DepthwiseArgs core0_args = shared_args;
+    core0_args.start_y = 0;
+    core0_args.end_y = mid_y;
+
+    DepthwiseArgs core1_args = shared_args;
+    core1_args.start_y = mid_y;
+    core1_args.end_y = output_y;
+
+    // Start the second core working.
+    g_core1_depthwise_args = core1_args;
+    multicore_reset_core1();
+    multicore_launch_core1(core1_depthwise_worker);
+
+    // Do the processing on the first core.
+    depthwise_task(&core0_args);
+
+    // A result of ARM_CMSIS_NN_SUCCESS means success. Blocks until core 1 is
+    // done.
+    const uint32_t core1_result = multicore_fifo_pop_blocking();
+    if (core1_result != ARM_CMSIS_NN_SUCCESS) {
+        return core1_result;
+    }
+
+#else  // TF_LITE_PICO_MULTICORE
+
+    arm_depthwise_conv_3x3_s8_task(dw_conv_params,
+                                   quant_params,
+                                   input_dims,
+                                   input,
+                                   filter_dims,
+                                   kernel,
+                                   bias,
+                                   output_dims,
+                                   output,
+                                   0,
+                                   output_y);
+
+#endif // TF_LITE_PICO_MULTICORE
 
     /* Return to application */
     return ARM_CMSIS_NN_SUCCESS;
