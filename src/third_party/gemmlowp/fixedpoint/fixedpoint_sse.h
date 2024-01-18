@@ -19,7 +19,7 @@
 #define GEMMLOWP_INTERNAL_FIXEDPOINT_SSE_H_
 
 #include <smmintrin.h>
-#include "fixedpoint.h"
+#include "third_party/gemmlowp/fixedpoint/fixedpoint.h"
 
 namespace gemmlowp {
 

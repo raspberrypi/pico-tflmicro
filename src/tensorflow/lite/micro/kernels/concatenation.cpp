@@ -1,4 +1,4 @@
-/* Copyright 2019 The TensorFlow Authors. All Rights Reserved.
+/* Copyright 2022 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,16 +18,15 @@ limitations under the License.
 
 #include "tensorflow/lite/c/builtin_op_data.h"
 #include "tensorflow/lite/c/common.h"
-#include "tensorflow/lite/kernels/internal/portable_tensor.h"
 #include "tensorflow/lite/kernels/internal/tensor_ctypes.h"
 #include "tensorflow/lite/kernels/internal/types.h"
 #include "tensorflow/lite/kernels/kernel_util.h"
 #include "tensorflow/lite/micro/kernels/kernel_util.h"
+#include "tensorflow/lite/micro/micro_log.h"
 
 namespace tflite {
-namespace ops {
-namespace micro {
-namespace concatenation {
+
+namespace {
 
 constexpr int kMaxInputNum = 10;  // Maximum number of input tensors
 constexpr int kOutputTensor = 0;
@@ -104,51 +103,37 @@ void EvalUnquantized(TfLiteContext* context, TfLiteNode* node) {
                                tflite::micro::GetTensorData<data_type>(output));
 }
 
-void EvalQuantizedUInt8(TfLiteContext* context, TfLiteNode* node) {
-  // Collect the shapes and data pointer of input tensors
-  RuntimeShape inputs_shape[kMaxInputNum];
-  const RuntimeShape* inputs_shape_ptr[kMaxInputNum];
-  const uint8_t* inputs_data[kMaxInputNum];
-  GetAllInputTensorShapes(context, node, inputs_shape);
-  GetShapesPointers(inputs_shape, node->inputs->size, inputs_shape_ptr);
-  GetAllInputTensorData(context, node, inputs_data);
-
-  TfLiteEvalTensor* output =
-      tflite::micro::GetEvalOutput(context, node, kOutputTensor);
-
-  TFLITE_DCHECK(node->user_data != nullptr);
-  const OpData* data = static_cast<const OpData*>(node->user_data);
-
-  reference_ops::ConcatenationWithScaling(
-      data->params, inputs_shape_ptr, inputs_data,
-      tflite::micro::GetTensorShape(output),
-      tflite::micro::GetTensorData<uint8_t>(output));
-}
-
-void* Init(TfLiteContext* context, const char* buffer, size_t length) {
+void* ConcatenationInit(TfLiteContext* context, const char* buffer,
+                        size_t length) {
   TFLITE_DCHECK(context->AllocatePersistentBuffer != nullptr);
   return context->AllocatePersistentBuffer(context, sizeof(OpData));
 }
 
-TfLiteStatus Prepare(TfLiteContext* context, TfLiteNode* node) {
+TfLiteStatus ConcatenationPrepare(TfLiteContext* context, TfLiteNode* node) {
   // This function only checks the types. Additional shape validations are
   // performed in the reference implementation called during Eval().
   const TfLiteConcatenationParams* params =
       reinterpret_cast<TfLiteConcatenationParams*>(node->builtin_data);
 
-  const TfLiteTensor* input_tensor = GetInput(context, node, 0);
+  MicroContext* micro_context = GetMicroContext(context);
+
+  TfLiteTensor* input_tensor = micro_context->AllocateTempInputTensor(node, 0);
   TF_LITE_ENSURE(context, input_tensor != nullptr);
   TfLiteType input_type = input_tensor->type;
-  const TfLiteTensor* output_tensor = GetOutput(context, node, kOutputTensor);
+  TfLiteTensor* output_tensor =
+      micro_context->AllocateTempOutputTensor(node, kOutputTensor);
   TF_LITE_ENSURE(context, output_tensor != nullptr);
   TfLiteType output_type = output_tensor->type;
+
+  micro_context->DeallocateTempTfLiteTensor(input_tensor);
+  micro_context->DeallocateTempTfLiteTensor(output_tensor);
 
   // Check activation and input type
   TF_LITE_ENSURE_EQ(context, params->activation, kTfLiteActNone);
   TF_LITE_ENSURE(context,
-                 input_type == kTfLiteFloat32 || input_type == kTfLiteUInt8 ||
-                     input_type == kTfLiteInt8 || input_type == kTfLiteInt32 ||
-                     input_type == kTfLiteInt64);
+                 input_type == kTfLiteFloat32 || input_type == kTfLiteInt8 ||
+                     input_type == kTfLiteInt16 || input_type == kTfLiteInt32 ||
+                     input_type == kTfLiteInt64 || input_type == kTfLiteBool);
 
   // Output type must match input type
   TF_LITE_ENSURE_EQ(context, output_type, input_type);
@@ -159,36 +144,38 @@ TfLiteStatus Prepare(TfLiteContext* context, TfLiteNode* node) {
 
   // Shapes with dimensions >4 are not yet supported with static allocation.
   for (int i = 0; i < num_inputs; ++i) {
-    const TfLiteTensor* input = GetInput(context, node, i);
+    TfLiteTensor* input = micro_context->AllocateTempInputTensor(node, i);
     TF_LITE_ENSURE(context, input != nullptr);
     int num_dimensions = NumDimensions(input);
 
-    if (num_dimensions > 4) {
-      TF_LITE_KERNEL_LOG(
-          context,
-          "Op Concatenation does not currently support num dimensions >4 "
+    if (num_dimensions > RuntimeShape::kMaxSmallSize) {
+      MicroPrintf(
+          "Op Concatenation does not currently support num dimensions > %d "
           "Tensor has %d dimensions.",
-          num_dimensions);
+          RuntimeShape::kMaxSmallSize, num_dimensions);
       return kTfLiteError;
     }
+    micro_context->DeallocateTempTfLiteTensor(input);
   }
 
   // Calculate OpData.
   TFLITE_DCHECK(node->user_data != nullptr);
   OpData* data = static_cast<OpData*>(node->user_data);
 
-  TfLiteTensor* output = GetOutput(context, node, kOutputTensor);
+  TfLiteTensor* output =
+      micro_context->AllocateTempOutputTensor(node, kOutputTensor);
   TF_LITE_ENSURE(context, output != nullptr);
 
   switch (output_type) {  // Already know in/outtypes are same.
+    case kTfLiteBool:
     case kTfLiteFloat32:
+    case kTfLiteInt16:
     case kTfLiteInt32:
     case kTfLiteInt64: {
       data->params.axis = CalculatePositiveAxis(params->axis, output);
       data->params.inputs_count = node->inputs->size;
       break;
     }
-    case kTfLiteUInt8:
     case kTfLiteInt8: {
       data->params.axis = CalculatePositiveAxis(params->axis, output);
       data->params.inputs_count = node->inputs->size;
@@ -204,10 +191,11 @@ TfLiteStatus Prepare(TfLiteContext* context, TfLiteNode* node) {
       // Allocate persistent scale and zeropoint buffers.
       // Store input scale and zero point values in OpParams:
       for (int i = 0; i < node->inputs->size; ++i) {
-        const TfLiteTensor* t = GetInput(context, node, i);
+        TfLiteTensor* t = micro_context->AllocateTempInputTensor(node, i);
         TF_LITE_ENSURE(context, t != nullptr);
         input_scales[i] = t->params.scale;
         input_zero_points[i] = t->params.zero_point;
+        micro_context->DeallocateTempTfLiteTensor(t);
       }
 
       data->params.input_scale = input_scales;
@@ -217,17 +205,19 @@ TfLiteStatus Prepare(TfLiteContext* context, TfLiteNode* node) {
       break;
     }
     default:
-      TF_LITE_KERNEL_LOG(
-          context, "Op Concatenation does not currently support Type '%s'.",
-          TfLiteTypeGetName(output_type));
+      MicroPrintf("Op Concatenation does not currently support Type '%s'.",
+                  TfLiteTypeGetName(output_type));
       return kTfLiteError;
   }
+
+  micro_context->DeallocateTempTfLiteTensor(output);
 
   return kTfLiteOk;
 }
 
-TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
-  const TfLiteTensor* output_tensor = GetOutput(context, node, kOutputTensor);
+TfLiteStatus ConcatenationEval(TfLiteContext* context, TfLiteNode* node) {
+  const TfLiteEvalTensor* output_tensor =
+      tflite::micro::GetEvalOutput(context, node, kOutputTensor);
   TF_LITE_ENSURE(context, output_tensor != nullptr);
   TfLiteType output_type = output_tensor->type;
 
@@ -238,39 +228,33 @@ TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
     case kTfLiteInt32:
       EvalUnquantized<int32_t>(context, node);
       break;
-    case kTfLiteUInt8:
-      EvalQuantizedUInt8(context, node);
-      break;
     case kTfLiteInt8:
       EvalUnquantized<int8_t>(context, node);
       break;
     case kTfLiteInt64:
       EvalUnquantized<int64_t>(context, node);
       break;
+    case kTfLiteInt16:
+      EvalUnquantized<int16_t>(context, node);
+      break;
+    case kTfLiteBool:
+      EvalUnquantized<bool>(context, node);
+      break;
 
     default:
-      TF_LITE_KERNEL_LOG(
-          context, "Op Concatenation does not currently support Type '%s'.",
-          TfLiteTypeGetName(output_type));
+      MicroPrintf("Op Concatenation does not currently support Type '%s'.",
+                  TfLiteTypeGetName(output_type));
       return kTfLiteError;
   }
 
   return kTfLiteOk;
 }
 
-}  // namespace concatenation
+}  // namespace
 
-TfLiteRegistration Register_CONCATENATION() {
-  return {/*init=*/concatenation::Init,
-          /*free=*/nullptr,
-          /*prepare=*/concatenation::Prepare,
-          /*invoke=*/concatenation::Eval,
-          /*profiling_string=*/nullptr,
-          /*builtin_code=*/0,
-          /*custom_name=*/nullptr,
-          /*version=*/0};
+TFLMRegistration Register_CONCATENATION() {
+  return tflite::micro::RegisterOp(ConcatenationInit, ConcatenationPrepare,
+                                   ConcatenationEval);
 }
 
-}  // namespace micro
-}  // namespace ops
 }  // namespace tflite

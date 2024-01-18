@@ -1,4 +1,4 @@
-/* Copyright 2019 The TensorFlow Authors. All Rights Reserved.
+/* Copyright 2023 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,11 +18,11 @@ limitations under the License.
 #include "tensorflow/lite/kernels/internal/tensor_ctypes.h"
 #include "tensorflow/lite/kernels/kernel_util.h"
 #include "tensorflow/lite/micro/kernels/kernel_util.h"
+#include "tensorflow/lite/micro/micro_log.h"
 
 namespace tflite {
-namespace ops {
-namespace micro {
-namespace split {
+
+namespace {
 
 template <typename T>
 TfLiteStatus SplitImpl(TfLiteContext* context, TfLiteNode* node,
@@ -67,8 +67,9 @@ TfLiteStatus SplitImpl(TfLiteContext* context, TfLiteNode* node,
   return kTfLiteOk;
 }
 
-TfLiteStatus Prepare(TfLiteContext* context, TfLiteNode* node) {
-  const TfLiteTensor* axis = GetInput(context, node, 0);
+TfLiteStatus SplitPrepare(TfLiteContext* context, TfLiteNode* node) {
+  MicroContext* micro_context = GetMicroContext(context);
+  TfLiteTensor* axis = micro_context->AllocateTempInputTensor(node, 0);
   TF_LITE_ENSURE(context, axis != nullptr);
 
   // Dynamic output tensors are needed if axis tensor is not constant.
@@ -76,10 +77,12 @@ TfLiteStatus Prepare(TfLiteContext* context, TfLiteNode* node) {
   // constant axis tensor for now.
   TF_LITE_ENSURE_MSG(context, IsConstantTensor(axis),
                      "Non constant axis tensor not supported");
+
+  micro_context->DeallocateTempTfLiteTensor(axis);
   return kTfLiteOk;
 }
 
-TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
+TfLiteStatus SplitEval(TfLiteContext* context, TfLiteNode* node) {
   const TfLiteEvalTensor* axis = tflite::micro::GetEvalInput(context, node, 0);
   const TfLiteEvalTensor* input = tflite::micro::GetEvalInput(context, node, 1);
 
@@ -95,9 +98,6 @@ TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
     case kTfLiteFloat32: {
       return SplitImpl<float>(context, node, input, axis_value);
     }
-    case kTfLiteUInt8: {
-      return SplitImpl<uint8_t>(context, node, input, axis_value);
-    }
     case kTfLiteInt8: {
       return SplitImpl<int8_t>(context, node, input, axis_value);
     }
@@ -108,28 +108,18 @@ TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
       return SplitImpl<int32_t>(context, node, input, axis_value);
     }
     default:
-      TF_LITE_KERNEL_LOG(context, "Type %s currently not supported.",
-                         TfLiteTypeGetName(input->type));
+      MicroPrintf("Type %s currently not supported.",
+                  TfLiteTypeGetName(input->type));
       return kTfLiteError;
   }
-#undef TF_LITE_SPLIT
 
   return kTfLiteOk;
 }
 
-}  // namespace split
+}  // namespace
 
-TfLiteRegistration Register_SPLIT() {
-  return {/*init=*/nullptr,
-          /*free=*/nullptr,
-          /*prepare=*/split::Prepare,
-          /*invoke=*/split::Eval,
-          /*profiling_string=*/nullptr,
-          /*builtin_code=*/0,
-          /*custom_name=*/nullptr,
-          /*version=*/0};
+TFLMRegistration Register_SPLIT() {
+  return tflite::micro::RegisterOp(nullptr, SplitPrepare, SplitEval);
 }
 
-}  // namespace micro
-}  // namespace ops
 }  // namespace tflite

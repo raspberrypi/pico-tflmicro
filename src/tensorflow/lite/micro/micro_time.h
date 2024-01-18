@@ -15,16 +15,21 @@ limitations under the License.
 #ifndef TENSORFLOW_LITE_MICRO_MICRO_TIME_H_
 #define TENSORFLOW_LITE_MICRO_MICRO_TIME_H_
 
-#include <stdint.h>
+#include <cstdint>
 
 namespace tflite {
 
 // These functions should be implemented by each target platform, and provide an
 // accurate tick count along with how many ticks there are per second.
-int32_t ticks_per_second();
+uint32_t ticks_per_second();
 
 // Return time in ticks.  The meaning of a tick varies per platform.
-int32_t GetCurrentTimeTicks();
+uint32_t GetCurrentTimeTicks();
+
+inline uint32_t TicksToMs(int32_t ticks) {
+  return static_cast<uint32_t>(1000.0f * static_cast<float>(ticks) /
+                               static_cast<float>(ticks_per_second()));
+}
 
 }  // namespace tflite
 

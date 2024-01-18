@@ -1,4 +1,4 @@
-/* Copyright 2018 The TensorFlow Authors. All Rights Reserved.
+/* Copyright 2022 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -23,11 +23,10 @@ limitations under the License.
 #include "tensorflow/lite/kernels/kernel_util.h"
 #include "tensorflow/lite/kernels/op_macros.h"
 #include "tensorflow/lite/micro/kernels/kernel_util.h"
+#include "tensorflow/lite/micro/micro_log.h"
 
 namespace tflite {
-namespace ops {
-namespace micro {
-namespace maximum_minimum {
+
 namespace {
 
 // This file has a reference implementation of TFMaximum/TFMinimum.
@@ -64,8 +63,6 @@ struct MinimumOp {
   }
 };
 
-}  // namespace
-
 template <typename data_type, typename op_type>
 void TFLiteOperation(TfLiteContext* context, TfLiteNode* node,
                      const OpContext& op_context) {
@@ -88,9 +85,6 @@ TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
       case kTfLiteFloat32:
         TFLiteOperation<float, OpType>(context, node, op_context);
         break;
-      case kTfLiteUInt8:
-        TFLiteOperation<uint8_t, OpType>(context, node, op_context);
-        break;
       case kTfLiteInt8:
         TFLiteOperation<int8_t, OpType>(context, node, op_context);
         break;
@@ -101,48 +95,28 @@ TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
         TFLiteOperation<int64_t, OpType>(context, node, op_context);
         break;
       default:
-        TF_LITE_KERNEL_LOG(context,
-                           "Type %s (%d) is not supported by Maximum/Minimum.",
-                           TfLiteTypeGetName(op_context.output->type),
-                           op_context.output->type);
+        MicroPrintf("Type %s (%d) is not supported by Maximum/Minimum.",
+                    TfLiteTypeGetName(op_context.output->type),
+                    op_context.output->type);
         return kTfLiteError;
     }
   } else {
-    TF_LITE_KERNEL_LOG(context,
-                       "Kernel type not supported by Maximum/Minimum.");
+    MicroPrintf("Kernel type not supported by Maximum/Minimum.");
     return kTfLiteError;
   }
   return kTfLiteOk;
 }
 
-}  // namespace maximum_minimum
+}  // namespace
 
-TfLiteRegistration Register_MAXIMUM() {
-  return {/*init=*/nullptr,
-          /*free=*/nullptr,
-          /*prepare=*/nullptr,
-          /*invoke=*/
-          maximum_minimum::Eval<maximum_minimum::kReference,
-                                maximum_minimum::MaximumOp>,
-          /*profiling_string=*/nullptr,
-          /*builtin_code=*/0,
-          /*custom_name=*/nullptr,
-          /*version=*/0};
+TFLMRegistration Register_MAXIMUM() {
+  return tflite::micro::RegisterOp(nullptr, nullptr,
+                                   Eval<kReference, MaximumOp>);
 }
 
-TfLiteRegistration Register_MINIMUM() {
-  return {/*init=*/nullptr,
-          /*free=*/nullptr,
-          /*prepare=*/nullptr,
-          /*invoke=*/
-          maximum_minimum::Eval<maximum_minimum::kReference,
-                                maximum_minimum::MinimumOp>,
-          /*profiling_string=*/nullptr,
-          /*builtin_code=*/0,
-          /*custom_name=*/nullptr,
-          /*version=*/0};
+TFLMRegistration Register_MINIMUM() {
+  return tflite::micro::RegisterOp(nullptr, nullptr,
+                                   Eval<kReference, MinimumOp>);
 }
 
-}  // namespace micro
-}  // namespace ops
 }  // namespace tflite

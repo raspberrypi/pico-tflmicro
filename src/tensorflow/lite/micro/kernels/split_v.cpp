@@ -1,4 +1,4 @@
-/* Copyright 2018 The TensorFlow Authors. All Rights Reserved.
+/* Copyright 2023 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,11 +19,11 @@ limitations under the License.
 #include "tensorflow/lite/kernels/kernel_util.h"
 #include "tensorflow/lite/kernels/op_macros.h"
 #include "tensorflow/lite/micro/kernels/kernel_util.h"
+#include "tensorflow/lite/micro/micro_log.h"
 
 namespace tflite {
-namespace ops {
-namespace micro {
-namespace split_v {
+
+namespace {
 
 template <typename T>
 TfLiteStatus SplitImpl(TfLiteContext* context, TfLiteNode* node,
@@ -71,20 +71,21 @@ TfLiteStatus SplitImpl(TfLiteContext* context, TfLiteNode* node,
   return kTfLiteOk;
 }
 
-TfLiteStatus Prepare(TfLiteContext* context, TfLiteNode* node) {
+TfLiteStatus SplitVPrepare(TfLiteContext* context, TfLiteNode* node) {
   TF_LITE_ENSURE_EQ(context, NumInputs(node), 3);
 
+  MicroContext* micro_context = GetMicroContext(context);
   // Dynamic output tensors are needed if axis tensor is not constant.
   // But Micro doesn't support dynamic memory allocation, so we only support
   // constant axis tensor for now.
-  const TfLiteTensor* axis = GetInput(context, node, 2);
+  TfLiteTensor* axis = micro_context->AllocateTempInputTensor(node, 2);
   TF_LITE_ENSURE_MSG(context, IsConstantTensor(axis),
                      "Non constant axis tensor not supported");
-
+  micro_context->DeallocateTempTfLiteTensor(axis);
   return kTfLiteOk;
 }
 
-TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
+TfLiteStatus SplitVEval(TfLiteContext* context, TfLiteNode* node) {
   const TfLiteEvalTensor* input = tflite::micro::GetEvalInput(context, node, 0);
   const TfLiteEvalTensor* axis = tflite::micro::GetEvalInput(context, node, 2);
 
@@ -110,26 +111,17 @@ TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
       return SplitImpl<int32_t>(context, node, input, axis_value);
     }
     default:
-      TF_LITE_KERNEL_LOG(context, "Type %s currently not supported.",
-                         TfLiteTypeGetName(input->type));
+      MicroPrintf("Type %s currently not supported.",
+                  TfLiteTypeGetName(input->type));
       return kTfLiteError;
   }
   return kTfLiteOk;
 }
 
-}  // namespace split_v
+}  // namespace
 
-TfLiteRegistration Register_SPLIT_V() {
-  return {/*init=*/nullptr,
-          /*free=*/nullptr,
-          /*prepare=*/split_v::Prepare,
-          /*invoke=*/split_v::Eval,
-          /*profiling_string=*/nullptr,
-          /*builtin_code=*/0,
-          /*custom_name=*/nullptr,
-          /*version=*/0};
+TFLMRegistration Register_SPLIT_V() {
+  return tflite::micro::RegisterOp(nullptr, SplitVPrepare, SplitVEval);
 }
 
-}  // namespace micro
-}  // namespace ops
 }  // namespace tflite

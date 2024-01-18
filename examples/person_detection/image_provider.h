@@ -17,7 +17,7 @@ limitations under the License.
 #define TENSORFLOW_LITE_MICRO_EXAMPLES_PERSON_DETECTION_IMAGE_PROVIDER_H_
 
 #include "tensorflow/lite/c/common.h"
-#include "tensorflow/lite/micro/micro_error_reporter.h"
+#include "tensorflow/lite/micro/tflite_bridge/micro_error_reporter.h"
 
 // This is an abstraction around an image source like a camera, and is
 // expected to return 8-bit sample data.  The assumption is that this will be
