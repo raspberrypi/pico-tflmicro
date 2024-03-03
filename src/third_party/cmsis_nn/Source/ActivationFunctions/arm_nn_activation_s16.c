@@ -1,5 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2010-2020, 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: <text>Copyright 2010-2020, 2022, 2024 Arm Limited and/or its affiliates
+ * <open-source-office@arm.com></text>
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -18,11 +19,11 @@
 
 /* ----------------------------------------------------------------------
  * Project:      CMSIS NN Library
- * Title:        arm_nn_activations_q15.c
+ * Title:        arm_nn_activation_s16.c
  * Description:  Q15 neural network activation function using direct table look-up
  *
- * $Date:        8 September 2022
- * $Revision:    V.1.0.0
+ * $Date:        19 January 2024
+ * $Revision:    V.2.0.0
  *
  * Target Processor:  Cortex-M cores
  *
@@ -47,11 +48,11 @@
  *
  */
 
-void arm_nn_activation_s16(const int16_t *input,
-                           int16_t *output,
-                           const uint16_t size,
-                           const uint16_t left_shift,
-                           const arm_nn_activation_type type)
+arm_cmsis_nn_status arm_nn_activation_s16(const int16_t *input,
+                                          int16_t *output,
+                                          const int32_t size,
+                                          const int32_t left_shift,
+                                          const arm_nn_activation_type type)
 {
     uint32_t abs_input_shift, max_saturation;
     switch (type)
@@ -67,18 +68,17 @@ void arm_nn_activation_s16(const int16_t *input,
         break;
     }
 
+    const int32_t input_multiplier = (left_shift < 0) ? 3 : 3 << left_shift;
+    const int32_t abs_left_shift = (left_shift < 0) ? -left_shift : 0;
+    const int32_t rounding = (abs_left_shift > 0) ? 1 << (abs_left_shift - 1) : 0;
     // Use the LUT for sigmoid and take into account, that
     // tanh(x) = 2*sigmoid(2*x) - 1
-    int32_t input_multiplier = ((int32_t)3) << left_shift;
 
     for (int i = 0; i < size; ++i, input++, output++)
     {
-        int32_t input_data = ((*input) * input_multiplier);
-
-        uint32_t abs_input_data = input_data > 0 ? input_data : -input_data;
-
-        uint32_t uh = abs_input_data >> abs_input_shift;
-
+        const int32_t input_data = ((*input) * input_multiplier + rounding) >> abs_left_shift;
+        const uint32_t abs_input_data = input_data > 0 ? input_data : -input_data;
+        const uint32_t uh = abs_input_data >> abs_input_shift;
         uint32_t result;
 
         if (uh >= 255)
@@ -87,8 +87,8 @@ void arm_nn_activation_s16(const int16_t *input,
         }
         else
         {
-            uint32_t ua = sigmoid_table_uint16[uh];
-            uint32_t ub = sigmoid_table_uint16[uh + 1];
+            const uint32_t ua = sigmoid_table_uint16[uh];
+            const uint32_t ub = sigmoid_table_uint16[uh + 1];
             uint32_t ut;
             if (type == ARM_SIGMOID)
             {
@@ -112,6 +112,8 @@ void arm_nn_activation_s16(const int16_t *input,
         }
         *output = (int16_t)result;
     }
+
+    return ARM_CMSIS_NN_SUCCESS;
 }
 
 /**

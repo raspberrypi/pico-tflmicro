@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2010-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2010-2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -21,8 +21,8 @@
  * Title:        arm_convolve_1_x_n_s8.c
  * Description:  s8 version of 1xN convolution using symmetric quantization.
  *
- * $Date:        8 March 2023
- * $Revision:    V.3.4.0
+ * $Date:        04 January 2024
+ * $Revision:    V.3.5.0
  *
  * Target :  Arm(R) M-Profile Architecture
  *
@@ -30,7 +30,6 @@
 
 #include "third_party/cmsis_nn/Include/arm_nnfunctions.h"
 #include "third_party/cmsis_nn/Include/arm_nnsupportfunctions.h"
-
 /**
  *  @ingroup Public
  */
@@ -149,6 +148,7 @@ arm_cmsis_nn_status arm_convolve_1_x_n_s8(const cmsis_nn_context *ctx,
                                 conv_params->output_offset,
                                 conv_params->activation.min,
                                 conv_params->activation.max,
+                                rhs_rows,
                                 lhs_offset);
 
         output_data += lhs_rows * rhs_rows;

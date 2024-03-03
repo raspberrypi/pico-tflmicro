@@ -228,6 +228,7 @@ target_sources(pico-tflmicro
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/kernels/internal/reference/tanh.h
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/kernels/internal/reference/transpose.h
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/kernels/internal/reference/transpose_conv.h
+  ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/kernels/internal/runtime_shape.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/kernels/internal/runtime_shape.h
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/kernels/internal/strided_slice_logic.h
   ${CMAKE_CURRENT_LIST_DIR}/src/tensorflow/lite/kernels/internal/tensor_ctypes.cpp
@@ -498,6 +499,7 @@ target_sources(pico-tflmicro
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/ActivationFunctions/arm_relu_q7.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/BasicMathFunctions/arm_elementwise_add_s16.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/BasicMathFunctions/arm_elementwise_add_s8.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/BasicMathFunctions/arm_elementwise_mul_acc_s16.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/BasicMathFunctions/arm_elementwise_mul_s16.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/BasicMathFunctions/arm_elementwise_mul_s16_s8.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/BasicMathFunctions/arm_elementwise_mul_s8.c
@@ -534,6 +536,7 @@ target_sources(pico-tflmicro
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/ConvolutionFunctions/arm_depthwise_conv_wrapper_s4.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/ConvolutionFunctions/arm_depthwise_conv_wrapper_s8.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/ConvolutionFunctions/arm_nn_depthwise_conv_s8_core.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/ConvolutionFunctions/arm_nn_mat_mult_kernel_row_offset_s8_s16.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/ConvolutionFunctions/arm_nn_mat_mult_kernel_s4_s16.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/ConvolutionFunctions/arm_nn_mat_mult_kernel_s8_s16.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/ConvolutionFunctions/arm_nn_mat_mult_s8.c
@@ -545,21 +548,19 @@ target_sources(pico-tflmicro
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/FullyConnectedFunctions/arm_fully_connected_s4.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/FullyConnectedFunctions/arm_fully_connected_s8.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/FullyConnectedFunctions/arm_vector_sum_s8.c
-  ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/LSTMFunctions/arm_lstm_unidirectional_s8_s16.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/LSTMFunctions/arm_lstm_unidirectional_s8.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/NNSupportFunctions/arm_nn_depthwise_conv_nt_t_padded_s8.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/NNSupportFunctions/arm_nn_depthwise_conv_nt_t_s16.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/NNSupportFunctions/arm_nn_depthwise_conv_nt_t_s8.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/NNSupportFunctions/arm_nn_lstm_calculate_gate_s8_s16.c
-  ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/NNSupportFunctions/arm_nn_lstm_step_s8_s16.c
-  ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/NNSupportFunctions/arm_nn_lstm_update_cell_state_s16.c
-  ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/NNSupportFunctions/arm_nn_lstm_update_output_s8_s16.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/NNSupportFunctions/arm_nn_lstm_step_s8.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/NNSupportFunctions/arm_nn_mat_mul_core_1x_s8.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/NNSupportFunctions/arm_nn_mat_mul_core_4x_s8.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/NNSupportFunctions/arm_nn_mat_mul_kernel_s16.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/NNSupportFunctions/arm_nn_mat_mult_nt_t_s4.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/NNSupportFunctions/arm_nn_mat_mult_nt_t_s8.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/NNSupportFunctions/arm_nn_mat_mult_nt_t_s8_s32.c
-  ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/NNSupportFunctions/arm_nn_vec_mat_mul_result_acc_s8.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/NNSupportFunctions/arm_nn_vec_mat_mul_result_acc_s8_s16.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/NNSupportFunctions/arm_nn_vec_mat_mult_t_s16.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/NNSupportFunctions/arm_nn_vec_mat_mult_t_s4.c
   ${CMAKE_CURRENT_LIST_DIR}/src/third_party/cmsis_nn/Source/NNSupportFunctions/arm_nn_vec_mat_mult_t_s8.c

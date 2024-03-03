@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office.com>
+ * SPDX-FileCopyrightText: Copyright 2022, 2024 Arm Limited and/or its affiliates <open-source-office.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -21,8 +21,8 @@
  * Title:        arm_nn_lstm_calculate_gate_s8_s16.c
  * Description:  Update single gate for an incremental step of LSTM function.
  *
- * $Date:        8 September 2022
- * $Revision:    V.1.0.0
+ * $Date:        19 January 2024
+ * $Revision:    V.2.0.0
  *
  * Target Processor:  Cortex-M cores
  *
@@ -31,7 +31,6 @@
 #include "third_party/cmsis_nn/Include/arm_nn_tables.h"
 #include "third_party/cmsis_nn/Include/arm_nnfunctions.h"
 #include "third_party/cmsis_nn/Include/arm_nnsupportfunctions.h"
-
 /**
  * @ingroup groupSupport
  */
@@ -52,47 +51,44 @@
  * Calculates a single LSTM gate, int8x8_16 version.
  * Refer to header file for details
  */
-void arm_nn_lstm_calculate_gate_s8_s16(const int8_t *input,
-                                       const int8_t *input_to_gate_weights,
-                                       const int32_t *input_to_gate_bias,
-                                       const cmsis_nn_scaling input_to_gate_scaling,
-                                       const int8_t *output_state,
-                                       const int8_t *recurrent_to_gate_weights,
-                                       const int32_t *recurrent_to_gate_bias,
-                                       const cmsis_nn_scaling recurrent_to_gate,
-                                       const int32_t n_batch,
-                                       const int32_t n_input,
-                                       const int32_t n_output,
-                                       const int32_t n_cell,
-                                       const arm_nn_activation_type activation_type,
-                                       int16_t *gate)
+arm_cmsis_nn_status arm_nn_lstm_calculate_gate_s8_s16(const int8_t *data_in,
+                                                      const int8_t *hidden_in,
+                                                      const cmsis_nn_lstm_gate *gate,
+                                                      const cmsis_nn_lstm_params *params,
+                                                      int16_t *output,
+                                                      const int32_t batch_offset)
 {
-    const int32_t n_block = n_batch * n_cell;
 
-    memset(gate, 0, n_block * sizeof(int16_t));
-    arm_nn_vec_mat_mul_result_acc_s8(input,
-                                     input_to_gate_weights,
-                                     input_to_gate_bias,
-                                     gate,
-                                     0,
-                                     input_to_gate_scaling.multiplier,
-                                     input_to_gate_scaling.shift,
-                                     n_input,
-                                     n_cell,
-                                     n_batch);
+    memset(output, 0, params->hidden_size * params->batch_size * sizeof(int16_t));
 
-    arm_nn_vec_mat_mul_result_acc_s8(output_state,
-                                     recurrent_to_gate_weights,
-                                     recurrent_to_gate_bias,
-                                     gate,
-                                     0,
-                                     recurrent_to_gate.multiplier,
-                                     recurrent_to_gate.shift,
-                                     n_output,
-                                     n_cell,
-                                     n_batch);
+    arm_nn_vec_mat_mul_result_acc_s8_s16(data_in,
+                                         gate->input_weights,
+                                         gate->input_effective_bias,
+                                         output,
+                                         gate->input_multiplier,
+                                         gate->input_shift,
+                                         params->input_size,
+                                         params->hidden_size,
+                                         params->batch_size,
+                                         batch_offset);
 
-    arm_nn_activation_s16(gate, gate, n_block, 0, activation_type);
+    if (hidden_in)
+    {
+        arm_nn_vec_mat_mul_result_acc_s8_s16(hidden_in,
+                                             gate->hidden_weights,
+                                             gate->hidden_effective_bias,
+                                             output,
+                                             gate->hidden_multiplier,
+                                             gate->hidden_shift,
+                                             params->hidden_size,
+                                             params->hidden_size,
+                                             params->batch_size,
+                                             batch_offset);
+    }
+
+    arm_nn_activation_s16(output, output, params->hidden_size * params->batch_size, 0, gate->activation_type);
+
+    return ARM_CMSIS_NN_SUCCESS;
 }
 /**
  * @} end of supportLSTM group

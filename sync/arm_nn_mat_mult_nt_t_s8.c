@@ -306,6 +306,9 @@ static void core1_mat_mul_worker(void) {
  * Refer header file for details.
  *
  */
+
+
+
 arm_cmsis_nn_status arm_nn_mat_mult_nt_t_s8(const int8_t *lhs,
                                             const int8_t *rhs,
                                             const int32_t *bias,
@@ -319,6 +322,7 @@ arm_cmsis_nn_status arm_nn_mat_mult_nt_t_s8(const int8_t *lhs,
                                             const int32_t dst_offset,
                                             const int32_t activation_min,
                                             const int32_t activation_max,
+                                            const int32_t row_address_offset,
                                             const int32_t lhs_cols_offset)
 {
 

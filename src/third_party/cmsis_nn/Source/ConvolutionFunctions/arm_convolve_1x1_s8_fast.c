@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2010-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2010-2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -21,8 +21,8 @@
  * Title:        arm_convolve_1x1_s8_fast.c
  * Description:  Fast s8 version of 1x1 convolution (non-square shape)
  *
- * $Date:        30 October 2023
- * $Revision:    V.3.4.0
+ * $Date:        04 January 2024
+ * $Revision:    V.3.5.0
  *
  * Target :  Arm(R) M-Profile Architecture
  *
@@ -86,6 +86,7 @@ arm_cmsis_nn_status arm_convolve_1x1_s8_fast(const cmsis_nn_context *ctx,
                             conv_params->output_offset,
                             conv_params->activation.min,
                             conv_params->activation.max,
+                            rhs_rows,
                             rhs_cols);
 
     /* Return to application */

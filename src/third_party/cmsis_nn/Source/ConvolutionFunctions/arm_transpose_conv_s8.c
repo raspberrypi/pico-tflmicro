@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2023-2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -19,10 +19,10 @@
 /* ----------------------------------------------------------------------
  * Project:      CMSIS NN Library
  * Title:        arm_transpose_conv_s8.c
- * Description:  s8 version of convolution using symmetric quantization.
+ * Description:  s8 version of transpose convolution using symmetric quantization.
  *
- * $Date:        5 October 2023
- * $Revision:    V.1.0.0
+ * $Date:        31 January 2024
+ * $Revision:    V.1.1.0
  *
  * Target :  Arm(R) M-Profile Architecture
  *
@@ -172,11 +172,30 @@ arm_cmsis_nn_status arm_transpose_conv_s8(const cmsis_nn_context *ctx,
                 }
             }
         }
-
         img_data = img_buf_ptr;
         for (int i = 0; i < output_x * output_y; i++)
         {
-            for (int i_output_ch = 0; i_output_ch < output_ch; i_output_ch++)
+#if defined(ARM_MATH_MVEI)
+            int output_ch_idx = 0;
+            int8_t *ip_out_data = output_data_ptr;
+            for (int32_t i_channel_rmdr = output_ch; i_channel_rmdr > 0; i_channel_rmdr -= 4)
+            {
+                mve_pred16_t p = vctp32q((uint32_t)i_channel_rmdr);
+                int32x4_t result = vldrwq_z_s32(&img_data[output_ch_idx], p);
+                result = arm_requantize_mve_32x4(result,
+                                                 vldrwq_z_s32(&output_multiplier[output_ch_idx], p),
+                                                 vldrwq_z_s32(&output_shift[output_ch_idx], p));
+                result = vaddq_n_s32(result, out_offset);
+                result = vmaxq_s32(result, vdupq_n_s32(activation_min));
+                result = vminq_s32(result, vdupq_n_s32(activation_max));
+                vstrbq_p_s32(ip_out_data, result, p);
+                ip_out_data += 4;
+                output_ch_idx += 4;
+            }
+            output_data_ptr += output_ch;
+#else
+            int i_output_ch = 0;
+            for (; i_output_ch < output_ch; i_output_ch++)
             {
                 int32_t result =
                     arm_nn_requantize(img_data[i_output_ch], output_multiplier[i_output_ch], output_shift[i_output_ch]);
@@ -185,13 +204,12 @@ arm_cmsis_nn_status arm_transpose_conv_s8(const cmsis_nn_context *ctx,
                 result = MIN(result, activation_max);
                 *output_data_ptr++ = (int8_t)result;
             }
+#endif
             img_data += output_ch;
         }
-
         input_data_ptr += (input_size * input_ch);
         batch_cnt--;
     }
-
     /* Return to application */
     return ARM_CMSIS_NN_SUCCESS;
 }

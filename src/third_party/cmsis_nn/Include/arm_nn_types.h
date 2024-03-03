@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2020-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2020-2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -22,16 +22,23 @@
  * Description:  Public header file to contain the CMSIS-NN structs for the
  *               TensorFlowLite micro compliant functions
  *
- * $Date:        27 October 2023
- * $Revision:    V.2.6.0
+ * $Date:        19 January 2024
+ * $Revision:    V.3.0.0
  *
  * Target :  Arm(R) M-Profile Architecture
  * -------------------------------------------------------------------- */
 
-#ifndef _ARM_NN_TYPES_H
-#define _ARM_NN_TYPES_H
+#ifndef ARM_NN_TYPES_H
+#define ARM_NN_TYPES_H
 
 #include <stdint.h>
+
+/**
+ * @defgroup genPubTypes Structure Types
+ * @ingroup Public
+ * @brief Enums and Data Structures used in public API
+ * @{
+ */
 
 /** Enum for specifying activation function types */
 typedef enum
@@ -137,6 +144,7 @@ typedef struct
     cmsis_nn_tile dilation;
     cmsis_nn_activation activation;
 } cmsis_nn_dw_conv_params;
+
 /** CMSIS-NN object for pooling layer parameters */
 typedef struct
 {
@@ -171,31 +179,6 @@ typedef struct
     const int16_t *one_by_one_lut;
 } cmsis_nn_softmax_lut_s16;
 
-/** LSTM guard parameters */
-typedef struct
-{
-    int32_t input_variance;
-    int32_t forget_variance;
-    int32_t cell_variance;
-    int32_t output_variance;
-} cmsis_nn_lstm_guard_params;
-
-/** LSTM scratch buffer container */
-typedef struct
-{
-    int16_t *input_gate;
-    int16_t *forget_gate;
-    int16_t *cell_gate;
-    int16_t *output_gate;
-} cmsis_nn_lstm_context;
-
-/** Quantized clip value for cell and projection of LSTM input. Zero value means no clipping. */
-typedef struct
-{
-    int16_t cell;
-    int8_t projection;
-} cmsis_nn_lstm_clip_params;
-
 /** CMSIS-NN object for quantization parameters */
 typedef struct
 {
@@ -203,68 +186,62 @@ typedef struct
     int32_t shift;      /**< Shift value */
 } cmsis_nn_scaling;
 
-/** CMSIS-NN norm layer coefficients */
+/** CMSIS-NN object for LSTM gate parameters*/
 typedef struct
 {
-    int16_t *input_weight;
-    int16_t *forget_weight;
-    int16_t *cell_weight;
-    int16_t *output_weight;
-} cmsis_nn_layer_norm;
+    int32_t input_multiplier;
+    int32_t input_shift;
+    const int8_t *input_weights;
+    const int32_t *input_effective_bias; /**< Bias added with precomputed kernel_sum * lhs_offset*/
 
-/** Parameters for integer LSTM, as defined in TFLM */
+    int32_t hidden_multiplier;
+    int32_t hidden_shift;
+    const int8_t *hidden_weights;
+    const int32_t *hidden_effective_bias; /**< Precomputed kernel_sum * lhs_offset*/
+
+    const int32_t *bias;
+    arm_nn_activation_type activation_type;
+} cmsis_nn_lstm_gate;
+
+/** CMSIS-NN object for LSTM parameters*/
 typedef struct
 {
-    int32_t time_major; /**< Nonzero (true) if first row of data is timestamps for input */
-    cmsis_nn_scaling input_to_input_scaling;
-    cmsis_nn_scaling input_to_forget_scaling;
-    cmsis_nn_scaling input_to_cell_scaling;
-    cmsis_nn_scaling input_to_output_scaling;
-    cmsis_nn_scaling recurrent_to_input_scaling;
-    cmsis_nn_scaling recurrent_to_forget_scaling;
-    cmsis_nn_scaling recurrent_to_cell_scaling;
-    cmsis_nn_scaling recurrent_to_output_scaling;
-    cmsis_nn_scaling cell_to_input_scaling;
-    cmsis_nn_scaling cell_to_forget_scaling;
-    cmsis_nn_scaling cell_to_output_scaling;
-    cmsis_nn_scaling projection_scaling;
-    cmsis_nn_scaling hidden_scaling;
-    cmsis_nn_scaling layer_norm_input_scaling;  /**< layer normalization for input layer */
-    cmsis_nn_scaling layer_norm_forget_scaling; /**< layer normalization for forget gate */
-    cmsis_nn_scaling layer_norm_cell_scaling;   /**< layer normalization for cell */
-    cmsis_nn_scaling layer_norm_output_scaling; /**< layer normalization for outpus layer */
+    int32_t time_major; /**< 0 if first dimension is batch, else first dimension is time */
+    int32_t batch_size;
+    int32_t time_steps;
+    int32_t input_size; /**< Size of new data input into the LSTM cell*/
+    int32_t
+        hidden_size; /**< Size of output from the LSTM cell, used as output and recursively into the next time step*/
 
-    int32_t cell_state_shift;
-    int32_t hidden_offset;
-    int32_t output_state_offset;
+    int32_t input_offset;
 
-    cmsis_nn_lstm_clip_params clip;
-    cmsis_nn_lstm_guard_params guard;
-    cmsis_nn_layer_norm layer_norm;
+    int32_t forget_to_cell_multiplier;
+    int32_t forget_to_cell_shift;
+    int32_t input_to_cell_multiplier;
+    int32_t input_to_cell_shift;
+    int32_t cell_clip; /**< Min/max value of cell output*/
+    int32_t cell_scale_power;
 
-    /* Effective bias is precalculated as bias + zero_point * weight.
-    Only applicable to when input/output are s8 and weights are s16 */
-    const int32_t *i2i_effective_bias; /**< input to input effective bias */
-    const int32_t *i2f_effective_bias; /**< input to forget gate effective bias */
-    const int32_t *i2c_effective_bias; /**< input to cell effective bias */
-    const int32_t *i2o_effective_bias; /**< input to output effective bias */
+    int32_t output_multiplier;
+    int32_t output_shift;
+    int32_t output_offset;
 
-    const int32_t *r2i_effective_bias; /**< recurrent gate to input effective bias */
-    const int32_t *r2f_effective_bias; /**< recurrent gate to forget gate effective bias */
-    const int32_t *r2c_effective_bias; /**< recurrent gate to cell effective bias */
-    const int32_t *r2o_effective_bias; /**< recurrent gate to output effective bias */
-
-    const int32_t *projection_effective_bias;
-
-    /* Not precalculated bias */
-    const int32_t *input_gate_bias;
-    const int32_t *forget_gate_bias;
-    const int32_t *cell_gate_bias;
-    const int32_t *output_gate_bias;
-
-    /* Activation min and max */
-    cmsis_nn_activation activation;
-
+    cmsis_nn_lstm_gate forget_gate;
+    cmsis_nn_lstm_gate input_gate;
+    cmsis_nn_lstm_gate cell_gate;
+    cmsis_nn_lstm_gate output_gate;
 } cmsis_nn_lstm_params;
 
-#endif // _ARM_NN_TYPES_H
+/** CMSIS-NN object for LSTM scratch buffers*/
+typedef struct
+{
+    void *temp1;
+    void *temp2;
+    void *cell_state;
+} cmsis_nn_lstm_context;
+
+/**
+ * @} // end group genPubTypes
+ */
+
+#endif /* ARM_NN_TYPES_H */

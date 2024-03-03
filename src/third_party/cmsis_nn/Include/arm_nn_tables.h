@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2010-2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2010-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -21,14 +21,14 @@
  * Title:        arm_nn_tables.h
  * Description:  Extern declaration for NN tables
  *
- * $Date:        28 October 2022
- * $Revision:    V.2.1.0
+ * $Date:        8 December 2022
+ * $Revision:    V.2.1.1
  *
  * Target Processor:  Cortex-M cores
  * -------------------------------------------------------------------- */
 
-#ifndef _ARM_NN_TABLES_H
-#define _ARM_NN_TABLES_H
+#ifndef ARM_NN_TABLES_H
+#define ARM_NN_TABLES_H
 
 #include "third_party/cmsis_nn/Include/arm_nn_math_types.h"
 

@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2022-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -21,8 +21,8 @@
  * Title:        arm_max_pool_s16.c
  * Description:  Pooling function implementations
  *
- * $Date:        26 October 2022
- * $Revision:    V.2.1.2
+ * $Date:        27 November 2023
+ * $Revision:    V.2.2.0
  *
  * Target Processor:  Cortex-M CPUs
  *
@@ -150,6 +150,7 @@ arm_cmsis_nn_status arm_max_pool_s16(const cmsis_nn_context *ctx,
                                      const cmsis_nn_dims *output_dims,
                                      int16_t *dst)
 {
+    (void)ctx;
     const int32_t input_y = input_dims->h;
     const int32_t input_x = input_dims->w;
     const int32_t output_y = output_dims->h;
@@ -163,46 +164,60 @@ arm_cmsis_nn_status arm_max_pool_s16(const cmsis_nn_context *ctx,
     const int16_t act_min = pool_params->activation.min;
     const int16_t act_max = pool_params->activation.max;
     const int32_t channel_in = input_dims->c;
-    (void)ctx;
-    int16_t *dst_base = dst;
+    const int32_t batch_size = input_x * input_y * channel_in;
+    int32_t batch_cnt = input_dims->n;
 
-    for (int i_y = 0, base_idx_y = -pad_y; i_y < output_y; base_idx_y += stride_y, i_y++)
+    if (batch_cnt < 1)
     {
-        for (int i_x = 0, base_idx_x = -pad_x; i_x < output_x; base_idx_x += stride_x, i_x++)
-        {
-            /* Condition for kernel start dimension: (base_idx_<x,y> + kernel_<x,y>_start) >= 0 */
-            const int32_t ker_y_start = MAX(0, -base_idx_y);
-            const int32_t ker_x_start = MAX(0, -base_idx_x);
-
-            /* Condition for kernel end dimension: (base_idx_<x,y> + kernel_<x,y>_end) < dim_src_<width,height> */
-            const int32_t kernel_y_end = MIN(kernel_y, input_y - base_idx_y);
-            const int32_t kernel_x_end = MIN(kernel_x, input_x - base_idx_x);
-
-            int count = 0;
-
-            for (int k_y = ker_y_start; k_y < kernel_y_end; k_y++)
-            {
-                for (int k_x = ker_x_start; k_x < kernel_x_end; k_x++)
-                {
-                    const int16_t *start = src + channel_in * (k_x + base_idx_x + (k_y + base_idx_y) * input_x);
-
-                    if (count == 0)
-                    {
-                        memcpy(dst, start, channel_in * sizeof(int16_t));
-                        count++;
-                    }
-                    else
-                    {
-                        compare_and_replace_if_larger(dst, start, channel_in);
-                    }
-                }
-            }
-            /* 'count' is expected to be non-zero here. */
-            dst += channel_in;
-        }
+        return ARM_CMSIS_NN_ARG_ERROR;
     }
 
-    clamp_output(dst_base, output_x * output_y * channel_in, act_min, act_max);
+    while (batch_cnt)
+    {
+
+        int16_t *dst_base = dst;
+
+        for (int i_y = 0, base_idx_y = -pad_y; i_y < output_y; base_idx_y += stride_y, i_y++)
+        {
+            for (int i_x = 0, base_idx_x = -pad_x; i_x < output_x; base_idx_x += stride_x, i_x++)
+            {
+                /* Condition for kernel start dimension: (base_idx_<x,y> + kernel_<x,y>_start) >= 0 */
+                const int32_t ker_y_start = MAX(0, -base_idx_y);
+                const int32_t ker_x_start = MAX(0, -base_idx_x);
+
+                /* Condition for kernel end dimension: (base_idx_<x,y> + kernel_<x,y>_end) < dim_src_<width,height> */
+                const int32_t kernel_y_end = MIN(kernel_y, input_y - base_idx_y);
+                const int32_t kernel_x_end = MIN(kernel_x, input_x - base_idx_x);
+
+                int count = 0;
+
+                for (int k_y = ker_y_start; k_y < kernel_y_end; k_y++)
+                {
+                    for (int k_x = ker_x_start; k_x < kernel_x_end; k_x++)
+                    {
+                        const int16_t *start = src + channel_in * (k_x + base_idx_x + (k_y + base_idx_y) * input_x);
+
+                        if (count == 0)
+                        {
+                            memcpy(dst, start, channel_in * sizeof(int16_t));
+                            count++;
+                        }
+                        else
+                        {
+                            compare_and_replace_if_larger(dst, start, channel_in);
+                        }
+                    }
+                }
+                /* 'count' is expected to be non-zero here. */
+                dst += channel_in;
+            }
+        }
+
+        clamp_output(dst_base, output_x * output_y * channel_in, act_min, act_max);
+
+        src += batch_size;
+        batch_cnt--;
+    }
 
     return ARM_CMSIS_NN_SUCCESS;
 }

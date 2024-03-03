@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2010-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2010-2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -21,8 +21,8 @@
  * Title:        arm_svdf_s8.c
  * Description:  S8 basic SVDF layer function
  *
- * $Date:        5 September 2023
- * $Revision:    V.6.0.0
+ * $Date:        14 Feb 2024
+ * $Revision:    V.6.1.0
  *
  * Target :  Arm(R) M-Profile Architecture
  *
@@ -133,7 +133,8 @@ arm_cmsis_nn_status arm_svdf_s8(const cmsis_nn_context *ctx,
                                                            feature_batches,
                                                            in_activation_min,
                                                            in_activation_max,
-                                                           time_batches);
+                                                           time_batches,
+                                                           0);
 
         if (res != ARM_CMSIS_NN_SUCCESS)
         {
