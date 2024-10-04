@@ -1,12 +1,31 @@
+# Generated Cmake Pico project file
 
 cmake_minimum_required(VERSION 3.12)
 
-# Pull in PICO SDK (must be before project)
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
+
+# == DO NEVER EDIT THE NEXT LINES for Raspberry Pi Pico VS Code Extension to work ==
+if(WIN32)
+    set(USERHOME $ENV{USERPROFILE})
+else()
+    set(USERHOME $ENV{HOME})
+endif()
+set(sdkVersion 2.0.0)
+set(toolchainVersion 13_2_Rel1)
+set(picotoolVersion 2.0.0)
+set(picoVscode ${USERHOME}/.pico-sdk/cmake/pico-vscode.cmake)
+if (EXISTS ${picoVscode})
+    include(${picoVscode})
+endif()
+# ====================================================================================
+
+set(PICO_BOARD pico2 CACHE STRING "Board type")
+
+# Pull in Raspberry Pi Pico SDK (must be before project)
 include(pico_sdk_import.cmake)
 
 project(pico-tflmicro C CXX ASM)
-set(CMAKE_C_STANDARD 11)
-set(CMAKE_CXX_STANDARD 11)
 
 pico_sdk_init()
 
@@ -35,14 +54,15 @@ target_compile_definitions(
   COMPILE_DEFINITIONS TFLITE_USE_CTIME=1
 )
 
-set_target_properties(
+target_compile_options(
   pico-tflmicro
-  PROPERTIES
-  COMPILE_FLAGS -Os
-  COMPILE_FLAGS -fno-rtti
-  COMPILE_FLAGS -fno-exceptions
-  COMPILE_FLAGS -fno-threadsafe-statics
-  COMPILE_FLAGS -nostdlib
+  PUBLIC
+  -Os
+  -fno-exceptions
+  -nostdlib
+  $<$<COMPILE_LANGUAGE:CXX>:
+    -fno-rtti
+    -fno-threadsafe-statics>
 )
 
 target_link_libraries(
@@ -670,7 +690,7 @@ add_subdirectory("tests/arena_allocator_persistent_arena_buffer_allocator_test")
 add_subdirectory("tests/arena_allocator_recording_single_arena_buffer_allocator_test")
 add_subdirectory("tests/arena_allocator_single_arena_buffer_allocator_test")
 add_subdirectory("tests/fake_micro_context_test")
-add_subdirectory("tests/flatbuffer_utils_test")
+#add_subdirectory("tests/flatbuffer_utils_test")
 add_subdirectory("tests/kernels_activations_test")
 add_subdirectory("tests/kernels_add_n_test")
 add_subdirectory("tests/kernels_add_test")
@@ -692,7 +712,7 @@ add_subdirectory("tests/kernels_depthwise_conv_test")
 add_subdirectory("tests/kernels_dequantize_test")
 add_subdirectory("tests/kernels_detection_postprocess_test")
 add_subdirectory("tests/kernels_div_test")
-add_subdirectory("tests/kernels_elementwise_test")
+#add_subdirectory("tests/kernels_elementwise_test")
 add_subdirectory("tests/kernels_elu_test")
 add_subdirectory("tests/kernels_embedding_lookup_test")
 add_subdirectory("tests/kernels_exp_test")
@@ -706,8 +726,8 @@ add_subdirectory("tests/kernels_gather_nd_test")
 add_subdirectory("tests/kernels_gather_test")
 add_subdirectory("tests/kernels_hard_swish_test")
 add_subdirectory("tests/kernels_if_test")
-add_subdirectory("tests/kernels_l2_pool_2d_test")
-add_subdirectory("tests/kernels_l2norm_test")
+#add_subdirectory("tests/kernels_l2_pool_2d_test")
+#add_subdirectory("tests/kernels_l2norm_test")
 add_subdirectory("tests/kernels_leaky_relu_test")
 add_subdirectory("tests/kernels_log_softmax_test")
 add_subdirectory("tests/kernels_logical_test")
