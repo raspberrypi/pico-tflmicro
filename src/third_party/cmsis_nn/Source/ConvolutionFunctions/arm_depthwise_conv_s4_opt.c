@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2023-2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -22,8 +22,8 @@
  * Description:  Optimized s4 depthwise separable convolution function for
  *               channel multiplier of 1.
  *
- * $Date:        31 October 2023
- * $Revision:    V.1.0.0
+ * $Date:        17 April 2024
+ * $Revision:    V.1.1.0
  *
  * Target :  Arm(R) M-Profile Architecture
  *
@@ -94,6 +94,161 @@ arm_cmsis_nn_status arm_depthwise_conv_s4_opt(const cmsis_nn_context *ctx,
     const int32_t output_activation_max = dw_conv_params->activation.max;
     int16_t *buffer_a = (int16_t *)ctx->buf;
 
+#ifdef ARM_MATH_MVEI
+    /* Generate two columns from the input tensor */
+    int8_t *lhs_buffer = (int8_t *)buffer_a;
+    int8_t *out = output;
+    int buffer_count = 0;
+    const int32_t kernel_size = kernel_x * kernel_y;
+
+    const int32_t ch_loop = (input_ch + (S4_CH_IN_BLOCK_MVE - 1)) / S4_CH_IN_BLOCK_MVE;
+    int32_t remaining_ch = output_ch;
+    int32_t active_ch = MIN(S4_CH_IN_BLOCK_MVE, remaining_ch);
+    remaining_ch -= S4_CH_IN_BLOCK_MVE;
+
+    for (int i_ch = 0; i_ch < ch_loop; i_ch++)
+    {
+        out = output + i_ch * S4_CH_IN_BLOCK_MVE;
+        const int8_t *input_slice = input + (i_ch * S4_CH_IN_BLOCK_MVE);
+
+        for (int i_out_y = 0, base_idx_y = -pad_y; i_out_y < output_y; base_idx_y += stride_y, i_out_y++)
+        {
+            for (int i_out_x = 0, base_idx_x = -pad_x; i_out_x < output_x; base_idx_x += stride_x, i_out_x++)
+            {
+                for (int i_ker_y = base_idx_y; i_ker_y < base_idx_y + kernel_y; i_ker_y++)
+                {
+                    for (int i_ker_x = base_idx_x; i_ker_x < base_idx_x + kernel_x; i_ker_x++)
+                    {
+                        if (i_ker_y < 0 || i_ker_y >= input_y || i_ker_x < 0 || i_ker_x >= input_x)
+                        {
+                            arm_memset_s8(lhs_buffer, (int8_t)-input_offset, (uint32_t)active_ch);
+                        }
+                        else
+                        {
+                            arm_memcpy_s8(lhs_buffer,
+                                          input_slice + (i_ker_y * input_x + i_ker_x) * input_ch,
+                                          (uint32_t)active_ch);
+                        }
+                        lhs_buffer += S4_CH_IN_BLOCK_MVE;
+                    }
+                }
+                buffer_count++;
+
+                if (buffer_count == 4)
+                {
+                    const int32_t block_offset = i_ch * S4_CH_IN_BLOCK_MVE;
+                    lhs_buffer = (int8_t *)buffer_a;
+                    arm_nn_depthwise_conv_nt_t_s4(lhs_buffer,
+                                                  kernel + (block_offset >> 1),
+                                                  input_offset,
+                                                  active_ch,
+                                                  input_ch,
+                                                  output_shift + block_offset,
+                                                  output_mult + block_offset,
+                                                  output_offset,
+                                                  output_activation_min,
+                                                  output_activation_max,
+                                                  kernel_size,
+                                                  bias + block_offset,
+                                                  out);
+
+                    out += (4 * input_ch);
+                    buffer_count = 0;
+                }
+            }
+        }
+        /* Handle left over buffers */
+        lhs_buffer = (int8_t *)buffer_a;
+
+        int8_t *out_base = out;
+        const uint32x4_t gather_offset = {0, 0, 1, 1};
+        const mve_pred16_t lower_nibble_mask = 3855; // 0000111100001111
+        for (int i_buf = 0; i_buf < buffer_count; i_buf++)
+        {
+            int32_t loop_count = (active_ch + 3) / 4;
+            int32_t num_ch_to_process = active_ch;
+            out = out_base + (i_buf * input_ch);
+            for (int i_loop_cnt = 0, offset = i_ch * S4_CH_IN_BLOCK_MVE; i_loop_cnt < loop_count;
+                 num_ch_to_process -= 4, offset += 4, i_loop_cnt++)
+            {
+                const int8_t *col_0 = lhs_buffer + (kernel_size * S4_CH_IN_BLOCK_MVE * i_buf) + (i_loop_cnt * 4);
+                const int8_t *row_0 = kernel + (offset >> 1);
+                int32x4_t out_0 = vdupq_n_s32(0);
+                if (bias)
+                {
+                    out_0 = vldrwq_s32(&bias[offset]);
+                }
+
+                if (input_ch % 2)
+                {
+                    int get_low_nibble = 1;
+                    for (int i_ker = 0; i_ker < kernel_size; i_ker++)
+                    {
+                        int32x4_t ker_0;
+                        if (get_low_nibble)
+                        {
+                            ker_0 = vldrbq_gather_offset_s32(row_0, gather_offset);
+                            ker_0 = vrshlq_m_n_s32(ker_0, 28, lower_nibble_mask);
+                            ker_0 = vshrq_m_n_s32(ker_0, ker_0, 24, lower_nibble_mask);
+
+                            ker_0 = vshrq_n_s32(ker_0, 4);
+                        }
+                        else
+                        {
+                            int8_t temp[] = {row_0[0] >> 4,
+                                             (int8_t)(row_0[1] << 4) >> 4,
+                                             row_0[1] >> 4,
+                                             (int8_t)(row_0[2] << 4) >> 4};
+                            ker_0 = vldrbq_s32(temp);
+                        }
+
+                        int32x4_t ip_0 = vldrbq_s32(col_0);
+                        ip_0 = vaddq_n_s32(ip_0, input_offset);
+                        out_0 += vmulq_s32(ip_0, ker_0);
+
+                        get_low_nibble = !get_low_nibble;
+                        col_0 += S4_CH_IN_BLOCK_MVE;
+                        row_0 += (input_ch >> 1) + get_low_nibble;
+                    }
+                }
+                else
+                {
+                    for (int i_ker = 0; i_ker < kernel_size; i_ker++)
+                    {
+                        int32x4_t ker_0 = vldrbq_gather_offset_s32(row_0, gather_offset);
+                        ker_0 = vrshlq_m_n_s32(ker_0, 28, lower_nibble_mask);
+                        ker_0 = vshrq_m_n_s32(ker_0, ker_0, 24, lower_nibble_mask);
+
+                        ker_0 = vshrq_n_s32(ker_0, 4);
+
+                        int32x4_t ip_0 = vldrbq_s32(col_0);
+                        ip_0 = vaddq_n_s32(ip_0, input_offset);
+                        out_0 += vmulq_s32(ip_0, ker_0);
+
+                        col_0 += S4_CH_IN_BLOCK_MVE;
+                        row_0 += input_ch >> 1;
+                    }
+                }
+
+                const int32x4_t mult = vldrwq_s32(&output_mult[offset]);
+                const int32x4_t shift = vldrwq_s32(&output_shift[offset]);
+
+                out_0 = arm_requantize_mve_32x4(out_0, mult, shift);
+                out_0 = vaddq_n_s32(out_0, output_offset);
+                out_0 = vmaxq_s32(out_0, vdupq_n_s32(output_activation_min));
+                out_0 = vminq_s32(out_0, vdupq_n_s32(output_activation_max));
+                mve_pred16_t p = vctp32q((uint32_t)num_ch_to_process);
+                vstrbq_p_s32(out, out_0, p);
+
+                out += 4;
+            }
+        }
+        buffer_count = 0;
+
+        active_ch = MIN(S4_CH_IN_BLOCK_MVE, remaining_ch);
+        remaining_ch -= S4_CH_IN_BLOCK_MVE;
+    }
+#else
     int16_t *const col_buffer_start = buffer_a;
     int16_t *col_buffer = col_buffer_start;
     const int32_t *const bias_start_pos = bias;
@@ -186,7 +341,7 @@ arm_cmsis_nn_status arm_depthwise_conv_s4_opt(const cmsis_nn_context *ctx,
 
                     while (col_count)
                     {
-#ifdef ARM_MATH_DSP
+    #ifdef ARM_MATH_DSP
                         /* General idea is to read 4 + 4 (input, kernel) pair and re-arrange them in the right order to
                            use in a SMLAD instruction . One run of this loop produces 4 partial outputs with 8 MACs. */
                         /* Note: variable names can be improved here to align with rows and columns. */
@@ -219,7 +374,7 @@ arm_cmsis_nn_status arm_depthwise_conv_s4_opt(const cmsis_nn_context *ctx,
                         op_b = PKHTB(ip_a1, ip_b1, 16);
                         sum_4 = SMLAD(op_a, op_b, sum_4);
 
-#else
+    #else
                         int8_t ker0, ker1, ker2, ker3, ker00, ker11;
 
                         ker00 = row_pos[0];
@@ -245,7 +400,7 @@ arm_cmsis_nn_status arm_depthwise_conv_s4_opt(const cmsis_nn_context *ctx,
                         sum_3 += ker2 * col_pos[2 + input_ch];
                         sum_4 += ker3 * col_pos[3 + input_ch];
 
-#endif
+    #endif
                         row_pos += (input_ch);
                         col_pos += input_ch << 1;
 
@@ -384,7 +539,7 @@ arm_cmsis_nn_status arm_depthwise_conv_s4_opt(const cmsis_nn_context *ctx,
                     row_shift += 2;
                     col_shift += 4;
 
-#ifdef ARM_MATH_DSP
+    #ifdef ARM_MATH_DSP
                     while (col_count)
                     {
                         /* General idea is to read 4 + 4 (input, kernel) pair and re-arrange them in the right order to
@@ -426,9 +581,9 @@ arm_cmsis_nn_status arm_depthwise_conv_s4_opt(const cmsis_nn_context *ctx,
                     }
 
                     col_count = num_cols & 0x1;
-#else
+    #else
                     col_count = num_cols;
-#endif
+    #endif
                     while (col_count)
                     {
                         int8_t ker0, ker1, ker2, ker3, ker00, ker11;
@@ -524,7 +679,7 @@ arm_cmsis_nn_status arm_depthwise_conv_s4_opt(const cmsis_nn_context *ctx,
             col_buffer = col_buffer_start;
         }
     }
-
+#endif // ARM_MATH_MVEI
     /* Return to application */
     return ARM_CMSIS_NN_SUCCESS;
 }

@@ -21,8 +21,8 @@
  * Title:        arm_svdf_s8.c
  * Description:  S8 basic SVDF layer function
  *
- * $Date:        14 Feb 2024
- * $Revision:    V.6.1.0
+ * $Date:        24 Sep 2024
+ * $Revision:    V.6.1.1
  *
  * Target :  Arm(R) M-Profile Architecture
  *
@@ -110,9 +110,17 @@ arm_cmsis_nn_status arm_svdf_s8(const cmsis_nn_context *ctx,
     int32_t *kernel_sum_data = (int32_t *)ctx->buf;
 
     // Left shift state
-    memmove((int8_t *)state_data,
-            (int8_t *)state_data + 1,
+    // Using memcpy on overlapping data is in general undefined behaviour, but since the behaviour of arm_memcpy_s8 is
+    // known it is certain that the data has been copied before it is overwritten in this case.
+#ifdef ARM_MATH_MVEI
+    arm_memcpy_s8(state_data,
+                  state_data + 1,
+                  (size_t)((input_batches * feature_batches * time_batches - 1) * (int32_t)sizeof(int8_t)));
+#else
+    memmove(state_data,
+            state_data + 1,
             (size_t)((input_batches * feature_batches * time_batches - 1) * (int32_t)sizeof(int8_t)));
+#endif
 
     // Matrix multiplication input * feature weight
     for (int i_batch = 0; i_batch < input_batches; i_batch++)

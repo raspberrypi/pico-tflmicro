@@ -1,4 +1,4 @@
-/* Copyright 2023 The TensorFlow Authors. All Rights Reserved.
+/* Copyright 2024 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -50,6 +50,9 @@ TfLiteStatus TfLiteTypeSizeOf(TfLiteType type, size_t* size) {
     case kTfLiteFloat16:
       *size = sizeof(int16_t);
       break;
+    case kTfLiteBFloat16:
+      *size = sizeof(int16_t);
+      break;
     case kTfLiteFloat32:
       *size = sizeof(float);
       break;
@@ -67,6 +70,9 @@ TfLiteStatus TfLiteTypeSizeOf(TfLiteType type, size_t* size) {
       break;
     case kTfLiteUInt8:
       *size = sizeof(uint8_t);
+      break;
+    case kTfLiteUInt16:
+      *size = sizeof(uint16_t);
       break;
     case kTfLiteInt8:
       *size = sizeof(int8_t);

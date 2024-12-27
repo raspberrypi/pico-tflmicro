@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.12)
 
 project(kernels_circular_buffer_test C CXX ASM)
 set(CMAKE_C_STANDARD 11)
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 
 add_executable(kernels_circular_buffer_test "")
 

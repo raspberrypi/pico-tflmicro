@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.12)
 
 project(memory_planner_linear_memory_planner_test C CXX ASM)
 set(CMAKE_C_STANDARD 11)
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 
 add_executable(memory_planner_linear_memory_planner_test "")
 

@@ -21,8 +21,8 @@
  * Title:        arm_vector_sum_s8
  * Description:  Generic function for calculating vector sums
  *
- * $Date:        15 February 2024
- * $Revision:    V.2.0.1
+ * $Date:        05 Sep 2024
+ * $Revision:    V.3.0.0
  *
  * Target :  Arm(R) M-Profile Architecture
  *
@@ -50,6 +50,7 @@ arm_cmsis_nn_status arm_vector_sum_s8(int32_t *vector_sum_buf,
                                       const int32_t vector_rows,
                                       const int8_t *vector_data,
                                       const int32_t lhs_offset,
+                                      const int32_t rhs_offset,
                                       const int32_t *bias_data)
 {
 
@@ -103,6 +104,15 @@ arm_cmsis_nn_status arm_vector_sum_s8(int32_t *vector_sum_buf,
             }
             vector_data += 5 * vector_cols;
 
+            if (rhs_offset)
+            {
+                vector_sum_0 += vector_cols * rhs_offset;
+                vector_sum_1 += vector_cols * rhs_offset;
+                vector_sum_2 += vector_cols * rhs_offset;
+                vector_sum_3 += vector_cols * rhs_offset;
+                vector_sum_4 += vector_cols * rhs_offset;
+            }
+
             vector_sum_0 *= lhs_offset;
             vector_sum_1 *= lhs_offset;
             vector_sum_2 *= lhs_offset;
@@ -132,6 +142,10 @@ arm_cmsis_nn_status arm_vector_sum_s8(int32_t *vector_sum_buf,
                 vector_0 += 16;
             }
             vector_data += vector_cols;
+            if (rhs_offset)
+            {
+                vector_sum_0 += vector_cols * rhs_offset;
+            }
             vector_sum_0 *= lhs_offset;
 
             vector_sum_buf[i_row_loop_cnt] += vector_sum_0;
@@ -143,6 +157,10 @@ arm_cmsis_nn_status arm_vector_sum_s8(int32_t *vector_sum_buf,
             for (int j = 0; j < vector_cols; j++)
             {
                 sum += *vector_data++;
+            }
+            if (rhs_offset)
+            {
+                sum += vector_cols * rhs_offset;
             }
             *vector_sum_buf++ += sum * lhs_offset;
         }

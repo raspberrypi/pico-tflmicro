@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.12)
 
 project(memory_planner_non_persistent_buffer_planner_shim_test C CXX ASM)
 set(CMAKE_C_STANDARD 11)
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 
 add_executable(memory_planner_non_persistent_buffer_planner_shim_test "")
 

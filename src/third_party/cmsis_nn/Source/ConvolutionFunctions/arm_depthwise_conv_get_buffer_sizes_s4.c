@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2023-2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -18,11 +18,11 @@
 
 /* ----------------------------------------------------------------------
  * Project:      CMSIS NN Library
- * Title:        arm_depthwise_conv_get_buffer_sizes_s8.c
- * Description:  Collection of get buffer size functions for the various s8 convolution layer functions.
+ * Title:        arm_depthwise_conv_get_buffer_sizes_s4.c
+ * Description:  Collection of get buffer size functions for the various s4 depthwise convolution layer functions.
  *
- * $Date:        30 October 2023
- * $Revision:    V.1.0.0
+ * $Date:        17 April 2024
+ * $Revision:    V.1.1.0
  *
  * Target :  Arm(R) M-Profile Architecture
  *
@@ -42,7 +42,11 @@
 
 int32_t arm_depthwise_conv_s4_opt_get_buffer_size(const cmsis_nn_dims *input_dims, const cmsis_nn_dims *filter_dims)
 {
+#if defined(ARM_MATH_MVEI)
+    return arm_depthwise_conv_s8_opt_get_buffer_size_mve(input_dims, filter_dims);
+#else
     return arm_depthwise_conv_s8_opt_get_buffer_size_dsp(input_dims, filter_dims);
+#endif
 }
 
 int32_t arm_depthwise_conv_wrapper_s4_get_buffer_size(const cmsis_nn_dw_conv_params *dw_conv_params,
@@ -74,7 +78,15 @@ int32_t arm_depthwise_conv_wrapper_s4_get_buffer_size_mve(const cmsis_nn_dw_conv
                                                           const cmsis_nn_dims *filter_dims,
                                                           const cmsis_nn_dims *output_dims)
 {
-    return arm_depthwise_conv_wrapper_s4_get_buffer_size(dw_conv_params, input_dims, filter_dims, output_dims);
+    int32_t size = 0;
+
+    if (input_dims->c == output_dims->c && input_dims->n == 1 && dw_conv_params->dilation.w == 1 &&
+        dw_conv_params->dilation.h == 1)
+    {
+        size = arm_depthwise_conv_s8_opt_get_buffer_size_mve(input_dims, filter_dims);
+    }
+
+    return size;
 }
 
 /**

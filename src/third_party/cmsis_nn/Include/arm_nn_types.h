@@ -22,8 +22,8 @@
  * Description:  Public header file to contain the CMSIS-NN structs for the
  *               TensorFlowLite micro compliant functions
  *
- * $Date:        19 January 2024
- * $Revision:    V.3.0.0
+ * $Date:        21 Oct 2024
+ * $Revision:    V.3.5.0
  *
  * Target :  Arm(R) M-Profile Architecture
  * -------------------------------------------------------------------- */
@@ -31,6 +31,7 @@
 #ifndef ARM_NN_TYPES_H
 #define ARM_NN_TYPES_H
 
+#include <stdbool.h>
 #include <stdint.h>
 
 /**
@@ -70,6 +71,13 @@ typedef struct
     int32_t size; /**< Buffer size */
 } cmsis_nn_context;
 
+/** CMSIS-NN object used to hold bias data for int16 variants. */
+typedef struct
+{
+    const void *data;         /**< Pointer to bias data */
+    const bool is_int32_bias; /**< Indicate type of bias data. True means int32 else int64 */
+} cmsis_nn_bias_data;
+
 /** CMSIS-NN object to contain the dimensions of the tensors */
 typedef struct
 {
@@ -102,6 +110,17 @@ typedef struct
     int32_t multiplier; /**< Multiplier value */
     int32_t shift;      /**< Shift value */
 } cmsis_nn_per_tensor_quant_params;
+
+/** CMSIS-NN object for quantization parameters.
+ *  This struct supports both per-tensor and per-channels requantization
+ *  and is recommended for new operators.
+ */
+typedef struct
+{
+    int32_t *multiplier;    /**< Multiplier values */
+    int32_t *shift;         /**< Shift values */
+    int32_t is_per_channel; /** Indicating if per channel or per tensor quantization */
+} cmsis_nn_quant_params;
 
 /** CMSIS-NN object for the quantized Relu activation */
 typedef struct
@@ -157,10 +176,25 @@ typedef struct
 typedef struct
 {
     int32_t input_offset;  /**< The negative of the zero value for the input tensor */
-    int32_t filter_offset; /**< The negative of the zero value for the filter tensor. Not used */
+    int32_t filter_offset; /**< The negative of the zero value for the filter tensor */
     int32_t output_offset; /**< The negative of the zero value for the output tensor */
     cmsis_nn_activation activation;
 } cmsis_nn_fc_params;
+
+/** CMSIS-NN object for Batch Matmul layer parameters */
+typedef struct
+{
+    const bool adj_x;
+    const bool adj_y;
+    cmsis_nn_fc_params fc_params;
+} cmsis_nn_bmm_params;
+
+/** CMSIS-NN object for Transpose layer parameters */
+typedef struct
+{
+    const int32_t num_dims;
+    const uint32_t *permutations; /**< The dimensions applied to the input dimensions */
+} cmsis_nn_transpose_params;
 
 /** CMSIS-NN object for SVDF layer parameters */
 typedef struct
@@ -191,15 +225,15 @@ typedef struct
 {
     int32_t input_multiplier;
     int32_t input_shift;
-    const int8_t *input_weights;
-    const int32_t *input_effective_bias; /**< Bias added with precomputed kernel_sum * lhs_offset*/
+    const void *input_weights;
+    const void *input_effective_bias; /**< Bias added with precomputed kernel_sum * lhs_offset*/
 
     int32_t hidden_multiplier;
     int32_t hidden_shift;
-    const int8_t *hidden_weights;
-    const int32_t *hidden_effective_bias; /**< Precomputed kernel_sum * lhs_offset*/
+    const void *hidden_weights;
+    const void *hidden_effective_bias; /**< Precomputed kernel_sum * lhs_offset*/
 
-    const int32_t *bias;
+    const void *bias;
     arm_nn_activation_type activation_type;
 } cmsis_nn_lstm_gate;
 

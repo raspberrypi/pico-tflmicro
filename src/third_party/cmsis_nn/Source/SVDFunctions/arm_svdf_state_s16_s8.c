@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2010-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2010-2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -18,11 +18,11 @@
 
 /* ----------------------------------------------------------------------
  * Project:      CMSIS NN Library
- * Title:        arm_svdf_s8.c
+ * Title:        arm_svdf_state_s16_s8.c
  * Description:  S8 basic SVDF layer function with s16 state tensor
  *
- * $Date:        5 January 2023
- * $Revision:    V.3.1.0
+ * $Date:        24 Sep 2024
+ * $Revision:    V.3.1.1
  *
  * Target :  Arm(R) M-Profile Architecture
  *
@@ -100,9 +100,17 @@ arm_cmsis_nn_status arm_svdf_state_s16_s8(const cmsis_nn_context *input_ctx,
     int32_t *buffer_b = (int32_t *)output_ctx->buf;
 
     // Left shift state
-    memmove((int16_t *)state_data,
-            (int16_t *)state_data + 1,
+    // Using memcpy on overlapping data is in general undefined behaviour, but since the behaviour of arm_memcpy_s8 is
+    // known it is certain that the data has been copied before it is overwritten in this case.
+#ifdef ARM_MATH_MVEI
+    arm_memcpy_s8((int8_t *)state_data,
+                  (int8_t *)(state_data + 1),
+                  (size_t)((input_batches * feature_batches * time_batches - 1) * (int32_t)sizeof(int16_t)));
+#else
+    memmove(state_data,
+            state_data + 1,
             (size_t)((input_batches * feature_batches * time_batches - 1) * (int32_t)sizeof(int16_t)));
+#endif
 
     // Matrix multiplication input * feature weight
     for (int i_batch = 0; i_batch < input_batches; i_batch++)

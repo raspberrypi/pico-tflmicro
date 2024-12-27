@@ -21,8 +21,8 @@
  * Title:        arm_nn_compiler.h
  * Description:  Generic compiler header
  *
- * $Date:        16 January 2024
- * $Revision:    V.1.2.2
+ * $Date:        20 June 2024
+ * $Revision:    V.1.3.0
  *
  * Target :  Arm(R) M-Profile Architecture
  * -------------------------------------------------------------------- */
@@ -189,6 +189,7 @@ __STATIC_FORCEINLINE uint8_t CLZ(uint32_t value)
     // Common intrinsics
     #define SMLABB __smlabb
     #define SMLATT __smlatt
+    #define SMLALD __smlald
     #define QADD __qadd
     #define QSUB8 __qsub8
     #define QSUB16 __qsub16

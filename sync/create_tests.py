@@ -25,10 +25,13 @@ import os
 import shutil
 import sys
 
+TESTS_TO_IGNORE = {
+  "micro_interpreter_test",     # Too large for the RP2040.
+  "compression_metadata_test",  # Uses experimental compression.
+}
 
 def create_test(test_name, source_cc_path, output_folder, cmake_template):
-  if test_name == "micro_interpreter_test":
-    # Too large for the RP2040.
+  if test_name in TESTS_TO_IGNORE:
     return
 
   if test_name == "kernels_conv_test":

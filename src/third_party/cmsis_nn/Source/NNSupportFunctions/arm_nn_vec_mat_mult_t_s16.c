@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2020-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2020-2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -19,18 +19,16 @@
 /* ----------------------------------------------------------------------
  * Project:      CMSIS NN Library
  * Title:        arm_nn_vec_mat_mult_t_s16
- * Description:  s16 vector by matrix (transposed) multiplication
+ * Description:  s16 vector by s8 matrix (transposed) multiplication
  *
- * $Date:        5 January 2023
- * $Revision:    V.2.2.0
+ * $Date:        19 June 2024
+ * $Revision:    V.2.4.0
  *
  * Target :  Arm(R) M-Profile Architecture
  *
  * -------------------------------------------------------------------- */
 
 #include "third_party/cmsis_nn/Include/arm_nnsupportfunctions.h"
-
-#define MAX_COL_COUNT (512)
 
 /**
  * @ingroup groupSupport
@@ -42,7 +40,7 @@
  */
 
 /*
- * s16 vector(lhs) by matrix (transposed) multiplication
+ * s16 vector(lhs) by s8 matrix (transposed) multiplication
  *
  * Refer header file for details.
  *
@@ -353,8 +351,8 @@ arm_cmsis_nn_status arm_nn_vec_mat_mult_t_s16(const int16_t *lhs,
         result = arm_nn_requantize_s64(result, dst_multiplier, dst_shift);
 
         // Clamp the result
-        result = ((result) > (activation_min) ? (result) : (activation_min));
-        result = ((result) < (activation_max) ? (result) : (activation_max));
+        result = MAX(result, activation_min);
+        result = MIN(result, activation_max);
 
         *dst++ = (int16_t)result;
         rhs += rhs_cols;

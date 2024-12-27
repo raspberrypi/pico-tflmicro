@@ -21,8 +21,8 @@
  * Title:        arm_nn_vec_mat_mult_t_s8
  * Description:  s8 vector by matrix (transposed) multiplication
  *
- * $Date:        14 Feb 2023
- * $Revision:    V.6.0.0
+ * $Date:        5 Sep 2024
+ * $Revision:    V.6.2.0
  *
  * Target :  Arm(R) M-Profile Architecture
  *
@@ -52,7 +52,7 @@
  * Refer header file for details.
  *
  */
-#if defined(ARM_MATH_DSP) && !defined(__ARMCC_VERSION) && !defined(__ICCARM__)
+#if !defined(ARM_MATH_MVEI) && defined(ARM_MATH_DSP) && !defined(__ARMCC_VERSION) && !defined(__ICCARM__)
     #pragma GCC optimize("unroll-loops")
 #endif
 arm_cmsis_nn_status arm_nn_vec_mat_mult_t_s8(const int8_t *lhs,
@@ -74,15 +74,17 @@ arm_cmsis_nn_status arm_nn_vec_mat_mult_t_s8(const int8_t *lhs,
     if (rhs_offset)
     {
 #if defined(ARM_MATH_MVEI)
+        (void)bias;
+        (void)lhs_offset;
         const int32_t row_loop_cnt = rhs_rows / 4;
         const uint32x4_t address_offset_array = {0, address_offset, address_offset * 2, address_offset * 3};
 
         for (int i_row_loop_cnt = 0; i_row_loop_cnt < row_loop_cnt; i_row_loop_cnt++)
         {
-            int32_t acc_0 = 0;
-            int32_t acc_1 = 0;
-            int32_t acc_2 = 0;
-            int32_t acc_3 = 0;
+            int32_t acc_0 = *kernel_sum++;
+            int32_t acc_1 = *kernel_sum++;
+            int32_t acc_2 = *kernel_sum++;
+            int32_t acc_3 = *kernel_sum++;
 
             const int32_t col_loop_cnt = (rhs_cols + 15) / 16;
 
@@ -93,14 +95,6 @@ arm_cmsis_nn_status arm_nn_vec_mat_mult_t_s8(const int8_t *lhs,
             const int8_t *rhs_3_ptr = rhs + 3 * rhs_cols;
 
             int32_t lhs_sum = 0;
-
-            if (bias)
-            {
-                acc_0 = *bias++;
-                acc_1 = *bias++;
-                acc_2 = *bias++;
-                acc_3 = *bias++;
-            }
 
             uint32_t col_cnt = (uint32_t)rhs_cols;
 
@@ -134,12 +128,7 @@ arm_cmsis_nn_status arm_nn_vec_mat_mult_t_s8(const int8_t *lhs,
 
             int32x4_t acc = {acc_0, acc_1, acc_2, acc_3};
 
-            const int32x4_t rhs_sum = {kernel_sum[0], kernel_sum[1], kernel_sum[2], kernel_sum[3]};
-            acc += vdupq_n_s32(lhs_offset) * rhs_sum;
-            kernel_sum += 4;
-
             acc += vdupq_n_s32(rhs_offset) * vdupq_n_s32(lhs_sum);
-            acc += vdupq_n_s32(rhs_offset * lhs_offset) * vdupq_n_s32(rhs_cols);
 
             acc = arm_requantize_mve(acc, dst_multiplier, dst_shift);
             acc = vaddq_s32(acc, vdupq_n_s32(dst_offset));
@@ -154,7 +143,7 @@ arm_cmsis_nn_status arm_nn_vec_mat_mult_t_s8(const int8_t *lhs,
         const int loop_cnt = rhs_rows % 4;
         for (int32_t i_row_loop_cnt = 0; i_row_loop_cnt < loop_cnt; i_row_loop_cnt++)
         {
-            int32_t acc_0 = 0;
+            int32_t acc_0 = *kernel_sum++;
             const int32_t col_loop_cnt = (rhs_cols + 15) / 16;
             const int8_t *lhs_vec = lhs;
             const int8_t *rhs_ptr = rhs;
@@ -176,15 +165,7 @@ arm_cmsis_nn_status arm_nn_vec_mat_mult_t_s8(const int8_t *lhs,
             }
             rhs += rhs_cols;
 
-            if (bias)
-            {
-                acc_0 += *bias;
-                bias++;
-            }
-            const int32_t rhs_sum = kernel_sum[i_row_loop_cnt];
-            acc_0 += rhs_sum * lhs_offset;
             acc_0 += lhs_sum * rhs_offset;
-            acc_0 += rhs_cols * lhs_offset * rhs_offset;
 
             acc_0 = arm_nn_requantize(acc_0, dst_multiplier, dst_shift);
             acc_0 += dst_offset;
@@ -422,17 +403,16 @@ arm_cmsis_nn_status arm_nn_vec_mat_mult_t_s8(const int8_t *lhs,
 
     else
     {
-
 #if defined(ARM_MATH_MVEI)
         const int32_t row_loop_cnt = rhs_rows / 4;
         const uint32x4_t address_offset_array = {0, address_offset, address_offset * 2, address_offset * 3};
 
         for (int32_t i_row_loop_cnt = 0; i_row_loop_cnt < row_loop_cnt; i_row_loop_cnt++)
         {
-            int32_t acc_0 = 0;
-            int32_t acc_1 = 0;
-            int32_t acc_2 = 0;
-            int32_t acc_3 = 0;
+            int32_t acc_0 = *kernel_sum++;
+            int32_t acc_1 = *kernel_sum++;
+            int32_t acc_2 = *kernel_sum++;
+            int32_t acc_3 = *kernel_sum++;
 
             const int32_t col_loop_cnt = (rhs_cols + 15) / 16;
 
@@ -441,14 +421,6 @@ arm_cmsis_nn_status arm_nn_vec_mat_mult_t_s8(const int8_t *lhs,
             const int8_t *rhs_1_ptr = rhs + rhs_cols;
             const int8_t *rhs_2_ptr = rhs + 2 * rhs_cols;
             const int8_t *rhs_3_ptr = rhs + 3 * rhs_cols;
-
-            if (bias)
-            {
-                acc_0 = *bias++;
-                acc_1 = *bias++;
-                acc_2 = *bias++;
-                acc_3 = *bias++;
-            }
 
             uint32_t col_cnt = (uint32_t)rhs_cols;
 
@@ -481,10 +453,6 @@ arm_cmsis_nn_status arm_nn_vec_mat_mult_t_s8(const int8_t *lhs,
 
             int32x4_t acc = {acc_0, acc_1, acc_2, acc_3};
 
-            const int32x4_t rhs_sum = {kernel_sum[0], kernel_sum[1], kernel_sum[2], kernel_sum[3]};
-            acc += vdupq_n_s32(lhs_offset) * rhs_sum;
-            kernel_sum += 4;
-
             acc = arm_requantize_mve(acc, dst_multiplier, dst_shift);
             acc = vaddq_s32(acc, vdupq_n_s32(dst_offset));
             acc = vmaxq_s32(acc, vdupq_n_s32(activation_min));
@@ -498,7 +466,7 @@ arm_cmsis_nn_status arm_nn_vec_mat_mult_t_s8(const int8_t *lhs,
         const int loop_cnt = rhs_rows % 4;
         for (int32_t i_row_loop_cnt = 0; i_row_loop_cnt < loop_cnt; i_row_loop_cnt++)
         {
-            int32_t acc_0 = 0;
+            int32_t acc_0 = *kernel_sum++;
             const int32_t col_loop_cnt = (rhs_cols + 15) / 16;
             const int8_t *lhs_vec = lhs;
             const int8_t *rhs_ptr = rhs;
@@ -518,14 +486,6 @@ arm_cmsis_nn_status arm_nn_vec_mat_mult_t_s8(const int8_t *lhs,
             }
             rhs += rhs_cols;
 
-            if (bias)
-            {
-                acc_0 += *bias;
-                bias++;
-            }
-            const int32_t rhs_sum = kernel_sum[i_row_loop_cnt];
-            const int32_t offsets = rhs_sum * lhs_offset;
-            acc_0 += offsets;
             acc_0 = arm_nn_requantize(acc_0, dst_multiplier, dst_shift);
             acc_0 += dst_offset;
 

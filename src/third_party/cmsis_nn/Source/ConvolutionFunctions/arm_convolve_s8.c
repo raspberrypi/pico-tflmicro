@@ -21,8 +21,8 @@
  * Title:        arm_convolve_s8.c
  * Description:  s8 version of convolution using symmetric quantization.
  *
- * $Date:        04 January 2024
- * $Revision:    V.3.6.0
+ * $Date:        04 November 2024
+ * $Revision:    V.4.0.0
  *
  * Target :  Arm(R) M-Profile Architecture
  *
@@ -55,6 +55,7 @@ arm_cmsis_nn_status arm_convolve_s8(const cmsis_nn_context *ctx,
                                     const int8_t *filter_data,
                                     const cmsis_nn_dims *bias_dims,
                                     const int32_t *bias_data,
+                                    const cmsis_nn_dims *upscale_dims,
                                     const cmsis_nn_dims *output_dims,
                                     int8_t *output_data)
 {
@@ -92,24 +93,40 @@ arm_cmsis_nn_status arm_convolve_s8(const cmsis_nn_context *ctx,
     const int32_t rhs_cols = kernel_x * kernel_y * kernel_ch;
     const int32_t output_ch_per_group = output_ch / groups;
 
-    int32_t *output_mult = quant_params->multiplier;
-    int32_t *output_shift = quant_params->shift;
+    const int32_t *output_mult = quant_params->multiplier;
+    const int32_t *output_shift = quant_params->shift;
 
     if (input_ch % groups != 0 || output_ch % groups != 0)
     {
         return ARM_CMSIS_NN_ARG_ERROR;
     }
 
-    int i_batch;
-    for (i_batch = 0; i_batch < input_batches; i_batch++)
+    // For upscale_dims == 2, the actual index of the input data is the index of the upscaled input divided by two. In
+    // the ordinary case, there is no difference. The division is implemented as a rshift for optimization purposes.
+    uint32_t y_rshift = 0;
+    uint32_t x_rshift = 0;
+
+    if (upscale_dims)
     {
+        y_rshift = upscale_dims->h == 2 ? 1 : 0;
+        x_rshift = upscale_dims->w == 2 ? 1 : 0;
+    }
+
+    const int32_t input_x_rshifted = input_x >> x_rshift;
+    const int32_t input_y_rshifted = input_y >> y_rshift;
+
+    const int32_t remainder = rhs_cols % 4;
+    const int32_t aligned_rhs_cols = remainder != 0 ? rhs_cols + 4 - remainder : rhs_cols;
+
+    for (int i_batch = 0; i_batch < input_batches; i_batch++)
+    {
+
 #if defined(ARM_MATH_MVEI)
+        const int32_t aligned_rhs_cols_offset = aligned_rhs_cols - rhs_cols;
+
         /* Generate up to four columns from the input tensor a GEMM computation */
         int8_t *im2col_buf = (int8_t *)buffer_a;
 #else
-        const int32_t remainder = rhs_cols % 4;
-        const int32_t aligned_rhs_cols = remainder != 0 ? rhs_cols + 4 - remainder : rhs_cols;
-
         /* Use as a ping-pong buffer for unordered elements */
         int8_t *im2col_buf = (int8_t *)buffer_a + aligned_rhs_cols * 2;
         int16_t *im2col_buf_start_s16 = buffer_a;
@@ -132,29 +149,68 @@ arm_cmsis_nn_status arm_convolve_s8(const cmsis_nn_context *ctx,
                     const int32_t base_idx_x = stride_x * i_out_x - pad_x;
                     const int32_t base_idx_y = stride_y * i_out_y - pad_y;
 
-                    for (int32_t i_ker_y = 0; i_ker_y < kernel_y; i_ker_y++)
+                    if (y_rshift == 1 || x_rshift == 1)
                     {
-                        for (int32_t i_ker_x = 0; i_ker_x < kernel_x; i_ker_x++)
+                        // Fill complete buf with -input_offset
+                        arm_memset_s8(
+                            im2col_buf, (int8_t)-input_offset, sizeof(int8_t) * kernel_ch * kernel_x * kernel_y);
+                        for (int32_t i_ker_y = 0; i_ker_y < kernel_y; i_ker_y++)
                         {
                             const int32_t k_y = base_idx_y + dilation_y * i_ker_y;
-                            const int32_t k_x = base_idx_x + dilation_x * i_ker_x;
 
-                            if (k_y < 0 || k_y >= input_y || k_x < 0 || k_x >= input_x)
+                            //  Don't copy data when padding, or for every second row if stride_y == 2
+                            if ((k_y < 0 || k_y >= input_y) || (k_y % 2 && y_rshift == 1))
                             {
-                                arm_memset_s8(im2col_buf, (int8_t)-input_offset, sizeof(int8_t) * kernel_ch);
+                                im2col_buf += kernel_ch * kernel_x;
                             }
                             else
                             {
-                                arm_memcpy_s8(im2col_buf,
-                                              input_data + (k_y * input_x + k_x) * input_ch + i_group * kernel_ch,
-                                              sizeof(int8_t) * kernel_ch);
+                                const int32_t k_y_rshifted = k_y >> y_rshift;
+                                for (int32_t i_ker_x = 0; i_ker_x < kernel_x; i_ker_x++)
+                                {
+                                    const int32_t k_x = base_idx_x + dilation_x * i_ker_x;
+
+                                    // Don't copy data when padding, or for every second element if stride_x == 2
+                                    if ((k_x >= 0 && k_x < input_x) && ((k_x % 2 == 0) || x_rshift == 0))
+                                    {
+                                        const int32_t k_x_rshifted = k_x >> x_rshift;
+                                        arm_memcpy_s8(im2col_buf,
+                                                      input_data +
+                                                          (k_y_rshifted * input_x_rshifted + k_x_rshifted) * input_ch,
+                                                      sizeof(int8_t) * kernel_ch);
+                                    }
+                                    im2col_buf += kernel_ch;
+                                }
                             }
-                            im2col_buf += kernel_ch;
+                        }
+                    }
+                    else
+                    {
+                        for (int32_t i_ker_y = 0; i_ker_y < kernel_y; i_ker_y++)
+                        {
+                            for (int32_t i_ker_x = 0; i_ker_x < kernel_x; i_ker_x++)
+                            {
+                                const int32_t k_y = base_idx_y + dilation_y * i_ker_y;
+                                const int32_t k_x = base_idx_x + dilation_x * i_ker_x;
+
+                                if (k_y < 0 || k_y >= input_y || k_x < 0 || k_x >= input_x)
+                                {
+                                    arm_memset_s8(im2col_buf, (int8_t)-input_offset, sizeof(int8_t) * kernel_ch);
+                                }
+                                else
+                                {
+                                    arm_memcpy_s8(im2col_buf,
+                                                  input_data + (k_y * input_x + k_x) * input_ch + i_group * kernel_ch,
+                                                  sizeof(int8_t) * kernel_ch);
+                                }
+                                im2col_buf += kernel_ch;
+                            }
                         }
                     }
                     lhs_rows++;
 
 #if defined(ARM_MATH_MVEI)
+                    im2col_buf += aligned_rhs_cols_offset;
 
                     /* Computation is filed for every 4 columns */
                     if (lhs_rows == 4)
@@ -173,7 +229,7 @@ arm_cmsis_nn_status arm_convolve_s8(const cmsis_nn_context *ctx,
                                                 out_activation_min,
                                                 out_activation_max,
                                                 output_ch,
-                                                rhs_cols);
+                                                aligned_rhs_cols);
 
                         out += lhs_rows * output_ch;
 
@@ -259,7 +315,7 @@ arm_cmsis_nn_status arm_convolve_s8(const cmsis_nn_context *ctx,
                                         out_activation_min,
                                         out_activation_max,
                                         output_ch,
-                                        rhs_cols);
+                                        aligned_rhs_cols);
 
                 out += lhs_rows * output_ch;
                 lhs_rows = 0;
@@ -330,7 +386,7 @@ arm_cmsis_nn_status arm_convolve_s8(const cmsis_nn_context *ctx,
             output_shift_ptr += output_ch_per_group;
         }
         /* Advance to the next batch */
-        input_data += (input_x * input_y * input_ch);
+        input_data += (input_x_rshifted * input_y_rshifted * input_ch);
         output_data += (output_x * output_y * output_ch);
     }
 

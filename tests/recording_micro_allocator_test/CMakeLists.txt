@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.12)
 
 project(recording_micro_allocator_test C CXX ASM)
 set(CMAKE_C_STANDARD 11)
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 
 add_executable(recording_micro_allocator_test "")
 

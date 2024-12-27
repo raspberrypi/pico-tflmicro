@@ -21,8 +21,8 @@
  * Title:        arm_convolve_1_x_n_s8.c
  * Description:  s8 version of 1xN convolution using symmetric quantization.
  *
- * $Date:        04 January 2024
- * $Revision:    V.3.5.0
+ * $Date:        04 November 2024
+ * $Revision:    V.3.6.1
  *
  * Target :  Arm(R) M-Profile Architecture
  *
@@ -45,7 +45,6 @@
  * Refer header file for details.
  *
  */
-
 arm_cmsis_nn_status arm_convolve_1_x_n_s8(const cmsis_nn_context *ctx,
                                           const cmsis_nn_conv_params *conv_params,
                                           const cmsis_nn_per_channel_quant_params *quant_params,
@@ -59,24 +58,23 @@ arm_cmsis_nn_status arm_convolve_1_x_n_s8(const cmsis_nn_context *ctx,
                                           int8_t *output_data)
 {
     arm_cmsis_nn_status status = ARM_CMSIS_NN_SUCCESS;
-    int32_t buffer_size = arm_convolve_1_x_n_s8_get_buffer_size(input_dims, filter_dims);
+
     /* The wrapper API is the ultimate reference for argument check */
-    if ((input_dims->h != 1) || conv_params->dilation.w != 1 || (buffer_size != 0 && ctx->buf == NULL) ||
-        conv_params->stride.w == 0 || (conv_params->stride.w * input_dims->c % 4 != 0))
+    if ((input_dims->h != 1) || conv_params->dilation.w != 1 || ctx->buf == NULL || conv_params->stride.w == 0 ||
+        (conv_params->stride.w * input_dims->c % 4 != 0))
     {
-        status = ARM_CMSIS_NN_ARG_ERROR;
-        goto out;
+        return ARM_CMSIS_NN_ARG_ERROR;
     }
 
 #if defined(ARM_MATH_MVEI)
     (void)bias_dims;
-    const uint16_t input_x = input_dims->w;
-    const uint16_t kernel_x = filter_dims->w;
-    const uint16_t output_x = output_dims->w;
-    const uint16_t output_ch = output_dims->c;
-    const uint16_t input_ch = input_dims->c;
-    const uint16_t pad_x = conv_params->padding.w;
-    const uint16_t stride_x = conv_params->stride.w;
+
+    const int32_t input_x = input_dims->w;
+    const int32_t kernel_x = filter_dims->w;
+    const int32_t output_x = output_dims->w;
+    const int32_t input_ch = input_dims->c;
+    const int32_t pad_x = conv_params->padding.w;
+    const int32_t stride_x = conv_params->stride.w;
 
     // Total pad for dilation of 1
     const int32_t total_pad = ((output_x - 1) * stride_x + kernel_x - input_x);
@@ -90,48 +88,70 @@ arm_cmsis_nn_status arm_convolve_1_x_n_s8(const cmsis_nn_context *ctx,
     const int32_t right_pad_num = pad_x + asym_pad != 0 ? MAX(1, (pad_x + asym_pad + stride_x - 1) / stride_x) : 0;
     const int32_t left_pad_num = pad_x != 0 ? MAX(1, (pad_x + stride_x - 1) / stride_x) : 0;
     const int32_t no_pad_num = MAX(output_x - (right_pad_num + left_pad_num), 0);
+
+    const int32_t pad_size_left = pad_x * input_ch;
+    const int32_t pad_size_right = asym_pad ? right_pad_num * input_ch : pad_size_left;
+
+    const int32_t rhs_cols = kernel_x * input_ch;
+    const int32_t rhs_rows = output_dims->c;
+    const int32_t lhs_offset = input_ch * stride_x;
+
     if (right_pad_num + no_pad_num + left_pad_num != output_x)
     {
-        return ARM_CMSIS_NN_FAILURE;
+        return arm_convolve_s8(ctx,
+                               conv_params,
+                               quant_params,
+                               input_dims,
+                               input_data,
+                               filter_dims,
+                               filter_data,
+                               bias_dims,
+                               bias_data,
+                               NULL,
+                               output_dims,
+                               output_data);
     }
+
+    const uint32_t num_elem_left = kernel_x * input_ch;
+    const uint32_t num_elem_right = num_elem_left - input_ch;
 
     for (int i_batch = 0; i_batch < input_dims->n; i_batch++)
     {
-        // Handle left padded sections
+        /* Handle left padded sections */
         int32_t lhs_rows = left_pad_num;
-        const int32_t rhs_cols = kernel_x * input_dims->c;
-        const int32_t rhs_rows = output_dims->c;
-        const int32_t lhs_offset = input_ch * stride_x;
+        int8_t *im2col = ctx->buf;
 
-        int32_t out_idx = 0;
+        arm_memset_s8(im2col, (int8_t)-conv_params->input_offset, sizeof(int8_t) * (uint32_t)pad_size_left);
+        im2col += pad_size_left;
+        arm_memcpy_s8(im2col, input_data, sizeof(int8_t) * num_elem_left);
 
-        for (int i = 0; i < lhs_rows; i++)
-        {
-            const int32_t est_input_x_idx = stride_x * i - pad_x;
-            const int32_t ker_begin_idx = -est_input_x_idx;
+        arm_nn_mat_mult_nt_t_s8((int8_t *)ctx->buf,
+                                filter_data,
+                                bias_data,
+                                output_data,
+                                quant_params->multiplier,
+                                quant_params->shift,
+                                lhs_rows,
+                                rhs_rows,
+                                rhs_cols,
+                                conv_params->input_offset,
+                                conv_params->output_offset,
+                                conv_params->activation.min,
+                                conv_params->activation.max,
+                                rhs_rows,
+                                lhs_offset);
 
-            const int32_t actual_kernel_len = kernel_x - ker_begin_idx;
+        output_data += lhs_rows * rhs_rows;
 
-            status = arm_nn_mat_mul_core_1x_s8(actual_kernel_len * input_ch,
-                                               ker_begin_idx * input_ch,
-                                               input_data,
-                                               filter_data + (ker_begin_idx * input_ch),
-                                               output_ch,
-                                               conv_params,
-                                               quant_params,
-                                               bias_data,
-                                               output_data);
-            output_data += output_ch;
-        }
-
-        out_idx += lhs_rows;
+        /* Non padded elements */
+        int32_t out_idx = lhs_rows;
         int32_t input_start = stride_x * lhs_rows - pad_x;
 
         if (input_start < 0)
         {
             return ARM_CMSIS_NN_FAILURE;
         }
-        /* Non padded elements */
+
         input_start *= input_ch;
         lhs_rows = no_pad_num;
 
@@ -152,9 +172,9 @@ arm_cmsis_nn_status arm_convolve_1_x_n_s8(const cmsis_nn_context *ctx,
                                 lhs_offset);
 
         output_data += lhs_rows * rhs_rows;
+        out_idx += lhs_rows;
 
         /* Right padded elements */
-        out_idx += lhs_rows;
         lhs_rows = output_x - out_idx;
 
         if (lhs_rows < 0)
@@ -162,22 +182,31 @@ arm_cmsis_nn_status arm_convolve_1_x_n_s8(const cmsis_nn_context *ctx,
             return ARM_CMSIS_NN_FAILURE;
         }
 
-        for (int i = out_idx; i < output_x; i++)
-        {
-            const int32_t est_input_x_idx = stride_x * i - pad_x;
-            const int32_t ker_end_idx = MIN(kernel_x, input_x - est_input_x_idx);
+        im2col = ctx->buf;
+        input_start = (stride_x * (left_pad_num + no_pad_num) - pad_x) * input_ch;
 
-            status = arm_nn_mat_mul_core_1x_s8(ker_end_idx * input_ch,
-                                               (kernel_x - ker_end_idx) * input_ch,
-                                               input_data + est_input_x_idx * input_ch,
-                                               filter_data,
-                                               output_ch,
-                                               conv_params,
-                                               quant_params,
-                                               bias_data,
-                                               output_data);
-            output_data += output_ch;
-        }
+        arm_memcpy_s8(im2col, input_data + input_start, sizeof(int8_t) * num_elem_right);
+        im2col += num_elem_right;
+        arm_memset_s8(im2col, (int8_t)-conv_params->input_offset, sizeof(int8_t) * (uint32_t)pad_size_right);
+
+        arm_nn_mat_mult_nt_t_s8((int8_t *)ctx->buf,
+                                filter_data,
+                                bias_data,
+                                output_data,
+                                quant_params->multiplier,
+                                quant_params->shift,
+                                lhs_rows,
+                                rhs_rows,
+                                rhs_cols,
+                                conv_params->input_offset,
+                                conv_params->output_offset,
+                                conv_params->activation.min,
+                                conv_params->activation.max,
+                                rhs_rows,
+                                lhs_offset);
+
+        output_data += lhs_rows * rhs_rows;
+
         /* Advance to the next batch */
         input_data += (input_x * input_ch);
     }
@@ -191,12 +220,12 @@ arm_cmsis_nn_status arm_convolve_1_x_n_s8(const cmsis_nn_context *ctx,
                              filter_data,
                              bias_dims,
                              bias_data,
+                             NULL,
                              output_dims,
                              output_data);
 
 #endif
 
-out:
     /* Return to application */
     return status;
 }

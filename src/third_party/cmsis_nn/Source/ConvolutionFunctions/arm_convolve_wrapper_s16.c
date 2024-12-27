@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2021-2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -22,8 +22,8 @@
  * Description:  s16 convolution layer wrapper function with the main purpose to call the optimal kernel available in
  * cmsis-nn to perform the convolution.
  *
- * $Date:        30 January 2023
- * $Revision:    V.2.1.0
+ * $Date:        23 April 2024
+ * $Revision:    V.3.0.0
  *
  * Target :  Arm(R) M-Profile Architecture
  *
@@ -55,41 +55,10 @@ arm_cmsis_nn_status arm_convolve_wrapper_s16(const cmsis_nn_context *ctx,
                                              const cmsis_nn_dims *filter_dims,
                                              const int8_t *filter_data,
                                              const cmsis_nn_dims *bias_dims,
-                                             const int64_t *bias_data,
+                                             const cmsis_nn_bias_data *bias_data,
                                              const cmsis_nn_dims *output_dims,
                                              int16_t *output_data)
 {
-#if defined(ARM_MATH_DSP) && !defined(ARM_MATH_MVEI)
-    if (filter_dims->w * filter_dims->h * input_dims->c < 512 &&
-        (conv_params->dilation.w == 1 && conv_params->dilation.h == 1))
-    {
-        return arm_convolve_fast_s16(ctx,
-                                     conv_params,
-                                     quant_params,
-                                     input_dims,
-                                     input_data,
-                                     filter_dims,
-                                     filter_data,
-                                     bias_dims,
-                                     bias_data,
-                                     output_dims,
-                                     output_data);
-    }
-    else
-    {
-        return arm_convolve_s16(ctx,
-                                conv_params,
-                                quant_params,
-                                input_dims,
-                                input_data,
-                                filter_dims,
-                                filter_data,
-                                bias_dims,
-                                bias_data,
-                                output_dims,
-                                output_data);
-    }
-#else
     return arm_convolve_s16(ctx,
                             conv_params,
                             quant_params,
@@ -101,7 +70,6 @@ arm_cmsis_nn_status arm_convolve_wrapper_s16(const cmsis_nn_context *ctx,
                             bias_data,
                             output_dims,
                             output_data);
-#endif
 }
 
 /**
